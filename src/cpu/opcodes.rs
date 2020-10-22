@@ -1,4 +1,7 @@
-use crate::cpu::instruction::{ArithmeticTarget, HLTarget, IncDecTarget, Instruction};
+use crate::cpu::instruction::{
+    AddressTarget, ArithmeticSource, HLSource, HLTarget, IncDecTarget, Instruction, LoadSource,
+    LoadTarget, LoadType,
+};
 
 /// SM83 non prefixed instruction map
 ///
@@ -6,25 +9,25 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     // 0
     [
         Instruction::NOP,
-        Instruction::NAI,
-        Instruction::NAI,
+        Instruction::LD(LoadType::Word(HLTarget::BC, LoadSource::D16)),
+        Instruction::LD(LoadType::ToAddress(AddressTarget::BC, LoadSource::A)),
         Instruction::INC(IncDecTarget::BC),
         Instruction::INC(IncDecTarget::B),
         Instruction::DEC(IncDecTarget::B),
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::ADDHL(HLTarget::BC),
-        Instruction::NAI,
+        Instruction::LD(LoadType::Byte(LoadTarget::B, LoadSource::D8)),
+        Instruction::RLCA,
+        Instruction::LD(LoadType::ToAddress(AddressTarget::A16, LoadSource::SP)),
+        Instruction::ADDHL(HLTarget::HL, HLSource::BC),
+        Instruction::LD(LoadType::FromAddress(LoadTarget::A, LoadSource::BC)),
         Instruction::DEC(IncDecTarget::BC),
         Instruction::INC(IncDecTarget::C),
         Instruction::DEC(IncDecTarget::C),
-        Instruction::NAI,
-        Instruction::NAI,
+        Instruction::LD(LoadType::Byte(LoadTarget::C, LoadSource::D8)),
+        Instruction::RRCA,
     ],
     // 1
     [
-        Instruction::NAI,
+        Instruction::STOP,
         Instruction::NAI,
         Instruction::NAI,
         Instruction::NAI,
@@ -157,22 +160,22 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     ],
     // 8
     [
-        Instruction::ADD(ArithmeticTarget::B),
-        Instruction::ADD(ArithmeticTarget::C),
-        Instruction::ADD(ArithmeticTarget::D),
-        Instruction::ADD(ArithmeticTarget::E),
-        Instruction::ADD(ArithmeticTarget::H),
-        Instruction::ADD(ArithmeticTarget::L),
-        Instruction::ADD(ArithmeticTarget::HLI),
-        Instruction::ADD(ArithmeticTarget::A),
-        Instruction::ADC(ArithmeticTarget::B),
-        Instruction::ADC(ArithmeticTarget::C),
-        Instruction::ADC(ArithmeticTarget::D),
-        Instruction::ADC(ArithmeticTarget::E),
-        Instruction::ADC(ArithmeticTarget::H),
-        Instruction::ADC(ArithmeticTarget::L),
-        Instruction::ADC(ArithmeticTarget::HLI),
-        Instruction::ADC(ArithmeticTarget::A),
+        Instruction::ADD(ArithmeticSource::B),
+        Instruction::ADD(ArithmeticSource::C),
+        Instruction::ADD(ArithmeticSource::D),
+        Instruction::ADD(ArithmeticSource::E),
+        Instruction::ADD(ArithmeticSource::H),
+        Instruction::ADD(ArithmeticSource::L),
+        Instruction::ADD(ArithmeticSource::HLI),
+        Instruction::ADD(ArithmeticSource::A),
+        Instruction::ADC(ArithmeticSource::B),
+        Instruction::ADC(ArithmeticSource::C),
+        Instruction::ADC(ArithmeticSource::D),
+        Instruction::ADC(ArithmeticSource::E),
+        Instruction::ADC(ArithmeticSource::H),
+        Instruction::ADC(ArithmeticSource::L),
+        Instruction::ADC(ArithmeticSource::HLI),
+        Instruction::ADC(ArithmeticSource::A),
     ],
     // 9
     [

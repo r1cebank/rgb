@@ -5,13 +5,25 @@ use strum_macros::Display;
 pub enum Instruction {
   INC(IncDecTarget),
   DEC(IncDecTarget),
-  ADD(ArithmeticTarget),
-  ADC(ArithmeticTarget),
-  ADDHL(HLTarget),
+  ADD(ArithmeticSource),
+  ADC(ArithmeticSource),
+  ADDHL(HLTarget, HLSource),
   JP(JumpCondition),
+  LD(LoadType),
 
   NAI,
   NOP,
+  RLCA,
+  RRCA,
+  STOP,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum LoadType {
+  Word(HLTarget, LoadSource),
+  Byte(LoadTarget, LoadSource),
+  FromAddress(LoadTarget, LoadSource),
+  ToAddress(AddressTarget, LoadSource),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -31,7 +43,41 @@ pub enum IncDecTarget {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum ArithmeticTarget {
+pub enum LoadSource {
+  A,
+  B,
+  C,
+  D,
+  E,
+  H,
+  L,
+  D8,
+  D16,
+  BC,
+  SP,
+  HLI,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum LoadTarget {
+  A,
+  B,
+  C,
+  D,
+  E,
+  H,
+  L,
+  HLI,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum AddressTarget {
+  BC,
+  A16,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum ArithmeticSource {
   A,
   B,
   C,
@@ -45,6 +91,14 @@ pub enum ArithmeticTarget {
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum HLTarget {
+  BC,
+  DE,
+  HL,
+  SP,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum HLSource {
   BC,
   DE,
   HL,
@@ -150,21 +204,30 @@ mod tests {
           }
           Instruction::ADD(operand) => {
             assert_eq!(reference_opcode.mnemonic, "ADD");
-            assert_eq!(reference_opcode.operands[0].name, "A");
+            assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "A");
             if !reference_opcode.operands[1].immediate {
               assert_eq!(String::from("HLI"), operand.to_string());
             } else {
-              assert_eq!(reference_opcode.operands[1].name, operand.to_string());
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                operand.to_string()
+              );
             }
           }
-          Instruction::ADDHL(operand) => {
+          Instruction::ADDHL(target, source) => {
             assert_eq!(reference_opcode.mnemonic, "ADD");
-            assert_eq!(reference_opcode.operands[0].name, "HL");
-            assert_eq!(reference_opcode.operands[1].name, operand.to_string());
+            assert_eq!(
+              reference_opcode.operands[0].name.to_uppercase(),
+              target.to_string()
+            );
+            assert_eq!(
+              reference_opcode.operands[1].name.to_uppercase(),
+              source.to_string()
+            );
           }
           Instruction::ADC(operand) => {
             assert_eq!(reference_opcode.mnemonic, "ADC");
-            assert_eq!(reference_opcode.operands[0].name, "A");
+            assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "A");
             if !reference_opcode.operands[1].immediate {
               assert_eq!(String::from("HLI"), operand.to_string());
             } else {
@@ -185,8 +248,65 @@ mod tests {
               );
             }
           }
+          Instruction::LD(load_type) => match load_type {
+            LoadType::Word(target, source) => {
+              assert_eq!(reference_opcode.mnemonic, "LD");
+              assert_eq!(
+                reference_opcode.operands[0].name.to_uppercase(),
+                target.to_string()
+              );
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
+            LoadType::ToAddress(target, source) => {
+              assert_eq!(reference_opcode.mnemonic, "LD");
+              assert_eq!(
+                reference_opcode.operands[0].name.to_uppercase(),
+                target.to_string()
+              );
+              assert_eq!(reference_opcode.operands[0].immediate, false);
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
+            LoadType::FromAddress(target, source) => {
+              assert_eq!(reference_opcode.mnemonic, "LD");
+              assert_eq!(
+                reference_opcode.operands[0].name.to_uppercase(),
+                target.to_string()
+              );
+              assert_eq!(reference_opcode.operands[1].immediate, false);
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
+            LoadType::Byte(target, source) => {
+              assert_eq!(reference_opcode.mnemonic, "LD");
+              assert_eq!(
+                reference_opcode.operands[0].name.to_uppercase(),
+                target.to_string()
+              );
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
+          },
+          Instruction::RLCA => {
+            assert_eq!(reference_opcode.mnemonic, "RLCA");
+          }
+          Instruction::RRCA => {
+            assert_eq!(reference_opcode.mnemonic, "RRCA");
+          }
           Instruction::NAI => {
             assert_eq!(reference_opcode.mnemonic.contains("ILLEGAL"), true);
+          }
+          Instruction::STOP => {
+            assert_eq!(reference_opcode.mnemonic, "STOP");
           }
           _ => {
             println!("{:?} not tested", instruction);

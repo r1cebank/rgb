@@ -2,7 +2,7 @@ pub mod instruction;
 pub mod opcodes;
 pub mod registers;
 
-pub use self::instruction::{ArithmeticTarget, Instruction, JumpCondition};
+pub use self::instruction::{ArithmeticSource, Instruction, JumpCondition};
 use self::registers::Registers;
 use crate::memory::MemoryBus;
 
@@ -47,9 +47,9 @@ impl CPU {
     }
     pub fn execute(&mut self, instruction: Instruction) -> u16 {
         match instruction {
-            Instruction::ADD(target) => {
-                match target {
-                    ArithmeticTarget::C => {
+            Instruction::ADD(source) => {
+                match source {
+                    ArithmeticSource::C => {
                         let value = self.registers.c;
                         let new_value = self.add(value);
                         self.registers.a = new_value;
@@ -57,7 +57,7 @@ impl CPU {
                     }
                     _ => {
                         /* TODO: support more targets */
-                        panic!("ADD ({:?}) not yet implemented", target);
+                        panic!("ADD ({:?}) not yet implemented", source);
                     }
                 }
             }
