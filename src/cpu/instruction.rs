@@ -5,13 +5,17 @@ use strum_macros::Display;
 pub enum Instruction {
   INC(IncDecTarget),
   DEC(IncDecTarget),
-  ADD(ArithmeticSource),
-  ADC(ArithmeticSource),
-  ADDHL(HLTarget, HLSource),
+  ADD(ArithmeticTarget, ArithmeticSource),
+  ADC(ArithmeticTarget, ArithmeticSource),
   JP(JumpCondition),
+  JR(JumpCondition, JumpSource),
   LD(LoadType),
 
   NAI,
+  CPL,
+  RLA,
+  DAA,
+  RRA,
   NOP,
   RLCA,
   RRCA,
@@ -20,9 +24,8 @@ pub enum Instruction {
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum LoadType {
-  Word(HLTarget, LoadSource),
-  Byte(LoadTarget, LoadSource),
-  FromAddress(LoadTarget, LoadSource),
+  ToRegister(LoadTarget, LoadSource),
+  FromAddress(LoadTarget, AddressSource),
   ToAddress(AddressTarget, LoadSource),
 }
 
@@ -54,8 +57,16 @@ pub enum LoadSource {
   D8,
   D16,
   BC,
+  DE,
   SP,
   HLI,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum AddressSource {
+  BC,
+  DE,
+  HLP,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -67,13 +78,23 @@ pub enum LoadTarget {
   E,
   H,
   L,
+  HL,
+  BC,
+  DE,
   HLI,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum AddressTarget {
   BC,
+  DE,
   A16,
+  HLP,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum JumpSource {
+  R8,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -86,23 +107,16 @@ pub enum ArithmeticSource {
   H,
   L,
   D8,
+  DE,
+  BC,
+  HL,
   HLI,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum HLTarget {
-  BC,
-  DE,
+pub enum ArithmeticTarget {
+  A,
   HL,
-  SP,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum HLSource {
-  BC,
-  DE,
-  HL,
-  SP,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -155,6 +169,7 @@ mod tests {
   struct Operand {
     name: String,
     immediate: bool,
+    increment: Option<bool>,
   }
 
   #[derive(Deserialize, Debug)]
@@ -186,7 +201,7 @@ mod tests {
       let opcode_u8 = u8::from_str_radix(opcode.as_str().trim_start_matches("0x"), 16).unwrap();
       let instruction = Instruction::from_byte_not_prefixed(opcode_u8);
       if instruction != Instruction::NAI {
-        println!("Checking: {:?}", instruction);
+        print!("Checking: {:?}", instruction);
         match instruction {
           Instruction::NOP => {
             assert_eq!(reference_opcode.mnemonic, "NOP");
@@ -202,38 +217,33 @@ mod tests {
               );
             }
           }
-          Instruction::ADD(operand) => {
-            assert_eq!(reference_opcode.mnemonic, "ADD");
-            assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "A");
-            if !reference_opcode.operands[1].immediate {
-              assert_eq!(String::from("HLI"), operand.to_string());
-            } else {
-              assert_eq!(
-                reference_opcode.operands[1].name.to_uppercase(),
-                operand.to_string()
-              );
-            }
-          }
-          Instruction::ADDHL(target, source) => {
+          Instruction::ADD(target, source) => {
             assert_eq!(reference_opcode.mnemonic, "ADD");
             assert_eq!(
               reference_opcode.operands[0].name.to_uppercase(),
               target.to_string()
             );
-            assert_eq!(
-              reference_opcode.operands[1].name.to_uppercase(),
-              source.to_string()
-            );
-          }
-          Instruction::ADC(operand) => {
-            assert_eq!(reference_opcode.mnemonic, "ADC");
-            assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "A");
             if !reference_opcode.operands[1].immediate {
-              assert_eq!(String::from("HLI"), operand.to_string());
+              assert_eq!(String::from("HLI"), source.to_string());
             } else {
               assert_eq!(
                 reference_opcode.operands[1].name.to_uppercase(),
-                operand.to_string()
+                source.to_string()
+              );
+            }
+          }
+          Instruction::ADC(target, source) => {
+            assert_eq!(reference_opcode.mnemonic, "ADC");
+            assert_eq!(
+              reference_opcode.operands[0].name.to_uppercase(),
+              target.to_string()
+            );
+            if !reference_opcode.operands[1].immediate {
+              assert_eq!(String::from("HLI"), source.to_string());
+            } else {
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
               );
             }
           }
@@ -249,7 +259,7 @@ mod tests {
             }
           }
           Instruction::LD(load_type) => match load_type {
-            LoadType::Word(target, source) => {
+            LoadType::ToRegister(target, source) => {
               assert_eq!(reference_opcode.mnemonic, "LD");
               assert_eq!(
                 reference_opcode.operands[0].name.to_uppercase(),
@@ -262,10 +272,21 @@ mod tests {
             }
             LoadType::ToAddress(target, source) => {
               assert_eq!(reference_opcode.mnemonic, "LD");
-              assert_eq!(
-                reference_opcode.operands[0].name.to_uppercase(),
-                target.to_string()
-              );
+              if let Some(is_increment) = reference_opcode.operands[0].increment {
+                if is_increment {
+                  assert_eq!(target.to_string(), "HLP");
+                } else {
+                  assert_eq!(
+                    reference_opcode.operands[0].name.to_uppercase(),
+                    target.to_string()
+                  );
+                }
+              } else {
+                assert_eq!(
+                  reference_opcode.operands[0].name.to_uppercase(),
+                  target.to_string()
+                );
+              }
               assert_eq!(reference_opcode.operands[0].immediate, false);
               assert_eq!(
                 reference_opcode.operands[1].name.to_uppercase(),
@@ -279,22 +300,40 @@ mod tests {
                 target.to_string()
               );
               assert_eq!(reference_opcode.operands[1].immediate, false);
-              assert_eq!(
-                reference_opcode.operands[1].name.to_uppercase(),
-                source.to_string()
-              );
+              if let Some(is_increment) = reference_opcode.operands[1].increment {
+                if is_increment {
+                  assert_eq!(source.to_string(), "HLP");
+                } else {
+                  assert_eq!(
+                    reference_opcode.operands[1].name.to_uppercase(),
+                    source.to_string()
+                  );
+                }
+              } else {
+                assert_eq!(
+                  reference_opcode.operands[1].name.to_uppercase(),
+                  source.to_string()
+                );
+              }
             }
-            LoadType::Byte(target, source) => {
-              assert_eq!(reference_opcode.mnemonic, "LD");
+          },
+          Instruction::JR(condition, source) => match condition {
+            JumpCondition::Always => {
+              assert_eq!(reference_opcode.mnemonic, "JR");
               assert_eq!(
                 reference_opcode.operands[0].name.to_uppercase(),
-                target.to_string()
+                source.to_string()
               );
+            }
+            JumpCondition::NotZero => {
+              assert_eq!(reference_opcode.mnemonic, "JR");
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NZ");
               assert_eq!(
                 reference_opcode.operands[1].name.to_uppercase(),
                 source.to_string()
               );
             }
+            _ => {}
           },
           Instruction::RLCA => {
             assert_eq!(reference_opcode.mnemonic, "RLCA");
@@ -302,16 +341,29 @@ mod tests {
           Instruction::RRCA => {
             assert_eq!(reference_opcode.mnemonic, "RRCA");
           }
-          Instruction::NAI => {
-            assert_eq!(reference_opcode.mnemonic.contains("ILLEGAL"), true);
+          Instruction::RLA => {
+            assert_eq!(reference_opcode.mnemonic, "RLA");
+          }
+          Instruction::RRA => {
+            assert_eq!(reference_opcode.mnemonic, "RRA");
+          }
+          Instruction::DAA => {
+            assert_eq!(reference_opcode.mnemonic, "DAA");
+          }
+          Instruction::CPL => {
+            assert_eq!(reference_opcode.mnemonic, "CPL");
           }
           Instruction::STOP => {
             assert_eq!(reference_opcode.mnemonic, "STOP");
+          }
+          Instruction::NAI => {
+            assert_eq!(reference_opcode.mnemonic.contains("ILLEGAL"), true);
           }
           _ => {
             println!("{:?} not tested", instruction);
           }
         }
+        println!(" ✔");
       }
     }
   }
