@@ -1,11 +1,13 @@
 pub mod instruction;
+pub mod opcodes;
 pub mod registers;
 
+pub use self::instruction::{ArithmeticTarget, Instruction, JumpCondition};
+use self::registers::Registers;
 use crate::memory::MemoryBus;
-use instruction::{ArithmeticTarget, Instruction, JumpCondition};
 
 pub struct CPU {
-    pub registers: registers::Registers,
+    pub registers: Registers,
     bus: MemoryBus,
     pc: u16,
     sp: u16,
@@ -14,14 +16,24 @@ pub struct CPU {
 }
 
 impl CPU {
-    fn step(&mut self) {
+    pub fn new() -> CPU {
+        CPU {
+            registers: Registers::new(),
+            bus: MemoryBus::new(),
+            pc: 0x0,
+            sp: 0x0,
+            is_halted: true,
+            interrupts_enabled: true,
+        }
+    }
+    pub fn step(&mut self) {
         let mut instruction_byte = self.bus.read_byte(self.pc);
         let prefixed = instruction_byte == 0xCB;
         if prefixed {
             instruction_byte = self.bus.read_byte(self.pc + 1);
         }
-        let next_pc = if let Some(instruction) = Instruction::from_byte(instruction_byte, prefixed)
-        {
+        let instruction = Instruction::from_byte(instruction_byte, prefixed);
+        let next_pc = if instruction != Instruction::NAI {
             self.execute(instruction)
         } else {
             let description = format!(
@@ -33,7 +45,7 @@ impl CPU {
         };
         self.pc = next_pc;
     }
-    fn execute(&mut self, instruction: Instruction) -> u16 {
+    pub fn execute(&mut self, instruction: Instruction) -> u16 {
         match instruction {
             Instruction::ADD(target) => {
                 match target {
@@ -45,7 +57,7 @@ impl CPU {
                     }
                     _ => {
                         /* TODO: support more targets */
-                        self.pc
+                        panic!("ADD ({:?}) not yet implemented", target);
                     }
                 }
             }
@@ -61,7 +73,7 @@ impl CPU {
             }
             _ => {
                 /* TODO: support more instructions */
-                self.pc
+                panic!("{:?} is not yet implemented", instruction);
             }
         }
     }
