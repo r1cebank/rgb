@@ -2,7 +2,9 @@ pub mod instruction;
 pub mod opcodes;
 pub mod registers;
 
-pub use self::instruction::{ArithmeticSource, ArithmeticTarget, Instruction, JumpCondition};
+pub use self::instruction::{
+    ArithmeticSource, ArithmeticTarget, Instruction, JumpCondition, OperationType,
+};
 use self::registers::Registers;
 use crate::memory::MemoryBus;
 
@@ -47,23 +49,28 @@ impl CPU {
     }
     pub fn execute(&mut self, instruction: Instruction) -> u16 {
         match instruction {
-            Instruction::ADD(target, source) => {
-                match source {
-                    ArithmeticSource::C => match target {
-                        ArithmeticTarget::A => {
-                            let value = self.registers.c;
-                            let new_value = self.add(value);
-                            self.registers.a = new_value;
-                            self.pc.wrapping_add(1)
+            Instruction::ADD(operation_type) => {
+                match operation_type {
+                    OperationType::ToRegister(target, source) => {
+                        match source {
+                            ArithmeticSource::C => match target {
+                                ArithmeticTarget::A => {
+                                    let value = self.registers.c;
+                                    let new_value = self.add(value);
+                                    self.registers.a = new_value;
+                                    self.pc.wrapping_add(1)
+                                }
+                                ArithmeticTarget::HL => {
+                                    panic!("Not implemented");
+                                }
+                            },
+                            _ => {
+                                /* TODO: support more targets */
+                                panic!("ADD ({:?}) not yet implemented", source);
+                            }
                         }
-                        ArithmeticTarget::HL => {
-                            panic!("Not implemented");
-                        }
-                    },
-                    _ => {
-                        /* TODO: support more targets */
-                        panic!("ADD ({:?}) not yet implemented", source);
                     }
+                    _ => panic!("Not implemented"),
                 }
             }
             Instruction::JP(condition) => {

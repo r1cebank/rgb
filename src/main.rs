@@ -4,7 +4,7 @@ pub mod memory;
 fn main() {
     // let mut test = cpu::CPU::new();
     // test.execute(cpu::instruction::Instruction::ADD(
-    //     cpu::instruction::ArithmeticTarget::HLI,
+    //     cpu::instruction::ArithmeticTarget::HL,
     // ));
     println!("Hello, world!");
     println!(
