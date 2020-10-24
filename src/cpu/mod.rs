@@ -3,7 +3,7 @@ pub mod opcodes;
 pub mod registers;
 
 pub use self::instruction::{
-    ArithmeticSource, ArithmeticTarget, Instruction, JumpCondition, OperationType,
+    ArithmeticOperationType, ArithmeticSource, ArithmeticTarget, Condition, Instruction,
 };
 use self::registers::Registers;
 use crate::memory::MemoryBus;
@@ -51,7 +51,7 @@ impl CPU {
         match instruction {
             Instruction::ADD(operation_type) => {
                 match operation_type {
-                    OperationType::ToRegister(target, source) => {
+                    ArithmeticOperationType::ToRegister(target, source) => {
                         match source {
                             ArithmeticSource::C => match target {
                                 ArithmeticTarget::A => {
@@ -60,7 +60,7 @@ impl CPU {
                                     self.registers.a = new_value;
                                     self.pc.wrapping_add(1)
                                 }
-                                ArithmeticTarget::HL => {
+                                _ => {
                                     panic!("Not implemented");
                                 }
                             },
@@ -73,13 +73,13 @@ impl CPU {
                     _ => panic!("Not implemented"),
                 }
             }
-            Instruction::JP(condition) => {
+            Instruction::JP(condition, _) => {
                 let jump_condition = match condition {
-                    JumpCondition::NotZero => !self.registers.f.zero,
-                    JumpCondition::NotCarry => !self.registers.f.carry,
-                    JumpCondition::Zero => self.registers.f.zero,
-                    JumpCondition::Carry => self.registers.f.carry,
-                    JumpCondition::Always => true,
+                    Condition::NotZero => !self.registers.f.zero,
+                    Condition::NotCarry => !self.registers.f.carry,
+                    Condition::Zero => self.registers.f.zero,
+                    Condition::Carry => self.registers.f.carry,
+                    Condition::Always => true,
                 };
                 self.jump(jump_condition)
             }

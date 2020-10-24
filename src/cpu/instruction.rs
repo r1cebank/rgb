@@ -5,14 +5,26 @@ use strum_macros::Display;
 pub enum Instruction {
   INC(IncDecOperationType),
   DEC(IncDecOperationType),
-  ADD(OperationType),
-  SUB(OperationType),
-  ADC(OperationType),
-  SBC(OperationType),
-  JP(JumpCondition),
-  JR(JumpCondition, JumpSource),
+  OR(ArithmeticOperationType),
+  CP(ArithmeticOperationType),
+  ADD(ArithmeticOperationType),
+  AND(ArithmeticOperationType),
+  SUB(ArithmeticOperationType),
+  ADC(ArithmeticOperationType),
+  SBC(ArithmeticOperationType),
+  XOR(ArithmeticOperationType),
+  JR(Condition, ConditionSource),
+  JP(Condition, ConditionSource),
+  RST(AddressLocation),
+  CALL(Condition, ConditionSource),
+  PUSH(RegisterSource),
+  POP(RegisterTarget),
+  RET(Condition),
   LD(LoadType),
+  LDH(LoadType),
 
+  EI,
+  DI,
   NAI,
   CPL,
   CCF,
@@ -24,7 +36,9 @@ pub enum Instruction {
   HALT,
   RLCA,
   RRCA,
+  RETI,
   STOP,
+  PREFIX,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -34,15 +48,28 @@ pub enum IncDecOperationType {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum OperationType {
+pub enum AddressLocation {
+  X00H,
+  X08H,
+  X10H,
+  X18H,
+  X20H,
+  X28H,
+  X30H,
+  X38H,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum ArithmeticOperationType {
   ToRegister(ArithmeticTarget, ArithmeticSource),
   FromAddress(ArithmeticTarget, ArithmeticSource),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum LoadType {
-  ToRegister(LoadTarget, LoadSource),
-  FromAddress(LoadTarget, AddressSource),
+  ToRegister(RegisterTarget, LoadSource),
+  ToOffsetAddress(AddressTarget, LoadSource),
+  FromAddress(RegisterTarget, AddressSource),
   ToAddress(AddressTarget, LoadSource),
 }
 
@@ -74,20 +101,33 @@ pub enum LoadSource {
   D16,
   BC,
   DE,
+  HL,
   SP,
+  SPP,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum RegisterSource {
+  AF,
+  HL,
+  BC,
+  DE,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum AddressSource {
+  C,
   BC,
   DE,
   HL,
+  A8,
+  A16,
   HLP,
   HLM,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum LoadTarget {
+pub enum RegisterTarget {
   A,
   B,
   C,
@@ -95,6 +135,7 @@ pub enum LoadTarget {
   E,
   H,
   L,
+  AF,
   HL,
   BC,
   DE,
@@ -103,17 +144,20 @@ pub enum LoadTarget {
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum AddressTarget {
+  C,
   BC,
   DE,
   A16,
+  A8,
   HL,
   HLP,
   HLM,
 }
-
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum JumpSource {
+pub enum ConditionSource {
   R8,
+  HL,
+  A16,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -130,16 +174,18 @@ pub enum ArithmeticSource {
   BC,
   SP,
   HL,
+  R8,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum ArithmeticTarget {
   A,
+  SP,
   HL,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum JumpCondition {
+pub enum Condition {
   NotZero,
   NotCarry,
   Zero,
@@ -186,7 +232,7 @@ mod tests {
     increment: bool,
   }
 
-  #[derive(Deserialize, Debug)]
+  #[derive(Deserialize, Clone, Debug)]
   struct Opcode {
     mnemonic: String,
     bytes: u8,
@@ -211,6 +257,91 @@ mod tests {
     }
   }
 
+  fn assert_condition(reference_opcode: Opcode, condition: Condition, source: ConditionSource) {
+    match condition {
+      Condition::Always => {
+        assert_eq!(
+          reference_opcode.operands[0].name.to_uppercase(),
+          source.to_string()
+        );
+      }
+      Condition::NotZero => {
+        assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NZ");
+        assert_eq!(
+          reference_opcode.operands[1].name.to_uppercase(),
+          source.to_string()
+        );
+      }
+      Condition::Carry => {
+        assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "C");
+        assert_eq!(
+          reference_opcode.operands[1].name.to_uppercase(),
+          source.to_string()
+        );
+      }
+      Condition::NotCarry => {
+        assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NC");
+        assert_eq!(
+          reference_opcode.operands[1].name.to_uppercase(),
+          source.to_string()
+        );
+      }
+      Condition::Zero => {
+        assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "Z");
+        assert_eq!(
+          reference_opcode.operands[1].name.to_uppercase(),
+          source.to_string()
+        );
+      }
+    }
+  }
+
+  fn assert_arithmetric(
+    reference_opcode: Opcode,
+    operation_type: ArithmeticOperationType,
+    fixed_target: bool,
+  ) {
+    if fixed_target {
+      match operation_type {
+        ArithmeticOperationType::ToRegister(target, source) => {
+          assert_operand(
+            Operand {
+              increment: false,
+              decrement: false,
+              immediate: true,
+              name: String::from("A"),
+            },
+            target.to_string(),
+          );
+          assert_operand(reference_opcode.operands[0].clone(), source.to_string());
+        }
+        ArithmeticOperationType::FromAddress(target, source) => {
+          assert_operand(
+            Operand {
+              increment: false,
+              decrement: false,
+              immediate: true,
+              name: String::from("A"),
+            },
+            target.to_string(),
+          );
+          assert_operand(reference_opcode.operands[0].clone(), source.to_string());
+        }
+      }
+    } else {
+      match operation_type {
+        ArithmeticOperationType::ToRegister(target, source) => {
+          assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+          assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+        }
+        ArithmeticOperationType::FromAddress(target, source) => {
+          assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+          assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+        }
+      }
+    }
+  }
+
   #[test]
   /// Use the opcode json from https://gbdev.io/gb-opcodes//optables/classic
   /// to ensure the opcode is decoded correctly
@@ -223,184 +354,210 @@ mod tests {
     for (opcode, reference_opcode) in opcodes.unprefixed {
       let opcode_u8 = u8::from_str_radix(opcode.as_str().trim_start_matches("0x"), 16).unwrap();
       let instruction = Instruction::from_byte_not_prefixed(opcode_u8);
-      if instruction != Instruction::NAI {
-        print!("Checking: {:?}", instruction);
-        match instruction {
-          Instruction::NOP => {
-            assert_eq!(reference_opcode.mnemonic, "NOP");
-          }
-          Instruction::INC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "INC");
-            match operation_type {
-              IncDecOperationType::ToRegister(target) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-              }
-              IncDecOperationType::ToAddress(target) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-              }
+      print!("Checking: {:?}", instruction);
+      match instruction {
+        Instruction::NOP => {
+          assert_eq!(reference_opcode.mnemonic, "NOP");
+        }
+        Instruction::INC(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "INC");
+          match operation_type {
+            IncDecOperationType::ToRegister(target) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+            }
+            IncDecOperationType::ToAddress(target) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
             }
           }
-          Instruction::ADD(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "ADD");
-            match operation_type {
-              OperationType::ToRegister(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
-              OperationType::FromAddress(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
+        }
+        Instruction::AND(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "AND");
+          assert_arithmetric(reference_opcode, operation_type, true);
+        }
+        Instruction::OR(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "OR");
+          assert_arithmetric(reference_opcode, operation_type, true);
+        }
+        Instruction::CP(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "CP");
+          assert_arithmetric(reference_opcode, operation_type, true);
+        }
+        Instruction::XOR(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "XOR");
+          assert_arithmetric(reference_opcode, operation_type, true);
+        }
+        Instruction::ADD(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "ADD");
+          assert_arithmetric(reference_opcode, operation_type, false);
+        }
+        Instruction::ADC(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "ADC");
+          assert_arithmetric(reference_opcode, operation_type, false);
+        }
+        Instruction::SUB(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "SUB");
+          assert_arithmetric(reference_opcode, operation_type, true);
+        }
+        Instruction::SBC(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "SBC");
+          assert_arithmetric(reference_opcode, operation_type, false);
+        }
+        Instruction::DEC(operation_type) => {
+          assert_eq!(reference_opcode.mnemonic, "DEC");
+          match operation_type {
+            IncDecOperationType::ToRegister(target) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+            }
+            IncDecOperationType::ToAddress(target) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
             }
           }
-          Instruction::ADC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "ADC");
-            match operation_type {
-              OperationType::ToRegister(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
-              OperationType::FromAddress(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
-            }
-          }
-          Instruction::SUB(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SUB");
-            match operation_type {
-              OperationType::ToRegister(target, source) => {
-                assert_operand(
-                  Operand {
-                    increment: false,
-                    decrement: false,
-                    immediate: true,
-                    name: String::from("A"),
-                  },
-                  target.to_string(),
-                );
-                assert_operand(reference_opcode.operands[0].clone(), source.to_string());
-              }
-              OperationType::FromAddress(target, source) => {
-                assert_operand(
-                  Operand {
-                    increment: false,
-                    decrement: false,
-                    immediate: true,
-                    name: String::from("A"),
-                  },
-                  target.to_string(),
-                );
-                assert_operand(reference_opcode.operands[0].clone(), source.to_string());
-              }
-            }
-          }
-          Instruction::SBC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SBC");
-            match operation_type {
-              OperationType::ToRegister(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
-              OperationType::FromAddress(target, source) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-                assert_operand(reference_opcode.operands[1].clone(), source.to_string());
-              }
-            }
-          }
-          Instruction::DEC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "DEC");
-            match operation_type {
-              IncDecOperationType::ToRegister(target) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-              }
-              IncDecOperationType::ToAddress(target) => {
-                assert_operand(reference_opcode.operands[0].clone(), target.to_string());
-              }
-            }
-          }
-          Instruction::LD(load_type) => match load_type {
+        }
+        Instruction::LD(load_type) => {
+          assert_eq!(reference_opcode.mnemonic, "LD");
+          match load_type {
             LoadType::ToRegister(target, source) => {
-              assert_eq!(reference_opcode.mnemonic, "LD");
               assert_operand(reference_opcode.operands[0].clone(), target.to_string());
               assert_operand(reference_opcode.operands[1].clone(), source.to_string());
             }
             LoadType::ToAddress(target, source) => {
-              assert_eq!(reference_opcode.mnemonic, "LD");
               assert_operand(reference_opcode.operands[0].clone(), target.to_string());
               assert_operand(reference_opcode.operands[1].clone(), source.to_string());
             }
             LoadType::FromAddress(target, source) => {
-              assert_eq!(reference_opcode.mnemonic, "LD");
               assert_operand(reference_opcode.operands[0].clone(), target.to_string());
               assert_operand(reference_opcode.operands[1].clone(), source.to_string());
             }
-          },
-          Instruction::JR(condition, source) => match condition {
-            JumpCondition::Always => {
-              assert_eq!(reference_opcode.mnemonic, "JR");
+            LoadType::ToOffsetAddress(target, source) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+              assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+            }
+          }
+        }
+        Instruction::LDH(load_type) => {
+          assert_eq!(reference_opcode.mnemonic, "LDH");
+          match load_type {
+            LoadType::ToRegister(target, source) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+              assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+            }
+            LoadType::ToAddress(target, source) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+              assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+            }
+            LoadType::FromAddress(target, source) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+              assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+            }
+            LoadType::ToOffsetAddress(target, source) => {
+              assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+              assert_operand(reference_opcode.operands[1].clone(), source.to_string());
+            }
+          }
+        }
+        Instruction::POP(target) => {
+          assert_eq!(reference_opcode.mnemonic, "POP");
+          assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+        }
+        Instruction::PUSH(target) => {
+          assert_eq!(reference_opcode.mnemonic, "PUSH");
+          assert_operand(reference_opcode.operands[0].clone(), target.to_string());
+        }
+        Instruction::JR(condition, source) => {
+          assert_eq!(reference_opcode.mnemonic, "JR");
+          match condition {
+            Condition::Always => {
               assert_eq!(
                 reference_opcode.operands[0].name.to_uppercase(),
                 source.to_string()
               );
             }
-            JumpCondition::NotZero => {
-              assert_eq!(reference_opcode.mnemonic, "JR");
+            Condition::NotZero => {
               assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NZ");
               assert_eq!(
                 reference_opcode.operands[1].name.to_uppercase(),
                 source.to_string()
               );
             }
-            JumpCondition::Carry => {
-              assert_eq!(reference_opcode.mnemonic, "JR");
+            Condition::Carry => {
               assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "C");
               assert_eq!(
                 reference_opcode.operands[1].name.to_uppercase(),
                 source.to_string()
               );
             }
-            _ => {}
-          },
-          Instruction::RLCA => {
-            assert_eq!(reference_opcode.mnemonic, "RLCA");
-          }
-          Instruction::RRCA => {
-            assert_eq!(reference_opcode.mnemonic, "RRCA");
-          }
-          Instruction::RLA => {
-            assert_eq!(reference_opcode.mnemonic, "RLA");
-          }
-          Instruction::RRA => {
-            assert_eq!(reference_opcode.mnemonic, "RRA");
-          }
-          Instruction::DAA => {
-            assert_eq!(reference_opcode.mnemonic, "DAA");
-          }
-          Instruction::SCF => {
-            assert_eq!(reference_opcode.mnemonic, "SCF");
-          }
-          Instruction::CPL => {
-            assert_eq!(reference_opcode.mnemonic, "CPL");
-          }
-          Instruction::CCF => {
-            assert_eq!(reference_opcode.mnemonic, "CCF");
-          }
-          Instruction::STOP => {
-            assert_eq!(reference_opcode.mnemonic, "STOP");
-          }
-          Instruction::HALT => {
-            assert_eq!(reference_opcode.mnemonic, "HALT");
-          }
-          Instruction::NAI => {
-            assert_eq!(reference_opcode.mnemonic.contains("ILLEGAL"), true);
-          }
-          _ => {
-            println!("{:?} not tested", instruction);
+            Condition::NotCarry => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NC");
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
+            Condition::Zero => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "Z");
+              assert_eq!(
+                reference_opcode.operands[1].name.to_uppercase(),
+                source.to_string()
+              );
+            }
           }
         }
-        println!(" ✔");
+        Instruction::CALL(condition, source) => {
+          assert_eq!(reference_opcode.mnemonic, "CALL");
+          assert_condition(reference_opcode, condition, source);
+        }
+        Instruction::JP(condition, source) => {
+          assert_eq!(reference_opcode.mnemonic, "JP");
+          assert_condition(reference_opcode, condition, source);
+        }
+        Instruction::RET(condition) => {
+          assert_eq!(reference_opcode.mnemonic, "RET");
+          match condition {
+            Condition::NotZero => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NZ");
+            }
+            Condition::Zero => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "Z");
+            }
+            Condition::Carry => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "C");
+            }
+            Condition::NotCarry => {
+              assert_eq!(reference_opcode.operands[0].name.to_uppercase(), "NC");
+            }
+            Condition::Always => {
+              assert_eq!(reference_opcode.operands.len(), 0);
+            }
+          }
+        }
+        Instruction::RST(location) => {
+          assert_eq!(reference_opcode.mnemonic, "RST");
+          assert_eq!(
+            format!("X{}", reference_opcode.operands[0].name.to_uppercase()),
+            location.to_string()
+          );
+        }
+        Instruction::DI
+        | Instruction::EI
+        | Instruction::RLCA
+        | Instruction::RRCA
+        | Instruction::RLA
+        | Instruction::RRA
+        | Instruction::DAA
+        | Instruction::CPL
+        | Instruction::CCF
+        | Instruction::STOP
+        | Instruction::HALT
+        | Instruction::PREFIX
+        | Instruction::RETI
+        | Instruction::SCF => {
+          assert_eq!(reference_opcode.mnemonic, format!("{:?}", instruction));
+        }
+        Instruction::NAI => {
+          assert_eq!(reference_opcode.mnemonic.contains("ILLEGAL"), true);
+        }
       }
+      println!(" ✔");
     }
   }
 }
