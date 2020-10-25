@@ -20,7 +20,7 @@ pub enum Instruction {
   PUSH(RegisterSource),
   POP(RegisterTarget),
   RET(Condition),
-  LD(LoadType),
+  LD(OperationType),
   LDH(LoadType),
   EI,
   DI,
@@ -49,6 +49,49 @@ pub enum Instruction {
   SRL(BitArthOperationType),
   SWAP(BitArthOperationType),
   BIT(BitTestType),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum OperationType {
+  RegisterToRegister(Register, Register),
+  RegisterToAddress(Address, Register),
+  AddressToAddress(Address, Address),
+  AddressToRegister(Register, Address),
+  ValueToRegister(Register, Value),
+  ValueToAddress(Address, Value),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum Register {
+  A,
+  B,
+  C,
+  D,
+  E,
+  H,
+  L,
+  HL,
+  BC,
+  DE,
+  SP,
+  SPP,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum Value {
+  D8,
+  D16,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum Address {
+  C,
+  HL,
+  HLP,
+  HLM,
+  A16,
+  BC,
+  DE,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -562,6 +605,7 @@ mod tests {
     for (opcode, reference_opcode) in opcodes.unprefixed {
       let opcode_u8 = u8::from_str_radix(opcode.as_str().trim_start_matches("0x"), 16).unwrap();
       let instruction = Instruction::from_byte_not_prefixed(opcode_u8);
+      println!("{:?}", instruction);
       match instruction {
         Instruction::NOP => {
           assert_eq!(reference_opcode.mnemonic, "NOP");
@@ -636,14 +680,24 @@ mod tests {
             }
           }
         }
-        Instruction::LD(load_type) => {
+        Instruction::LD(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "LD");
-          match load_type {
-            LoadType::ToRegister(target, source) => {
+          match operation_type {
+            OperationType::RegisterToAddress(target, source) => {
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
                 format!("{:?} failed assert", instruction),
+              );
+              assert_eq!(
+                reference_opcode.operands[0].immediate, false,
+                "{:?} failed assert",
+                instruction
+              );
+              assert_eq!(
+                reference_opcode.operands[1].immediate, true,
+                "{:?} failed assert",
+                instruction
               );
               assert_operand(
                 reference_opcode.operands[1].clone(),
@@ -651,11 +705,21 @@ mod tests {
                 format!("{:?} failed assert", instruction),
               );
             }
-            LoadType::ToAddress(target, source) => {
+            OperationType::AddressToRegister(target, source) => {
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
                 format!("{:?} failed assert", instruction),
+              );
+              assert_eq!(
+                reference_opcode.operands[0].immediate, true,
+                "{:?} failed assert",
+                instruction
+              );
+              assert_eq!(
+                reference_opcode.operands[1].immediate, false,
+                "{:?} failed assert",
+                instruction
               );
               assert_operand(
                 reference_opcode.operands[1].clone(),
@@ -663,11 +727,21 @@ mod tests {
                 format!("{:?} failed assert", instruction),
               );
             }
-            LoadType::FromAddress(target, source) => {
+            OperationType::RegisterToRegister(target, source) => {
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
                 format!("{:?} failed assert", instruction),
+              );
+              assert_eq!(
+                reference_opcode.operands[0].immediate, true,
+                "{:?} failed assert",
+                instruction
+              );
+              assert_eq!(
+                reference_opcode.operands[1].immediate, true,
+                "{:?} failed assert",
+                instruction
               );
               assert_operand(
                 reference_opcode.operands[1].clone(),
@@ -675,17 +749,42 @@ mod tests {
                 format!("{:?} failed assert", instruction),
               );
             }
-            LoadType::ToOffsetAddress(target, source) => {
+            OperationType::ValueToAddress(target, source) => {
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
                 format!("{:?} failed assert", instruction),
+              );
+              assert_eq!(
+                reference_opcode.operands[0].immediate, false,
+                "{:?} failed assert",
+                instruction
               );
               assert_operand(
                 reference_opcode.operands[1].clone(),
                 source.to_string(),
                 format!("{:?} failed assert", instruction),
               );
+            }
+            OperationType::ValueToRegister(target, source) => {
+              assert_operand(
+                reference_opcode.operands[0].clone(),
+                target.to_string(),
+                format!("{:?} failed assert", instruction),
+              );
+              assert_eq!(
+                reference_opcode.operands[0].immediate, true,
+                "{:?} failed assert",
+                instruction
+              );
+              assert_operand(
+                reference_opcode.operands[1].clone(),
+                source.to_string(),
+                format!("{:?} failed assert", instruction),
+              );
+            }
+            OperationType::AddressToAddress(_, _) => {
+              panic!("This is not supposed to happend {:?}", instruction);
             }
           }
         }
