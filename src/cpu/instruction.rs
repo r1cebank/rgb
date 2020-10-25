@@ -48,12 +48,43 @@ pub enum Instruction {
   SRA(BitArthOperationType),
   SRL(BitArthOperationType),
   SWAP(BitArthOperationType),
+  BIT(BitTestType),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum IncDecOperationType {
   ToRegister(IncDecTarget),
   ToAddress(IncDecTarget),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum BitTestType {
+  FromRegister(BitTestLocation, BitTestSource),
+  FromAddress(BitTestLocation, BitTestSource),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum BitTestSource {
+  A,
+  B,
+  C,
+  D,
+  E,
+  H,
+  L,
+  HL,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum BitTestLocation {
+  B0,
+  B1,
+  B2,
+  B3,
+  B4,
+  B5,
+  B6,
+  B7,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -479,6 +510,45 @@ mod tests {
       }
     }
   }
+  fn assert_bit_test(
+    reference_opcode: Opcode,
+    operation_type: BitTestType,
+    instruction: Instruction,
+  ) {
+    match operation_type {
+      BitTestType::FromAddress(location, target) => {
+        assert_eq!(
+          reference_opcode.operands[1].immediate, false,
+          "{:?}",
+          instruction
+        );
+        assert_eq!(
+          format!("B{}", reference_opcode.operands[0].name),
+          location.to_string(),
+          "{:?}",
+          instruction
+        );
+        assert_operand(
+          reference_opcode.operands[1].clone(),
+          target.to_string(),
+          format!("{:?} failed assert", instruction),
+        );
+      }
+      BitTestType::FromRegister(location, target) => {
+        assert_eq!(
+          format!("B{}", reference_opcode.operands[0].name),
+          location.to_string(),
+          "{:?}",
+          instruction
+        );
+        assert_operand(
+          reference_opcode.operands[1].clone(),
+          target.to_string(),
+          format!("{:?} failed assert", instruction),
+        );
+      }
+    }
+  }
 
   #[test]
   /// Use the opcode json from https://gbdev.io/gb-opcodes//optables/classic
@@ -842,6 +912,10 @@ mod tests {
           Instruction::SWAP(operation_type) => {
             assert_eq!(reference_opcode.mnemonic, "SWAP");
             assert_rotate(reference_opcode, operation_type, instruction);
+          }
+          Instruction::BIT(operation_type) => {
+            assert_eq!(reference_opcode.mnemonic, "BIT");
+            assert_bit_test(reference_opcode, operation_type, instruction);
           }
           _ => {
             // Skipping non prefixed instructions

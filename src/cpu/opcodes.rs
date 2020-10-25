@@ -1,8 +1,8 @@
 use crate::cpu::instruction::{
     AddressLocation, AddressSource, AddressTarget, ArithmeticOperationType, ArithmeticSource,
-    ArithmeticTarget, BitArthOperationType, BitOperationTarget, Condition, ConditionSource,
-    IncDecOperationType, IncDecTarget, Instruction, LoadSource, LoadType, RegisterSource,
-    RegisterTarget,
+    ArithmeticTarget, BitArthOperationType, BitOperationTarget, BitTestLocation, BitTestSource,
+    BitTestType, Condition, ConditionSource, IncDecOperationType, IncDecTarget, Instruction,
+    LoadSource, LoadType, RegisterSource, RegisterTarget,
 };
 
 /// SM83 non prefixed instruction map
@@ -626,14 +626,38 @@ pub static PREFIX_INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     ],
     // 4
     [
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
-        Instruction::NAI,
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::B,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::C,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::D,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::E,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::H,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::L,
+        )),
+        Instruction::BIT(BitTestType::FromAddress(
+            BitTestLocation::B0,
+            BitTestSource::HL,
+        )),
+        Instruction::BIT(BitTestType::FromRegister(
+            BitTestLocation::B0,
+            BitTestSource::A,
+        )),
         Instruction::NAI,
         Instruction::NAI,
         Instruction::NAI,
