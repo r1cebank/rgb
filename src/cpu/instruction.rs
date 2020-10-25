@@ -3,19 +3,19 @@ use strum_macros::Display;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Instruction {
-  INC(IncDecOperationType),
-  DEC(IncDecOperationType),
-  OR(ArithmeticOperationType),
-  CP(ArithmeticOperationType),
-  ADD(ArithmeticOperationType),
-  AND(ArithmeticOperationType),
-  SUB(ArithmeticOperationType),
-  ADC(ArithmeticOperationType),
-  SBC(ArithmeticOperationType),
+  INC(TargetType),
+  DEC(TargetType),
+  OR(OperationType),
+  CP(OperationType),
+  ADD(OperationType),
+  AND(OperationType),
+  SUB(OperationType),
+  ADC(OperationType),
+  SBC(OperationType),
   XOR(OperationType),
-  JR(Condition, ConditionSource),
-  JP(Condition, ConditionSource),
-  CALL(Condition, ConditionSource),
+  JR(Condition, Address),
+  JP(Condition, Address),
+  CALL(Condition, Address),
   RST(AddressLocation),
   PUSH(Register),
   POP(Register),
@@ -52,6 +52,12 @@ pub enum Instruction {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum TargetType {
+  Address(Address),
+  Register(Register),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum OperationType {
   RegisterToRegister(Register, Register),
   RegisterToAddress(Address, Register),
@@ -82,6 +88,7 @@ pub enum Register {
 pub enum Value {
   D8,
   D16,
+  R8,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -90,16 +97,11 @@ pub enum Address {
   HL,
   HLP,
   HLM,
+  R8,
   A8,
   A16,
   BC,
   DE,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum IncDecOperationType {
-  ToRegister(IncDecTarget),
-  ToAddress(IncDecTarget),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -160,137 +162,6 @@ pub enum AddressLocation {
   X28H,
   X30H,
   X38H,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum ArithmeticOperationType {
-  ToRegister(ArithmeticTarget, ArithmeticSource),
-  FromAddress(ArithmeticTarget, ArithmeticSource),
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum LoadType {
-  ToRegister(RegisterTarget, LoadSource),
-  ToOffsetAddress(AddressTarget, LoadSource),
-  FromAddress(RegisterTarget, AddressSource),
-  ToAddress(AddressTarget, LoadSource),
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum IncDecTarget {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  BC,
-  DE,
-  HL,
-  SP,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum LoadSource {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  D8,
-  D16,
-  BC,
-  DE,
-  HL,
-  SP,
-  SPP,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum RegisterSource {
-  AF,
-  HL,
-  BC,
-  DE,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum AddressSource {
-  C,
-  BC,
-  DE,
-  HL,
-  A8,
-  A16,
-  HLP,
-  HLM,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum RegisterTarget {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  AF,
-  HL,
-  BC,
-  DE,
-  SP,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum AddressTarget {
-  C,
-  BC,
-  DE,
-  A16,
-  A8,
-  HL,
-  HLP,
-  HLM,
-}
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum ConditionSource {
-  R8,
-  HL,
-  A16,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum ArithmeticSource {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  D8,
-  DE,
-  BC,
-  SP,
-  HL,
-  R8,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum ArithmeticTarget {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  SP,
-  HL,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -384,14 +255,14 @@ mod tests {
   fn assert_condition(
     reference_opcode: Opcode,
     condition: Condition,
-    source: ConditionSource,
+    address: Address,
     custom_msg: String,
   ) {
     match condition {
       Condition::Always => {
         assert_eq!(
           reference_opcode.operands[0].name.to_uppercase(),
-          source.to_string(),
+          address.to_string(),
           "{}",
           custom_msg
         );
@@ -405,7 +276,7 @@ mod tests {
         );
         assert_eq!(
           reference_opcode.operands[1].name.to_uppercase(),
-          source.to_string(),
+          address.to_string(),
           "{}",
           custom_msg
         );
@@ -419,7 +290,7 @@ mod tests {
         );
         assert_eq!(
           reference_opcode.operands[1].name.to_uppercase(),
-          source.to_string(),
+          address.to_string(),
           "{}",
           custom_msg
         );
@@ -433,7 +304,7 @@ mod tests {
         );
         assert_eq!(
           reference_opcode.operands[1].name.to_uppercase(),
-          source.to_string(),
+          address.to_string(),
           "{}",
           custom_msg
         );
@@ -447,7 +318,7 @@ mod tests {
         );
         assert_eq!(
           reference_opcode.operands[1].name.to_uppercase(),
-          source.to_string(),
+          address.to_string(),
           "{}",
           custom_msg
         );
@@ -686,79 +557,6 @@ mod tests {
     }
   }
 
-  fn assert_arithmetric(
-    reference_opcode: Opcode,
-    operation_type: ArithmeticOperationType,
-    fixed_target: bool,
-    instruction: Instruction,
-  ) {
-    if fixed_target {
-      match operation_type {
-        ArithmeticOperationType::ToRegister(target, source) => {
-          assert_operand(
-            Operand {
-              increment: false,
-              decrement: false,
-              immediate: true,
-              name: String::from("A"),
-            },
-            target.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-          assert_operand(
-            reference_opcode.operands[0].clone(),
-            source.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-        }
-        ArithmeticOperationType::FromAddress(target, source) => {
-          assert_operand(
-            Operand {
-              increment: false,
-              decrement: false,
-              immediate: true,
-              name: String::from("A"),
-            },
-            target.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-          assert_operand(
-            reference_opcode.operands[0].clone(),
-            source.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-        }
-      }
-    } else {
-      match operation_type {
-        ArithmeticOperationType::ToRegister(target, source) => {
-          assert_operand(
-            reference_opcode.operands[0].clone(),
-            target.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-          assert_operand(
-            reference_opcode.operands[1].clone(),
-            source.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-        }
-        ArithmeticOperationType::FromAddress(target, source) => {
-          assert_operand(
-            reference_opcode.operands[0].clone(),
-            target.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-          assert_operand(
-            reference_opcode.operands[1].clone(),
-            source.to_string(),
-            format!("{:?} failed assert", instruction),
-          );
-        }
-      }
-    }
-  }
-
   fn assert_rotate(
     reference_opcode: Opcode,
     operation_type: BitArthOperationType,
@@ -843,17 +641,46 @@ mod tests {
         Instruction::NOP => {
           assert_eq!(reference_opcode.mnemonic, "NOP");
         }
-        Instruction::INC(operation_type) => {
-          assert_eq!(reference_opcode.mnemonic, "INC");
-          match operation_type {
-            IncDecOperationType::ToRegister(target) => {
+        Instruction::DEC(target_type) => {
+          assert_eq!(reference_opcode.mnemonic, "DEC");
+          match target_type {
+            TargetType::Register(target) => {
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
                 format!("{:?} failed assert", instruction),
               );
             }
-            IncDecOperationType::ToAddress(target) => {
+            TargetType::Address(target) => {
+              assert_eq!(
+                reference_opcode.operands[0].immediate, false,
+                "{:?}",
+                instruction
+              );
+              assert_operand(
+                reference_opcode.operands[0].clone(),
+                target.to_string(),
+                format!("{:?} failed assert", instruction),
+              );
+            }
+          }
+        }
+        Instruction::INC(target_type) => {
+          assert_eq!(reference_opcode.mnemonic, "INC");
+          match target_type {
+            TargetType::Register(target) => {
+              assert_operand(
+                reference_opcode.operands[0].clone(),
+                target.to_string(),
+                format!("{:?} failed assert", instruction),
+              );
+            }
+            TargetType::Address(target) => {
+              assert_eq!(
+                reference_opcode.operands[0].immediate, false,
+                "{:?}",
+                instruction
+              );
               assert_operand(
                 reference_opcode.operands[0].clone(),
                 target.to_string(),
@@ -864,15 +691,15 @@ mod tests {
         }
         Instruction::AND(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "AND");
-          assert_arithmetric(reference_opcode, operation_type, true, instruction);
+          assert_operation(reference_opcode, operation_type, true, instruction);
         }
         Instruction::OR(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "OR");
-          assert_arithmetric(reference_opcode, operation_type, true, instruction);
+          assert_operation(reference_opcode, operation_type, true, instruction);
         }
         Instruction::CP(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "CP");
-          assert_arithmetric(reference_opcode, operation_type, true, instruction);
+          assert_operation(reference_opcode, operation_type, true, instruction);
         }
         Instruction::XOR(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "XOR");
@@ -880,38 +707,19 @@ mod tests {
         }
         Instruction::ADD(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "ADD");
-          assert_arithmetric(reference_opcode, operation_type, false, instruction);
+          assert_operation(reference_opcode, operation_type, false, instruction);
         }
         Instruction::ADC(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "ADC");
-          assert_arithmetric(reference_opcode, operation_type, false, instruction);
+          assert_operation(reference_opcode, operation_type, false, instruction);
         }
         Instruction::SUB(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "SUB");
-          assert_arithmetric(reference_opcode, operation_type, true, instruction);
+          assert_operation(reference_opcode, operation_type, true, instruction);
         }
         Instruction::SBC(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "SBC");
-          assert_arithmetric(reference_opcode, operation_type, false, instruction);
-        }
-        Instruction::DEC(operation_type) => {
-          assert_eq!(reference_opcode.mnemonic, "DEC");
-          match operation_type {
-            IncDecOperationType::ToRegister(target) => {
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-            IncDecOperationType::ToAddress(target) => {
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-          }
+          assert_operation(reference_opcode, operation_type, false, instruction);
         }
         Instruction::LD(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "LD");

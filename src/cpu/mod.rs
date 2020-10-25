@@ -2,9 +2,7 @@ pub mod instruction;
 pub mod opcodes;
 pub mod registers;
 
-pub use self::instruction::{
-    ArithmeticOperationType, ArithmeticSource, ArithmeticTarget, Condition, Instruction,
-};
+pub use self::instruction::{Condition, Instruction, OperationType, Register};
 use self::registers::Registers;
 use crate::memory::MemoryBus;
 
@@ -51,10 +49,10 @@ impl CPU {
         match instruction {
             Instruction::ADD(operation_type) => {
                 match operation_type {
-                    ArithmeticOperationType::ToRegister(target, source) => {
+                    OperationType::RegisterToRegister(target, source) => {
                         match source {
-                            ArithmeticSource::C => match target {
-                                ArithmeticTarget::A => {
+                            Register::C => match target {
+                                Register::A => {
                                     let value = self.registers.c;
                                     let new_value = self.add(value);
                                     self.registers.a = new_value;
