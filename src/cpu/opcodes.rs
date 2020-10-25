@@ -341,38 +341,14 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
             ArithmeticTarget::A,
             ArithmeticSource::A,
         )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::B,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::C,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::D,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::E,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::H,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::L,
-        )),
-        Instruction::XOR(ArithmeticOperationType::FromAddress(
-            ArithmeticTarget::A,
-            ArithmeticSource::HL,
-        )),
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::A,
-        )),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::B)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::C)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::D)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::E)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::H)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::L)),
+        Instruction::XOR(OperationType::AddressToRegister(Register::A, Address::HL)),
+        Instruction::XOR(OperationType::RegisterToRegister(Register::A, Register::A)),
     ],
     // b
     [
@@ -444,11 +420,11 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     // c
     [
         Instruction::RET(Condition::NotZero),
-        Instruction::POP(RegisterTarget::BC),
+        Instruction::POP(Register::BC),
         Instruction::JP(Condition::NotZero, ConditionSource::A16),
         Instruction::JP(Condition::Always, ConditionSource::A16),
         Instruction::CALL(Condition::NotZero, ConditionSource::A16),
-        Instruction::PUSH(RegisterSource::BC),
+        Instruction::PUSH(Register::BC),
         Instruction::ADD(ArithmeticOperationType::ToRegister(
             ArithmeticTarget::A,
             ArithmeticSource::D8,
@@ -469,11 +445,11 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     // d
     [
         Instruction::RET(Condition::NotCarry),
-        Instruction::POP(RegisterTarget::DE),
+        Instruction::POP(Register::DE),
         Instruction::JP(Condition::NotCarry, ConditionSource::A16),
         Instruction::NAI,
         Instruction::CALL(Condition::NotCarry, ConditionSource::A16),
-        Instruction::PUSH(RegisterSource::DE),
+        Instruction::PUSH(Register::DE),
         Instruction::SUB(ArithmeticOperationType::ToRegister(
             ArithmeticTarget::A,
             ArithmeticSource::D8,
@@ -493,12 +469,12 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
     ],
     // e
     [
-        Instruction::LDH(LoadType::ToOffsetAddress(AddressTarget::A8, LoadSource::A)),
-        Instruction::POP(RegisterTarget::HL),
+        Instruction::LDH(OperationType::RegisterToAddress(Address::A8, Register::A)),
+        Instruction::POP(Register::HL),
         Instruction::LD(OperationType::RegisterToAddress(Address::C, Register::A)),
         Instruction::NAI,
         Instruction::NAI,
-        Instruction::PUSH(RegisterSource::HL),
+        Instruction::PUSH(Register::HL),
         Instruction::AND(ArithmeticOperationType::FromAddress(
             ArithmeticTarget::A,
             ArithmeticSource::D8,
@@ -513,20 +489,17 @@ pub static INSTRUCTION_MAP: [[Instruction; 0x10]; 0x10] = [
         Instruction::NAI,
         Instruction::NAI,
         Instruction::NAI,
-        Instruction::XOR(ArithmeticOperationType::ToRegister(
-            ArithmeticTarget::A,
-            ArithmeticSource::D8,
-        )),
+        Instruction::XOR(OperationType::ValueToRegister(Register::A, Value::D8)),
         Instruction::RST(AddressLocation::X28H),
     ],
     // f
     [
-        Instruction::LDH(LoadType::FromAddress(RegisterTarget::A, AddressSource::A8)),
-        Instruction::POP(RegisterTarget::AF),
+        Instruction::LDH(OperationType::AddressToRegister(Register::A, Address::A8)),
+        Instruction::POP(Register::AF),
         Instruction::LD(OperationType::AddressToRegister(Register::A, Address::C)),
         Instruction::DI,
         Instruction::NAI,
-        Instruction::PUSH(RegisterSource::AF),
+        Instruction::PUSH(Register::AF),
         Instruction::OR(ArithmeticOperationType::ToRegister(
             ArithmeticTarget::A,
             ArithmeticSource::D8,
