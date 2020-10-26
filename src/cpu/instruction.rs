@@ -48,7 +48,9 @@ pub enum Instruction {
   SRA(TargetType),
   SRL(TargetType),
   SWAP(TargetType),
-  BIT(BitTestType),
+  BIT(TargetType, BitLocation),
+  RES(TargetType, BitLocation),
+  SET(TargetType, BitLocation),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -105,25 +107,7 @@ pub enum Address {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum BitTestType {
-  FromRegister(BitTestLocation, BitTestSource),
-  FromAddress(BitTestLocation, BitTestSource),
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum BitTestSource {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  HL,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum BitTestLocation {
+pub enum BitLocation {
   B0,
   B1,
   B2,
@@ -539,7 +523,7 @@ mod tests {
     }
   }
 
-  fn assert_rotate(reference_opcode: Opcode, operation_type: TargetType, instruction: Instruction) {
+  fn assert_target(reference_opcode: Opcode, operation_type: TargetType, instruction: Instruction) {
     match operation_type {
       TargetType::Address(target) => {
         assert_eq!(
@@ -562,23 +546,24 @@ mod tests {
       }
     }
   }
-  fn assert_bit_test(
+
+  fn assert_target_and_location(
     reference_opcode: Opcode,
-    operation_type: BitTestType,
+    operation_type: TargetType,
+    location: BitLocation,
     instruction: Instruction,
   ) {
     match operation_type {
-      BitTestType::FromAddress(location, target) => {
+      TargetType::Address(target) => {
         assert_eq!(
           reference_opcode.operands[1].immediate, false,
           "{:?}",
           instruction
         );
-        assert_eq!(
-          format!("B{}", reference_opcode.operands[0].name),
-          location.to_string(),
-          "{:?}",
-          instruction
+        assert_operand(
+          reference_opcode.operands[0].clone(),
+          String::from(location.to_string().as_str().trim_start_matches("B")),
+          format!("{:?} failed assert", instruction),
         );
         assert_operand(
           reference_opcode.operands[1].clone(),
@@ -586,12 +571,11 @@ mod tests {
           format!("{:?} failed assert", instruction),
         );
       }
-      BitTestType::FromRegister(location, target) => {
-        assert_eq!(
-          format!("B{}", reference_opcode.operands[0].name),
-          location.to_string(),
-          "{:?}",
-          instruction
+      TargetType::Register(target) => {
+        assert_operand(
+          reference_opcode.operands[0].clone(),
+          String::from(location.to_string().as_str().trim_start_matches("B")),
+          format!("{:?} failed assert", instruction),
         );
         assert_operand(
           reference_opcode.operands[1].clone(),
@@ -843,50 +827,54 @@ mod tests {
     for (opcode, reference_opcode) in opcodes.cbprefixed {
       let opcode_u8 = u8::from_str_radix(opcode.as_str().trim_start_matches("0x"), 16).unwrap();
       let instruction = Instruction::from_byte_prefixed(opcode_u8);
-      if instruction != Instruction::NAI {
-        print!("Checking: {:?}", instruction);
-        match instruction {
-          Instruction::RLC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "RLC");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::RRC(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "RRC");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::RR(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "RR");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::RL(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "RL");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::SLA(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SLA");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::SRA(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SRA");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::SRL(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SRL");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::SWAP(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "SWAP");
-            assert_rotate(reference_opcode, operation_type, instruction);
-          }
-          Instruction::BIT(operation_type) => {
-            assert_eq!(reference_opcode.mnemonic, "BIT");
-            assert_bit_test(reference_opcode, operation_type, instruction);
-          }
-          _ => {
-            // Skipping non prefixed instructions
-          }
+      match instruction {
+        Instruction::RLC(target) => {
+          assert_eq!(reference_opcode.mnemonic, "RLC");
+          assert_target(reference_opcode, target, instruction);
         }
-        println!(" ✔");
+        Instruction::RRC(target) => {
+          assert_eq!(reference_opcode.mnemonic, "RRC");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::RR(target) => {
+          assert_eq!(reference_opcode.mnemonic, "RR");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::RL(target) => {
+          assert_eq!(reference_opcode.mnemonic, "RL");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::SLA(target) => {
+          assert_eq!(reference_opcode.mnemonic, "SLA");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::SRA(target) => {
+          assert_eq!(reference_opcode.mnemonic, "SRA");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::SRL(target) => {
+          assert_eq!(reference_opcode.mnemonic, "SRL");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::SWAP(target) => {
+          assert_eq!(reference_opcode.mnemonic, "SWAP");
+          assert_target(reference_opcode, target, instruction);
+        }
+        Instruction::BIT(target, location) => {
+          assert_eq!(reference_opcode.mnemonic, "BIT");
+          assert_target_and_location(reference_opcode, target, location, instruction);
+        }
+        Instruction::RES(target, location) => {
+          assert_eq!(reference_opcode.mnemonic, "RES");
+          assert_target_and_location(reference_opcode, target, location, instruction);
+        }
+        Instruction::SET(target, location) => {
+          assert_eq!(reference_opcode.mnemonic, "SET");
+          assert_target_and_location(reference_opcode, target, location, instruction);
+        }
+        _ => {
+          // Skipping non prefixed instructions
+        }
       }
     }
   }
