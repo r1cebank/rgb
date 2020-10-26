@@ -40,14 +40,14 @@ pub enum Instruction {
   PREFIX,
 
   // Prefixed
-  RL(BitArthOperationType),
-  RR(BitArthOperationType),
-  RLC(BitArthOperationType),
-  RRC(BitArthOperationType),
-  SLA(BitArthOperationType),
-  SRA(BitArthOperationType),
-  SRL(BitArthOperationType),
-  SWAP(BitArthOperationType),
+  RL(TargetType),
+  RR(TargetType),
+  RLC(TargetType),
+  RRC(TargetType),
+  SLA(TargetType),
+  SRA(TargetType),
+  SRL(TargetType),
+  SWAP(TargetType),
   BIT(BitTestType),
 }
 
@@ -132,24 +132,6 @@ pub enum BitTestLocation {
   B5,
   B6,
   B7,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum BitArthOperationType {
-  ToRegister(BitOperationTarget),
-  ToAddress(BitOperationTarget),
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Display)]
-pub enum BitOperationTarget {
-  A,
-  B,
-  C,
-  D,
-  E,
-  H,
-  L,
-  HL,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -557,13 +539,9 @@ mod tests {
     }
   }
 
-  fn assert_rotate(
-    reference_opcode: Opcode,
-    operation_type: BitArthOperationType,
-    instruction: Instruction,
-  ) {
+  fn assert_rotate(reference_opcode: Opcode, operation_type: TargetType, instruction: Instruction) {
     match operation_type {
-      BitArthOperationType::ToAddress(target) => {
+      TargetType::Address(target) => {
         assert_eq!(
           reference_opcode.operands[0].immediate, false,
           "{:?}",
@@ -575,7 +553,7 @@ mod tests {
           format!("{:?} failed assert", instruction),
         );
       }
-      BitArthOperationType::ToRegister(target) => {
+      TargetType::Register(target) => {
         assert_operand(
           reference_opcode.operands[0].clone(),
           target.to_string(),
