@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 strum = "0.19"
 strum_macros = "0.19"
+clap = "2.33.3"
 
 [dev-dependencies]
 serde = { version = "1.0.117", features = ["derive"] }

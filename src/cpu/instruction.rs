@@ -598,7 +598,6 @@ mod tests {
     for (opcode, reference_opcode) in opcodes.unprefixed {
       let opcode_u8 = u8::from_str_radix(opcode.as_str().trim_start_matches("0x"), 16).unwrap();
       let instruction = Instruction::from_byte_not_prefixed(opcode_u8);
-      println!("{:?}", instruction);
       match instruction {
         Instruction::NOP => {
           assert_eq!(reference_opcode.mnemonic, "NOP");
@@ -812,6 +811,7 @@ mod tests {
         }
         _ => {
           // Skipping rest since they are prefixed
+          panic!("Should never reach here: {:?}", instruction);
         }
       }
     }
@@ -874,6 +874,7 @@ mod tests {
         }
         _ => {
           // Skipping non prefixed instructions
+          panic!("Should never reach here: {:?}", instruction);
         }
       }
     }
