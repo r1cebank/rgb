@@ -11,7 +11,7 @@ use crate::memory::Memory;
 
 pub struct CPU {
     pub registers: Registers,
-    memory: Rc<RefCell<dyn Memory>>,
+    memory: Memory,
     pc: u16,
     sp: u16,
     is_halted: bool,
@@ -19,16 +19,16 @@ pub struct CPU {
 }
 
 impl CPU {
-    // pub fn new(boot_rom: Option<Vec<u8>>) -> CPU {
-    //     CPU {
-    //         registers: Registers::new(),
-    //         memory: Memory::new(boot_rom),
-    //         pc: 0x0,
-    //         sp: 0x0,
-    //         is_halted: true,
-    //         interrupts_enabled: true,
-    //     }
-    // }
+    pub fn new(boot_rom: Option<Vec<u8>>) -> CPU {
+        CPU {
+            registers: Registers::new(),
+            memory: Memory::new(boot_rom),
+            pc: 0x0,
+            sp: 0x0,
+            is_halted: true,
+            interrupts_enabled: true,
+        }
+    }
     pub fn disassemble_boot(&self) {}
     pub fn execute(&mut self, dry_run: bool) -> u32 {
         let instruction = Instruction::HALT;
