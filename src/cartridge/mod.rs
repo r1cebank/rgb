@@ -1,13 +1,18 @@
+use crate::memory::Memory;
+
 use std::str;
 
 #[derive(Debug)]
 pub struct Cartridge {
     pub rom: Vec<u8>,
+    pub ram: Vec<u8>,
     pub title: String,
     pub cartridge_type: CartridgeType,
-    pub cartridge_rom_size: CartridgeROMSize,
+    pub cartridge_rom_size: CartridgeRomSize,
+    pub cartridge_ram_size: CartridgeRamSize,
 }
 
+#[derive(Debug)]
 pub enum Region {
     JP,
     NONJP,
@@ -127,7 +132,7 @@ impl CartridgeType {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum CartridgeROMSize {
+pub enum CartridgeRomSize {
     RomBanks2 = 0x0,
     RomBanks4 = 0x1,
     RomBanks8 = 0x2,
@@ -137,16 +142,50 @@ pub enum CartridgeROMSize {
     RomBanks128 = 0x6,
 }
 
-impl CartridgeROMSize {
-    fn from_u8(value: u8) -> Option<CartridgeROMSize> {
+impl CartridgeRomSize {
+    fn from_u8(value: u8) -> Option<CartridgeRomSize> {
         match value {
-            0x0 => Some(CartridgeROMSize::RomBanks2),
-            0x1 => Some(CartridgeROMSize::RomBanks4),
-            0x2 => Some(CartridgeROMSize::RomBanks8),
-            0x3 => Some(CartridgeROMSize::RomBanks16),
-            0x4 => Some(CartridgeROMSize::RomBanks32),
-            0x5 => Some(CartridgeROMSize::RomBanks64),
-            0x6 => Some(CartridgeROMSize::RomBanks128),
+            0x0 => Some(CartridgeRomSize::RomBanks2),
+            0x1 => Some(CartridgeRomSize::RomBanks4),
+            0x2 => Some(CartridgeRomSize::RomBanks8),
+            0x3 => Some(CartridgeRomSize::RomBanks16),
+            0x4 => Some(CartridgeRomSize::RomBanks32),
+            0x5 => Some(CartridgeRomSize::RomBanks64),
+            0x6 => Some(CartridgeRomSize::RomBanks128),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum CartridgeRamSize {
+    NoRam = 0x0,
+    Ram2K = 0x1,
+    Ram8K = 0x2,
+    Ram32K = 0x3,
+    Ram128K = 0x4,
+}
+
+fn ram_size(size: u8) -> usize {
+    match size {
+        0x00 => 0,
+        0x01 => 1024 * 2,
+        0x02 => 1024 * 8,
+        0x03 => 1024 * 32,
+        0x04 => 1024 * 128,
+        0x05 => 1024 * 64,
+        n => panic!("Unsupported ram size: 0x{:02x}", n),
+    }
+}
+
+impl CartridgeRamSize {
+    fn from_u8(value: u8) -> Option<CartridgeRamSize> {
+        match value {
+            0x0 => Some(CartridgeRamSize::NoRam),
+            0x1 => Some(CartridgeRamSize::Ram2K),
+            0x2 => Some(CartridgeRamSize::Ram8K),
+            0x3 => Some(CartridgeRamSize::Ram32K),
+            0x4 => Some(CartridgeRamSize::Ram128K),
             _ => None,
         }
     }
@@ -166,12 +205,15 @@ impl Cartridge {
         };
 
         let cartridge_type = CartridgeType::from_u8(rom[0x147]).expect("Incorrect cartridge type");
-        let cartridge_rom_size = CartridgeROMSize::from_u8(rom[0x148]).expect("Incorrect ROM size");
+        let cartridge_rom_size = CartridgeRomSize::from_u8(rom[0x148]).expect("Incorrect ROM size");
+        let cartridge_ram_size = CartridgeRamSize::from_u8(rom[0x149]).expect("Incorrect RAM size");
 
         Cartridge {
             rom,
+            ram: vec![0; ram_size(cartridge_ram_size as u8)],
             cartridge_type,
             cartridge_rom_size,
+            cartridge_ram_size,
             title,
         }
     }
@@ -183,6 +225,28 @@ impl Cartridge {
             Region::JP
         } else {
             Region::NONJP
+        }
+    }
+}
+
+impl Memory for Cartridge {
+    fn get(&self, a: u16) -> u8 {
+        match self.cartridge_type {
+            CartridgeType::ROM { ram: _, battery: _ } => self.rom[a as usize],
+            _ => {
+                panic!("Not implemented");
+            }
+        }
+    }
+
+    fn set(&mut self, _: u16, _: u8) {
+        match self.cartridge_type {
+            CartridgeType::ROM { ram: _, battery: _ } => {
+                // No support rom only with ram
+            }
+            _ => {
+                panic!("Not implemented");
+            }
         }
     }
 }

@@ -27,12 +27,14 @@ fn main() {
     let boot_buffer = matches.value_of("boot").map(|path| buffer_from_file(path));
     let rom_buffer = matches.value_of("rom").map(|path| buffer_from_file(path));
 
-    let test_cpu = cpu::CPU::new(boot_buffer);
+    // let test_cpu = cpu::CPU::new(boot_buffer);
     let test_cart = cartridge::Cartridge::from_buffer(rom_buffer);
 
     println!("{}", test_cart.title);
+    println!("{:?}", test_cart.is_japanese());
     println!("{:?}", test_cart.cartridge_type);
     println!("{:?}", test_cart.cartridge_rom_size);
+    println!("{:?}", test_cart.cartridge_ram_size);
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

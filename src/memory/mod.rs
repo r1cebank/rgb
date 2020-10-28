@@ -16,32 +16,17 @@
 
 const BOOT_ROM_SIZE: usize = 0x100;
 
-/// The memory for gameboy
-///
-pub struct Memory {
-    boot_rom: [u8; BOOT_ROM_SIZE],
-}
+pub trait Memory {
+    fn get(&self, a: u16) -> u8;
 
-impl Memory {
-    pub fn new(boot_rom_buffer: Option<Vec<u8>>) -> Memory {
-        let boot_rom = boot_rom_buffer
-            .map(|boot_rom_buffer| {
-                if boot_rom_buffer.len() > BOOT_ROM_SIZE {
-                    panic!(
-                        "Bootroom size mismatch, expected {}, got {}",
-                        BOOT_ROM_SIZE,
-                        boot_rom_buffer.len()
-                    );
-                }
-                let mut boot_rom = [0; BOOT_ROM_SIZE];
-                boot_rom.copy_from_slice(&boot_rom_buffer);
-                boot_rom
-            })
-            .unwrap();
-        Memory { boot_rom }
+    fn set(&mut self, a: u16, v: u8);
+
+    fn get_word(&self, a: u16) -> u16 {
+        u16::from(self.get(a)) | (u16::from(self.get(a + 1)) << 8)
     }
 
-    pub fn read_byte(&self, address: u16) -> u8 {
-        1
+    fn set_word(&mut self, a: u16, v: u16) {
+        self.set(a, (v & 0xFF) as u8);
+        self.set(a + 1, (v >> 8) as u8)
     }
 }
