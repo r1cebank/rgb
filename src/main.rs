@@ -1,11 +1,12 @@
 extern crate clap;
 
-use clap::{App, Arg};
-use std::io::Read;
-
 pub mod cartridge;
 pub mod cpu;
+pub mod dmg01;
 pub mod memory;
+
+use clap::{App, Arg};
+use std::io::Read;
 
 fn main() {
     let matches = App::new("rgb")
@@ -28,9 +29,9 @@ fn main() {
     let rom_buffer = matches.value_of("rom").map(|path| buffer_from_file(path));
 
     // let test_cpu = cpu::CPU::new(boot_buffer);
-    let test_cart = cartridge::Cartridge::from_buffer(rom_buffer);
+    let dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
 
-    test_cart.print_rom_info();
+    dmg.mmu.borrow().cartridge.print_rom_info();
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

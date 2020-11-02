@@ -400,6 +400,7 @@ impl Memory for Cartridge {
                 }
                 _ => {}
             },
+            // TODO: Implement more MBC types, currently focusing in MBC3
             _ => {
                 panic!("Not implemented");
             }
