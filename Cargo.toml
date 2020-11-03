@@ -12,6 +12,7 @@ strum = "0.19"
 strum_macros = "0.19"
 simplelog = "^0.7.6"
 clap = "2.33.3"
+conrod = { version = "0.55.0", features = ["glium", "winit"] }
 
 [dev-dependencies]
 serde = { version = "1.0.117", features = ["derive"] }

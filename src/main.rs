@@ -1,8 +1,8 @@
+#[macro_use]
+extern crate conrod;
 extern crate clap;
 #[macro_use]
 extern crate log;
-
-use simplelog::*;
 
 pub mod cartridge;
 pub mod cpu;
@@ -10,7 +10,12 @@ pub mod dmg01;
 pub mod memory;
 
 use clap::{App, Arg};
+use conrod::backend::glium::glium::{self, Surface};
+use simplelog::*;
 use std::io::Read;
+
+const WIDTH: u32 = 400;
+const HEIGHT: u32 = 200;
 
 fn main() {
     let matches = App::new("rgb")
@@ -37,9 +42,18 @@ fn main() {
     // let test_cpu = cpu::CPU::new(boot_buffer);
     let mut dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
 
-    dmg.tick();
-    dmg.tick();
-    dmg.tick();
+    let mut events_loop = glium::glutin::EventsLoop::new();
+    let window = glium::glutin::WindowBuilder::new()
+        .with_title("Hello Conrod")
+        .with_dimensions(WIDTH, HEIGHT);
+    let context = glium::glutin::ContextBuilder::new()
+        .with_vsync(true)
+        .with_multisampling(4);
+    let display = glium::Display::new(window, context, &events_loop).unwrap();
+
+    loop {
+        dmg.tick();
+    }
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

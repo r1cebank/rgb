@@ -98,9 +98,14 @@ impl CPU {
                             // Set the register value
                             self.set_reg_word(register, d16);
                         }
-                        _ => {}
+                        _ => {
+                            panic!("Not implemented: {:?}", instruction);
+                        }
                     },
-                    _ => {}
+                    OperationType::RegisterToAddress(address, register) => {}
+                    _ => {
+                        panic!("Not implemented: {:?}", instruction);
+                    }
                 }
             }
             Instruction::LDH(operation_type) => {
