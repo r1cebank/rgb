@@ -275,6 +275,11 @@ impl Cartridge {
             },
         };
 
+        debug!("Loading ROM [{}]", title);
+        debug!("ROM type is {:?}", cartridge_type);
+        debug!("ROM size is {:?}", cartridge_rom_size);
+        debug!("RAM size is {:?}", cartridge_ram_size);
+
         Cartridge {
             rom,
             ram: vec![0; ram_size(cartridge_ram_size as u8)],
@@ -294,15 +299,6 @@ impl Cartridge {
         } else {
             Region::NONJP
         }
-    }
-
-    pub fn print_rom_info(&self) {
-        println!("Title: {}", self.title);
-        println!("Region: {:?}", self.is_japanese());
-        println!("Type: {:?}", self.cartridge_type);
-        println!("Rom Size: {:?}", self.cartridge_rom_size);
-        println!("Ram Size: {:?}", self.cartridge_ram_size);
-        println!("MBC State: {:?}", self.mbc_state);
     }
 }
 

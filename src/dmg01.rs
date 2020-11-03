@@ -17,9 +17,9 @@ impl dmg01 {
         Self { mmu, cpu }
     }
     pub fn tick(&mut self) -> u32 {
-        if self.mmu.borrow().get(self.cpu.registers.pc) == 0x10 {
-            self.mmu.borrow_mut().switch_speed();
-        }
+        // if self.mmu.borrow().get(self.cpu.registers.pc) == 0x10 {
+        //     self.mmu.borrow_mut().switch_speed();
+        // }
         let cycles = self.cpu.next();
         self.mmu.borrow_mut().next(cycles);
         cycles

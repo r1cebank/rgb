@@ -5,14 +5,14 @@ use strum_macros::Display;
 pub enum Instruction {
   INC(TargetType),
   DEC(TargetType),
-  OR(OperationType),
+  OR(SourceType),
   CP(OperationType),
   ADD(OperationType),
   AND(OperationType),
   SUB(OperationType),
   ADC(OperationType),
   SBC(OperationType),
-  XOR(OperationType),
+  XOR(SourceType),
   JR(Condition, Address),
   JP(Condition, Address),
   CALL(Condition, Address),
@@ -57,6 +57,13 @@ pub enum Instruction {
 pub enum TargetType {
   Address(Address),
   Register(Register),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Display)]
+pub enum SourceType {
+  Address(Address),
+  Register(Register),
+  Value(Value),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
@@ -547,6 +554,37 @@ mod tests {
     }
   }
 
+  fn assert_source(reference_opcode: Opcode, source_type: SourceType, instruction: Instruction) {
+    match source_type {
+      SourceType::Address(target) => {
+        assert_eq!(
+          reference_opcode.operands[0].immediate, false,
+          "{:?}",
+          instruction
+        );
+        assert_operand(
+          reference_opcode.operands[0].clone(),
+          target.to_string(),
+          format!("{:?} failed assert", instruction),
+        );
+      }
+      SourceType::Register(target) => {
+        assert_operand(
+          reference_opcode.operands[0].clone(),
+          target.to_string(),
+          format!("{:?} failed assert", instruction),
+        );
+      }
+      SourceType::Value(value) => {
+        assert_operand(
+          reference_opcode.operands[0].clone(),
+          value.to_string(),
+          format!("{:?} failed assert", instruction),
+        );
+      }
+    }
+  }
+
   fn assert_target_and_location(
     reference_opcode: Opcode,
     operation_type: TargetType,
@@ -585,7 +623,6 @@ mod tests {
       }
     }
   }
-
   #[test]
   /// Use the opcode json from https://gbdev.io/gb-opcodes//optables/classic
   /// to ensure the opcode is decoded correctly
@@ -604,67 +641,27 @@ mod tests {
         }
         Instruction::DEC(target_type) => {
           assert_eq!(reference_opcode.mnemonic, "DEC");
-          match target_type {
-            TargetType::Register(target) => {
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-            TargetType::Address(target) => {
-              assert_eq!(
-                reference_opcode.operands[0].immediate, false,
-                "{:?}",
-                instruction
-              );
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-          }
+          assert_target(reference_opcode, target_type, instruction);
         }
         Instruction::INC(target_type) => {
           assert_eq!(reference_opcode.mnemonic, "INC");
-          match target_type {
-            TargetType::Register(target) => {
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-            TargetType::Address(target) => {
-              assert_eq!(
-                reference_opcode.operands[0].immediate, false,
-                "{:?}",
-                instruction
-              );
-              assert_operand(
-                reference_opcode.operands[0].clone(),
-                target.to_string(),
-                format!("{:?} failed assert", instruction),
-              );
-            }
-          }
+          assert_target(reference_opcode, target_type, instruction);
         }
         Instruction::AND(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "AND");
           assert_operation(reference_opcode, operation_type, true, instruction);
         }
-        Instruction::OR(operation_type) => {
+        Instruction::OR(source_type) => {
           assert_eq!(reference_opcode.mnemonic, "OR");
-          assert_operation(reference_opcode, operation_type, true, instruction);
+          assert_source(reference_opcode, source_type, instruction);
         }
         Instruction::CP(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "CP");
           assert_operation(reference_opcode, operation_type, true, instruction);
         }
-        Instruction::XOR(operation_type) => {
+        Instruction::XOR(source_type) => {
           assert_eq!(reference_opcode.mnemonic, "XOR");
-          assert_operation(reference_opcode, operation_type, true, instruction);
+          assert_source(reference_opcode, source_type, instruction);
         }
         Instruction::ADD(operation_type) => {
           assert_eq!(reference_opcode.mnemonic, "ADD");

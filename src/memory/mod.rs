@@ -40,6 +40,7 @@ pub struct MMU {
     work_ram: [u8; 0x8000],
     high_ram: [u8; 0x7f],
     work_ram_bank: usize,
+    boot_rom_enabled: bool,
 }
 
 impl MMU {
@@ -66,18 +67,24 @@ impl MMU {
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],
             work_ram_bank: 0x01,
+            boot_rom_enabled: true,
         }
     }
 
-    pub fn switch_speed(&mut self) {}
+    pub fn switch_speed(&mut self) {
+        // Switching speed for CGB
+    }
 
     pub fn next(&mut self, cycles: u32) -> u32 {
-        0
+        1
     }
 }
 
 impl Memory for MMU {
     fn get(&self, address: u16) -> u8 {
+        if self.boot_rom_enabled {
+            return self.boot_rom[address as usize];
+        }
         match address {
             0x0000..=0x7fff => self.cartridge.get(address),
             0x8000..=0x9fff => 1,

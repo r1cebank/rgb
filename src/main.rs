@@ -1,4 +1,8 @@
 extern crate clap;
+#[macro_use]
+extern crate log;
+
+use simplelog::*;
 
 pub mod cartridge;
 pub mod cpu;
@@ -25,13 +29,17 @@ fn main() {
         )
         .get_matches();
 
+    let _ = SimpleLogger::init(LevelFilter::Trace, Config::default());
+
     let boot_buffer = matches.value_of("boot").map(|path| buffer_from_file(path));
     let rom_buffer = matches.value_of("rom").map(|path| buffer_from_file(path));
 
     // let test_cpu = cpu::CPU::new(boot_buffer);
-    let dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
+    let mut dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
 
-    dmg.mmu.borrow().cartridge.print_rom_info();
+    dmg.tick();
+    dmg.tick();
+    dmg.tick();
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

@@ -1,4 +1,4 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct FlagsRegister {
     // set if the the last operation produced a result of 0
     pub zero: bool,
@@ -8,6 +8,20 @@ pub struct FlagsRegister {
     pub half_carry: bool,
     // set if the result overflowed
     pub carry: bool,
+}
+
+// The Fleg Register consists of the following bits: Z, N, H, C, 0, 0, 0, 0.
+pub enum Flag {
+    // Zero Flag. This bit is set when the result of a math operationis zero or two values match when using the CP
+    // instruction.
+    Z,
+    // Subtract Flag. This bit is set if a subtraction was performed in the last math instruction.
+    N,
+    // Half Carry Flag. This bit is set if a carry occurred from the lowernibble in the last math operation.
+    H,
+    // Carry Flag. This bit is set if a carry occurred from the last math operation or if register A is the smaller
+    // valuewhen executing the CP instruction.
+    C,
 }
 
 const ZERO_FLAG_BYTE_POSITION: u8 = 7;
@@ -56,7 +70,7 @@ impl std::convert::From<u8> for FlagsRegister {
 /// flag register f
 /// pc for pc counter  16-bit
 /// sp for stack pointer  16-bit
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Registers {
     pub a: u8,
     pub b: u8,
@@ -83,6 +97,59 @@ impl Registers {
             l: 0x00,
             pc: 0x00,
             sp: 0x00,
+        }
+    }
+
+    pub fn get_af(&self) -> u16 {
+        (u16::from(self.a) << 8) | u16::from(u8::from(self.f))
+    }
+
+    pub fn get_bc(&self) -> u16 {
+        (u16::from(self.b) << 8) | u16::from(self.c)
+    }
+
+    pub fn get_de(&self) -> u16 {
+        (u16::from(self.d) << 8) | u16::from(self.e)
+    }
+
+    pub fn get_hl(&self) -> u16 {
+        (u16::from(self.h) << 8) | u16::from(self.l)
+    }
+    pub fn set_af(&mut self, value: u16) {
+        self.a = (value >> 8) as u8;
+        self.f = FlagsRegister::from((value & 0x00f0) as u8);
+    }
+
+    pub fn set_bc(&mut self, value: u16) {
+        self.b = (value >> 8) as u8;
+        self.c = (value & 0x00ff) as u8;
+    }
+
+    pub fn set_de(&mut self, value: u16) {
+        self.d = (value >> 8) as u8;
+        self.e = (value & 0x00ff) as u8;
+    }
+
+    pub fn set_hl(&mut self, value: u16) {
+        self.h = (value >> 8) as u8;
+        self.l = (value & 0x00ff) as u8;
+    }
+
+    pub fn get_flag(&self, flag: Flag) -> bool {
+        match flag {
+            Flag::C => self.f.zero,
+            Flag::H => self.f.half_carry,
+            Flag::N => self.f.half_carry,
+            Flag::Z => self.f.zero,
+        }
+    }
+
+    pub fn set_flag(&mut self, flag: Flag, value: bool) {
+        match flag {
+            Flag::C => self.f.zero = value,
+            Flag::H => self.f.half_carry = value,
+            Flag::N => self.f.half_carry = value,
+            Flag::Z => self.f.zero = value,
         }
     }
 }
