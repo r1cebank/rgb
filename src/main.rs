@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate conrod;
 extern crate clap;
 #[macro_use]
 extern crate log;
@@ -9,13 +7,14 @@ pub mod cpu;
 pub mod dmg01;
 pub mod memory;
 
+use cartridge::CartridgeType;
 use clap::{App, Arg};
-use conrod::backend::glium::glium::{self, Surface};
+use imgui::*;
+use memory::Memory;
 use simplelog::*;
 use std::io::Read;
 
-const WIDTH: u32 = 400;
-const HEIGHT: u32 = 200;
+mod support;
 
 fn main() {
     let matches = App::new("rgb")
@@ -42,18 +41,91 @@ fn main() {
     // let test_cpu = cpu::CPU::new(boot_buffer);
     let mut dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
 
-    let mut events_loop = glium::glutin::EventsLoop::new();
-    let window = glium::glutin::WindowBuilder::new()
-        .with_title("Hello Conrod")
-        .with_dimensions(WIDTH, HEIGHT);
-    let context = glium::glutin::ContextBuilder::new()
-        .with_vsync(true)
-        .with_multisampling(4);
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
+    let system = support::init(file!());
+    let mut address_value: String = String::from("0");
+    let mut address = ImString::with_capacity(32);
 
-    loop {
+    system.main_loop(move |_, ui| {
         dmg.tick();
-    }
+        let cartridge = &dmg.mmu.borrow().cartridge;
+        let cpu = &dmg.cpu;
+        Window::new(&im_str!(
+            "cartridge: [{}]",
+            dmg.mmu.borrow().cartridge.title
+        ))
+        .size([700.0, 160.0], Condition::FirstUseEver)
+        .position([0.0, 0.0], Condition::FirstUseEver)
+        .build(ui, || {
+            ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
+            ui.text(im_str!(
+                "cartridge_rom_size: {:?}",
+                cartridge.cartridge_rom_size
+            ));
+            ui.text(im_str!(
+                "cartridge_ram_size: {:?}",
+                cartridge.cartridge_ram_size
+            ));
+            ui.separator();
+            let mbc_state = &cartridge.mbc_state;
+            match cartridge.cartridge_type {
+                CartridgeType::MBC3 {
+                    ram: _,
+                    battery: _,
+                    rtc: _,
+                } => {
+                    ui.text(im_str!("rtc: {:?}", mbc_state.mbc3.rtc));
+                    ui.text(im_str!("rom_bank: {:x}", mbc_state.mbc3.rom_bank));
+                    ui.text(im_str!("ram_bank: {:x}", mbc_state.mbc3.ram_bank));
+                    ui.text(im_str!("ram_enable: {:?}", mbc_state.mbc3.ram_enable));
+                }
+                _ => {}
+            }
+        });
+
+        Window::new(&im_str!("cpu: {}hz, speed: {}x", cpu.frequency, cpu.speed))
+            .size([700.0, 150.0], Condition::FirstUseEver)
+            .position([0.0, 160.0], Condition::FirstUseEver)
+            .build(ui, || {
+                ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
+                ui.text(im_str!(
+                    "wait_time: {}, cycle_duration: {}ms",
+                    cpu.wait_time,
+                    cpu.cycle_duration,
+                ));
+                ui.text(im_str!(
+                    "registers: {}",
+                    cpu.cpu.registers.get_register_overview()
+                ));
+                ui.text(im_str!(
+                    "16 bit registers: {}",
+                    cpu.cpu.registers.get_word_register_overview()
+                ));
+                ui.text(im_str!(
+                    "flags: {}",
+                    cpu.cpu.registers.get_flag_register_overview()
+                ));
+            });
+        Window::new(&im_str!("memory : {:?}", cartridge.cartridge_ram_size))
+            .size([250.0, 160.0], Condition::FirstUseEver)
+            .position([700.0, 0.0], Condition::FirstUseEver)
+            .build(ui, || {
+                ui.input_text(im_str!("address"), &mut address).build();
+                if ui.button(im_str!("lookup"), [100.0, 20.0]) {
+                    let address =
+                        u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16).unwrap();
+                    address_value = format!("{:x}", dmg.mmu.borrow().get(address));
+                }
+                if ui.button(im_str!("lookup word"), [100.0, 20.0]) {
+                    let address =
+                        u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16).unwrap();
+                    address_value = format!("{:x}", dmg.mmu.borrow().get_word(address));
+                }
+                ui.text(im_str!("value: {}", address_value));
+            });
+    });
+    // loop {
+    //     dmg.tick();
+    // }
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

@@ -100,6 +100,28 @@ impl Registers {
         }
     }
 
+    pub fn get_register_overview(&self) -> String {
+        format!(
+            "A: {:x}, B: {:x}, C: {:x}, D: {:x}, E: {:x}, H: {:x}, L: {:x}",
+            self.a, self.b, self.c, self.d, self.e, self.h, self.l
+        )
+    }
+
+    pub fn get_word_register_overview(&self) -> String {
+        format!(
+            "AF: {:x}, BC: {:x}, DE: {:x}, HL: {:x}, AF: {:x}",
+            self.get_af(),
+            self.get_bc(),
+            self.get_de(),
+            self.get_hl(),
+            self.get_af(),
+        )
+    }
+
+    pub fn get_flag_register_overview(&self) -> String {
+        format!("{:?}", self.f)
+    }
+
     pub fn get_af(&self) -> u16 {
         (u16::from(self.a) << 8) | u16::from(u8::from(self.f))
     }

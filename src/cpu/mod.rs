@@ -4,6 +4,7 @@ pub mod registers;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::SystemTime;
 
 pub use self::instruction::{Condition, Instruction, OperationType, Register, SourceType, Value};
 use self::registers::{Flag, Registers};
@@ -65,7 +66,7 @@ impl CPU {
         self.registers.set_flag(Flag::Z, result == 0x00);
         self.registers.a = result;
     }
-    pub fn next(&mut self) -> u32 {
+    pub fn tick(&mut self) -> u32 {
         let mut instruction_byte = self.get_next();
 
         let prefixed = instruction_byte == 0xCB;
@@ -262,9 +263,87 @@ impl CPU {
         }
 
         self.print_registers();
-        0
+        1
     }
     fn print_registers(&self) {
         debug!("{:?}", self.registers);
+    }
+}
+
+pub struct ClockedCPU {
+    pub cpu: CPU,
+    pub frequency: u32,
+    pub last_ran: u128,
+    pub cycle_time: u128,
+    pub wait_time: u128,
+    last_cycle: u128,
+    pub speed: f32,
+    pub cycle_duration: u128,
+}
+
+impl ClockedCPU {
+    pub fn new(frequency: u32, speed: f32, memory: Rc<RefCell<dyn Memory>>) -> ClockedCPU {
+        ClockedCPU {
+            frequency,
+            cpu: CPU::new(memory),
+            cycle_time: (1 as u128 / frequency as u128) * (1_000_000_000 as u128), // Cycletime in nano seconds
+            last_ran: SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos(),
+            wait_time: 0,
+            speed,
+            last_cycle: SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_millis(),
+            cycle_duration: 0,
+        }
+    }
+
+    pub fn update_freq(&mut self, frequency: u32) {}
+
+    pub fn tick(&mut self) -> u32 {
+        if self.wait_time > 0 {
+            let delta = SystemTime::now() // This will be the nano seconds taken for each cycle
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+                - self.last_ran;
+            match self.wait_time.checked_sub(delta) {
+                Some(w) => self.wait_time = w,
+                None => self.wait_time = 0,
+            }
+            self.last_ran = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            return 0;
+        } else {
+            let cycles = self.cpu.tick();
+            let delta = SystemTime::now() // This will be the nano seconds taken for each cycle
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+                - self.last_ran;
+            let expected_cycle_time = cycles as u128 * self.cycle_time;
+            if delta < expected_cycle_time {
+                self.wait_time = ((expected_cycle_time - delta) as f32 / self.speed as f32) as u128;
+            }
+            self.last_ran = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            self.cycle_duration = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_millis()
+                - self.last_cycle;
+            self.last_cycle = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_millis();
+            cycles
+        }
     }
 }
