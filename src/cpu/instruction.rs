@@ -115,14 +115,14 @@ pub enum Address {
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum BitLocation {
-  B0,
-  B1,
-  B2,
-  B3,
-  B4,
-  B5,
-  B6,
-  B7,
+  B0 = 0,
+  B1 = 1,
+  B2 = 2,
+  B3 = 3,
+  B4 = 4,
+  B5 = 5,
+  B6 = 6,
+  B7 = 7,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]

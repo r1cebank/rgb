@@ -137,6 +137,7 @@ impl Registers {
     pub fn get_hl(&self) -> u16 {
         (u16::from(self.h) << 8) | u16::from(self.l)
     }
+
     pub fn set_af(&mut self, value: u16) {
         self.a = (value >> 8) as u8;
         self.f = FlagsRegister::from((value & 0x00f0) as u8);

@@ -13,7 +13,7 @@ pub struct dmg01 {
 impl dmg01 {
     pub fn new(boot_rom_buffer: Option<Vec<u8>>, rom_buffer: Option<Vec<u8>>) -> Self {
         let mmu = Rc::new(RefCell::new(MMU::new(boot_rom_buffer, rom_buffer)));
-        let cpu = ClockedCPU::new(1, 0.1, mmu.clone());
+        let cpu = ClockedCPU::new(1, 1.0, mmu.clone());
         Self { mmu, cpu }
     }
     pub fn tick(&mut self) -> u32 {

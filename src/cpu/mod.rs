@@ -6,15 +6,70 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::SystemTime;
 
-pub use self::instruction::{Condition, Instruction, OperationType, Register, SourceType, Value};
+pub use self::instruction::{
+    Address, Condition, Instruction, OperationType, Register, SourceType, TargetType, Value,
+};
 use self::registers::{Flag, Registers};
 use crate::memory::Memory;
+
+// Nintendo documents describe the CPU & instructions speed in machine cycles while this document describes them in
+// clock cycles. Here is the translation:
+//   1 machine cycle = 4 clock cycles
+//                   GB CPU Speed    NOP Instruction
+// Machine Cycles    1.05MHz         1 cycle
+// Clock Cycles      4.19MHz         4 cycles
+//
+//  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+const OP_CYCLES: [u32; 256] = [
+    1, 3, 2, 2, 1, 1, 2, 1, 5, 2, 2, 2, 1, 1, 2, 1, // 0
+    0, 3, 2, 2, 1, 1, 2, 1, 3, 2, 2, 2, 1, 1, 2, 1, // 1
+    2, 3, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 1, 1, 2, 1, // 2
+    2, 3, 2, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1, 1, 2, 1, // 3
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 4
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 5
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 6
+    2, 2, 2, 2, 2, 2, 0, 2, 1, 1, 1, 1, 1, 1, 2, 1, // 7
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 8
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 9
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // a
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // b
+    2, 3, 3, 4, 3, 4, 2, 4, 2, 4, 3, 0, 3, 6, 2, 4, // c
+    2, 3, 3, 0, 3, 4, 2, 4, 2, 4, 3, 0, 3, 0, 2, 4, // d
+    3, 3, 2, 0, 0, 4, 2, 4, 4, 1, 4, 0, 0, 0, 2, 4, // e
+    3, 3, 2, 1, 0, 4, 2, 4, 3, 2, 4, 1, 0, 0, 2, 4, // f
+];
+
+//  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+const CB_CYCLES: [u32; 256] = [
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 0
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 1
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 2
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 3
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 4
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 5
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 6
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 7
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 8
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 9
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // a
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // b
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // c
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // d
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // e
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // f
+];
 
 pub struct CPU {
     pub registers: Registers,
     memory: Rc<RefCell<dyn Memory>>,
+    pub last_instruction: Instruction,
     is_halted: bool,
     interrupts_enabled: bool,
+}
+
+enum DataType {
+    U8(u8),
+    U16(u16),
 }
 
 impl CPU {
@@ -22,6 +77,7 @@ impl CPU {
         CPU {
             registers: Registers::new(),
             memory,
+            last_instruction: Instruction::NOP,
             is_halted: true,
             interrupts_enabled: true,
         }
@@ -36,7 +92,21 @@ impl CPU {
         self.registers.pc += 2;
         opcode
     }
-    fn set_reg_word(&mut self, register: Register, value: u16) {
+    // Test bit b in register r.
+    // b = 0 - 7, r = A,B,C,D,E,H,L,(HL)
+    //
+    // Flags affected:
+    // Z - Set if bit b of register r is 0.
+    // N - Reset.
+    // H - Set.
+    // C - Not affected
+    fn alu_bit(&mut self, value: u8, position: u8) {
+        let r = value & (1 << position) == 0x00;
+        self.registers.set_flag(Flag::H, true);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, r);
+    }
+    fn set_register_16(&mut self, register: Register, value: u16) {
         match register {
             Register::BC => {
                 self.registers.set_bc(value);
@@ -58,6 +128,135 @@ impl CPU {
             }
         }
     }
+    fn set_register(&mut self, register: Register, value: u8) {
+        match register {
+            Register::A => self.registers.a = value,
+            Register::B => self.registers.b = value,
+            Register::C => self.registers.c = value,
+            Register::D => self.registers.d = value,
+            Register::E => self.registers.e = value,
+            Register::H => self.registers.h = value,
+            Register::L => self.registers.l = value,
+            _ => {
+                panic!("Invalid assignment to register");
+            }
+        }
+    }
+    fn value_to_register(&mut self, register: Register, value: Value) {
+        match value {
+            Value::D16 => {
+                let d16 = self.get_next_word();
+                trace!("LD {}, ${:x}", register, d16);
+
+                // Set the register value
+                self.set_register_16(register, d16);
+            }
+            Value::D8 => {
+                let d8 = self.get_next();
+                trace!("LD {}, ${:x}", register, d8);
+                // Set the register value
+                self.set_register(register, d8);
+            }
+            _ => {
+                panic!("Not implemented: {:?} <- {:?}", register, value);
+            }
+        }
+    }
+    // fn value_to_address(&mut self, address: Address, value: Value) {
+    //     match value {
+    //         Value::D16 => {
+    //             let d16 = self.get_next_word();
+    //             trace!("LD {}, ${:x}", register, d16);
+
+    //             // Set the register value
+    //             self.set_register_16(register, d16);
+    //         }
+    //         Value::D8 => {
+    //             let d8 = self.get_next();
+    //             trace!("LD {}, ${:x}", register, d8);
+    //             // Set the register value
+    //             self.set_register(register, d8);
+    //         }
+    //         _ => {
+    //             panic!("Not implemented: {:?} <- {:?}", register, value);
+    //         }
+    //     }
+    // }
+    fn get_register(&self, register: Register) -> DataType {
+        match register {
+            Register::A => DataType::U8(self.registers.a),
+            Register::B => DataType::U8(self.registers.b),
+            Register::C => DataType::U8(self.registers.c),
+            Register::D => DataType::U8(self.registers.d),
+            Register::E => DataType::U8(self.registers.e),
+            Register::H => DataType::U8(self.registers.h),
+            Register::L => DataType::U8(self.registers.l),
+            Register::BC => DataType::U16(self.registers.get_bc()),
+            Register::DE => DataType::U16(self.registers.get_de()),
+            Register::HL => DataType::U16(self.registers.get_hl()),
+            Register::AF => DataType::U16(self.registers.get_af()),
+            Register::SP => DataType::U16(self.registers.sp),
+            _ => {
+                panic!("Invalid assignment to register");
+            }
+        }
+    }
+    fn set_address_value(&mut self, address: Address, value: u8) {
+        match address {
+            Address::BC => {
+                self.memory.borrow_mut().set(self.registers.get_bc(), value);
+            }
+            Address::DE => {
+                self.memory.borrow_mut().set(self.registers.get_de(), value);
+            }
+            Address::HLP => {
+                let address = self.registers.get_hl();
+                self.memory.borrow_mut().set(address, value);
+                self.registers.set_hl(address + 1);
+            }
+            Address::HLM => {
+                let address = self.registers.get_hl();
+                self.memory.borrow_mut().set(address, value);
+                self.registers.set_hl(address - 1);
+            }
+            _ => {
+                panic!("Not Implemented");
+            }
+        }
+    }
+    fn set_address_value_16(&mut self, address: Address, value: u16) {
+        match address {
+            Address::A16 => {
+                let address = self.get_next_word();
+                self.memory.borrow_mut().set_word(address, value);
+            }
+            _ => {
+                panic!("Not Implemented");
+            }
+        }
+    }
+    fn register_to_address(&mut self, address: Address, register: Register) {
+        let register_value = self.get_register(register);
+        match address {
+            Address::HLM => {
+                trace!("LD (HL-), {}", register);
+            }
+            Address::HLP => {
+                trace!("LD (HL+), {}", register);
+            }
+            _ => {
+                trace!("LD ({}), {}", address, register);
+            }
+        }
+        match register_value {
+            DataType::U8(value) => {
+                self.set_address_value(address, value);
+            }
+            DataType::U16(value) => {
+                self.set_address_value_16(address, value);
+            }
+        }
+    }
     fn xor(&mut self, value: u8) {
         let result = self.registers.a ^ value;
         self.registers.set_flag(Flag::C, false);
@@ -76,6 +275,8 @@ impl CPU {
 
         let instruction = Instruction::from_byte(instruction_byte, prefixed);
 
+        self.last_instruction = instruction;
+
         debug!(
             "HEX: {:x} Decoded: {:?} Prefixed: {}",
             instruction_byte, instruction, prefixed
@@ -88,27 +289,33 @@ impl CPU {
             Instruction::NOP => {
                 // Not doing anything for NOP
             }
-            Instruction::LD(operation_type) => {
-                // panic!("Not implemented: {:?}", instruction);
-                match operation_type {
-                    OperationType::ValueToRegister(register, value) => match value {
-                        Value::D16 => {
-                            let d16 = self.get_next_word();
-                            trace!("LD {}, ${:x}", register, d16);
-
-                            // Set the register value
-                            self.set_reg_word(register, d16);
+            Instruction::LD(operation_type) => match operation_type {
+                OperationType::ValueToRegister(register, value) => {
+                    self.value_to_register(register, value)
+                }
+                OperationType::ValueToAddress(address, value) => {
+                    // self.set_address_value(address, value: u8);
+                }
+                OperationType::RegisterToAddress(address, register) => {
+                    self.register_to_address(address, register);
+                }
+                OperationType::RegisterToRegister(target, source) => {
+                    let register_value = self.get_register(source);
+                    trace!("LD {}, {}", target, source);
+                    match register_value {
+                        DataType::U8(value) => {
+                            self.set_register(target, value);
                         }
                         _ => {
-                            panic!("Not implemented: {:?}", instruction);
+                            panic!("Invalid datatype u16");
                         }
-                    },
-                    OperationType::RegisterToAddress(address, register) => {}
-                    _ => {
-                        panic!("Not implemented: {:?}", instruction);
                     }
                 }
-            }
+                OperationType::AddressToRegister(register, address) => {}
+                _ => {
+                    panic!("Not implemented: {:?}", instruction);
+                }
+            },
             Instruction::LDH(operation_type) => {
                 panic!("Not implemented: {:?}", instruction);
             }
@@ -215,47 +422,61 @@ impl CPU {
             Instruction::STOP => {
                 panic!("Not implemented: {:?}", instruction);
             }
-            Instruction::PREFIX => {
-                let prefix_instruction = Instruction::NAI;
-                match prefix_instruction {
-                    // Prefixed
-                    Instruction::RL(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
+            Instruction::RL(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::RR(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::RLC(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::RRC(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::SLA(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::SRA(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::SRL(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::SWAP(target_type) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::BIT(target_type, location) => {
+                // Finished ✔
+                match target_type {
+                    TargetType::Register(register) => {
+                        trace!("BIT {}, {}", location as u8, register);
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                self.alu_bit(value, location as u8);
+                            }
+                            DataType::U16(_) => {
+                                panic!("Invalid datatype u16");
+                            }
+                        }
                     }
-                    Instruction::RR(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::RLC(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::RRC(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::SLA(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::SRA(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::SRL(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::SWAP(target_type) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::BIT(target_type, location) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::RES(target_type, location) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    Instruction::SET(target_type, location) => {
-                        panic!("Not implemented: {:?}", instruction);
-                    }
-                    _ => {
-                        panic!("Unknown instruction: {:?}", instruction);
-                    }
+                    TargetType::Address(address) => match address {
+                        Address::HL => {
+                            let address_value = self.memory.borrow().get(self.registers.get_hl());
+                            self.alu_bit(address_value, location as u8);
+                        }
+                        _ => {
+                            panic!("Invalid address value");
+                        }
+                    },
                 }
+            }
+            Instruction::RES(target_type, location) => {
+                panic!("Not implemented: {:?}", instruction);
+            }
+            Instruction::SET(target_type, location) => {
+                panic!("Not implemented: {:?}", instruction);
             }
             _ => {
                 panic!("Unknown instruction: {:?}", instruction);
@@ -263,7 +484,65 @@ impl CPU {
         }
 
         self.print_registers();
-        1
+
+        let ecycle = match instruction_byte {
+            0x20 | 0x30 => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x01
+                }
+            }
+            0x28 | 0x38 => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x01
+                } else {
+                    0x00
+                }
+            }
+            0xc0 | 0xd0 => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x03
+                }
+            }
+            0xc8 | 0xcc | 0xd8 | 0xdc => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x03
+                } else {
+                    0x00
+                }
+            }
+            0xc2 | 0xd2 => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x01
+                }
+            }
+            0xca | 0xda => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x01
+                } else {
+                    0x00
+                }
+            }
+            0xc4 | 0xd4 => {
+                if self.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x03
+                }
+            }
+            _ => 0x00,
+        };
+
+        if prefixed {
+            CB_CYCLES[instruction_byte as usize]
+        } else {
+            OP_CYCLES[instruction_byte as usize] + ecycle
+        }
     }
     fn print_registers(&self) {
         debug!("{:?}", self.registers);

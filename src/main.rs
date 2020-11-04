@@ -54,7 +54,7 @@ fn main() {
             dmg.mmu.borrow().cartridge.title
         ))
         .size([700.0, 160.0], Condition::FirstUseEver)
-        .position([0.0, 0.0], Condition::FirstUseEver)
+        .position([10.0, 10.0], Condition::FirstUseEver)
         .build(ui, || {
             ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
             ui.text(im_str!(
@@ -84,7 +84,7 @@ fn main() {
 
         Window::new(&im_str!("cpu: {}hz, speed: {}x", cpu.frequency, cpu.speed))
             .size([700.0, 150.0], Condition::FirstUseEver)
-            .position([0.0, 160.0], Condition::FirstUseEver)
+            .position([10.0, 180.0], Condition::FirstUseEver)
             .build(ui, || {
                 ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
                 ui.text(im_str!(
@@ -104,10 +104,11 @@ fn main() {
                     "flags: {}",
                     cpu.cpu.registers.get_flag_register_overview()
                 ));
+                ui.text(im_str!("last instruction: {:?}", cpu.cpu.last_instruction));
             });
         Window::new(&im_str!("memory : {:?}", cartridge.cartridge_ram_size))
             .size([250.0, 160.0], Condition::FirstUseEver)
-            .position([700.0, 0.0], Condition::FirstUseEver)
+            .position([720.0, 10.0], Condition::FirstUseEver)
             .build(ui, || {
                 ui.input_text(im_str!("address"), &mut address).build();
                 if ui.button(im_str!("lookup"), [100.0, 20.0]) {
@@ -120,12 +121,9 @@ fn main() {
                         u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16).unwrap();
                     address_value = format!("{:x}", dmg.mmu.borrow().get_word(address));
                 }
-                ui.text(im_str!("value: {}", address_value));
+                ui.text(im_str!("value: {}", address_value.to_uppercase()));
             });
     });
-    // loop {
-    //     dmg.tick();
-    // }
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {
