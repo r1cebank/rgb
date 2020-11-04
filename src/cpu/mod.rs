@@ -106,6 +106,12 @@ impl CPU {
         self.registers.set_flag(Flag::N, false);
         self.registers.set_flag(Flag::Z, r);
     }
+    // Add n to current address and jump to it.
+    // n = one byte signed immediate value
+    fn alu_jr(&mut self, n: u8) {
+        let n = n as i8;
+        self.registers.pc = ((u32::from(self.registers.pc) as i32) + i32::from(n)) as u16;
+    }
     fn set_register_16(&mut self, register: Register, value: u16) {
         match register {
             Register::BC => {
@@ -162,26 +168,19 @@ impl CPU {
             }
         }
     }
-    // fn value_to_address(&mut self, address: Address, value: Value) {
-    //     match value {
-    //         Value::D16 => {
-    //             let d16 = self.get_next_word();
-    //             trace!("LD {}, ${:x}", register, d16);
-
-    //             // Set the register value
-    //             self.set_register_16(register, d16);
-    //         }
-    //         Value::D8 => {
-    //             let d8 = self.get_next();
-    //             trace!("LD {}, ${:x}", register, d8);
-    //             // Set the register value
-    //             self.set_register(register, d8);
-    //         }
-    //         _ => {
-    //             panic!("Not implemented: {:?} <- {:?}", register, value);
-    //         }
-    //     }
-    // }
+    fn value_to_address(&mut self, address: Address, value: Value) {
+        match value {
+            Value::D8 => {
+                let d8 = self.get_next();
+                trace!("LD ({}), ${:x}", address, d8);
+                // Set the register value
+                self.set_address_value(address, d8);
+            }
+            _ => {
+                panic!("Not implemented: ({:?}) <- {:?}", address, value);
+            }
+        }
+    }
     fn get_register(&self, register: Register) -> DataType {
         match register {
             Register::A => DataType::U8(self.registers.a),
@@ -201,13 +200,55 @@ impl CPU {
             }
         }
     }
+    fn get_address(&mut self, address: Address) -> u8 {
+        match address {
+            Address::C => self
+                .memory
+                .borrow()
+                .get(0xff00 | u16::from(self.registers.c)),
+            Address::BC => self.memory.borrow().get(self.registers.get_bc()),
+            Address::DE => self.memory.borrow().get(self.registers.get_de()),
+            Address::A16 => {
+                let address = self.get_next_word();
+                self.memory.borrow().get(address)
+            }
+            Address::HL => self.memory.borrow().get(self.registers.get_hl()),
+            Address::HLP => {
+                let address = self.registers.get_hl();
+                let value = self.memory.borrow_mut().get(address);
+                self.registers.set_hl(address + 1);
+                value
+            }
+            Address::HLM => {
+                let address = self.registers.get_hl();
+                let value = self.memory.borrow_mut().get(address);
+                self.registers.set_hl(address - 1);
+                value
+            }
+            _ => {
+                panic!("Not Implemented");
+            }
+        }
+    }
     fn set_address_value(&mut self, address: Address, value: u8) {
         match address {
+            Address::C => {
+                self.memory
+                    .borrow_mut()
+                    .set(0xff00 | u16::from(self.registers.c), value);
+            }
             Address::BC => {
                 self.memory.borrow_mut().set(self.registers.get_bc(), value);
             }
             Address::DE => {
                 self.memory.borrow_mut().set(self.registers.get_de(), value);
+            }
+            Address::HL => {
+                self.memory.borrow_mut().set(self.registers.get_hl(), value);
+            }
+            Address::A16 => {
+                let address = self.get_next_word();
+                self.memory.borrow_mut().set(address, value);
             }
             Address::HLP => {
                 let address = self.registers.get_hl();
@@ -257,6 +298,21 @@ impl CPU {
             }
         }
     }
+    fn address_to_register(&mut self, register: Register, address: Address) {
+        let address_value = self.get_address(address);
+        match address {
+            Address::HLM => {
+                trace!("LD {}, (HL-)", register);
+            }
+            Address::HLP => {
+                trace!("LD {}, (HL+)", register);
+            }
+            _ => {
+                trace!("LD {}, ({})", register, address);
+            }
+        }
+        self.set_register(register, address_value);
+    }
     fn xor(&mut self, value: u8) {
         let result = self.registers.a ^ value;
         self.registers.set_flag(Flag::C, false);
@@ -290,11 +346,12 @@ impl CPU {
                 // Not doing anything for NOP
             }
             Instruction::LD(operation_type) => match operation_type {
+                // Finished ✔
                 OperationType::ValueToRegister(register, value) => {
                     self.value_to_register(register, value)
                 }
                 OperationType::ValueToAddress(address, value) => {
-                    // self.set_address_value(address, value: u8);
+                    self.value_to_address(address, value);
                 }
                 OperationType::RegisterToAddress(address, register) => {
                     self.register_to_address(address, register);
@@ -311,7 +368,9 @@ impl CPU {
                         }
                     }
                 }
-                OperationType::AddressToRegister(register, address) => {}
+                OperationType::AddressToRegister(register, address) => {
+                    self.address_to_register(register, address);
+                }
                 _ => {
                     panic!("Not implemented: {:?}", instruction);
                 }
@@ -362,8 +421,19 @@ impl CPU {
             Instruction::DEC(target_type) => {
                 panic!("Not implemented: {:?}", instruction);
             }
-            Instruction::JR(condition, address) => {
-                panic!("Not implemented: {:?}", instruction);
+            Instruction::JR(condition, _) => {
+                // Finished ✔
+                let can_jump = match condition {
+                    Condition::NotZero => !self.registers.get_flag(Flag::Z),
+                    Condition::Zero => self.registers.get_flag(Flag::Z),
+                    Condition::Carry => self.registers.get_flag(Flag::C),
+                    Condition::NotCarry => !self.registers.get_flag(Flag::C),
+                    Condition::Always => true,
+                };
+                let n = self.get_next();
+                if can_jump {
+                    self.alu_jr(n);
+                }
             }
             Instruction::JP(condition, address) => {
                 panic!("Not implemented: {:?}", instruction);

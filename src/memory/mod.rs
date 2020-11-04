@@ -34,6 +34,7 @@ pub trait Memory {
 const BOOT_ROM_SIZE: usize = 0x100;
 
 pub struct MMU {
+    pub last_op: String,
     pub cartridge: Cartridge,
     boot_rom: [u8; BOOT_ROM_SIZE],
     interrupt_enable: u8,
@@ -63,6 +64,7 @@ impl MMU {
         MMU {
             boot_rom,
             cartridge,
+            last_op: String::from("null"),
             interrupt_enable: 0x00,
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],
@@ -78,13 +80,8 @@ impl MMU {
     pub fn next(&mut self, cycles: u32) -> u32 {
         1
     }
-}
 
-impl Memory for MMU {
-    fn get(&self, address: u16) -> u8 {
-        if self.boot_rom_enabled {
-            return self.boot_rom[address as usize];
-        }
+    pub fn get_mem(&self, address: u16) -> u8 {
         match address {
             0x0000..=0x7fff => self.cartridge.get(address),
             0x8000..=0x9fff => 1,
@@ -115,7 +112,22 @@ impl Memory for MMU {
         }
     }
 
+    pub fn get_mem_word(&self, a: u16) -> u16 {
+        u16::from(self.get_mem(a)) | (u16::from(self.get_mem(a + 1)) << 8)
+    }
+}
+
+impl Memory for MMU {
+    fn get(&self, address: u16) -> u8 {
+        if self.boot_rom_enabled {
+            return self.boot_rom[address as usize];
+        }
+        self.get_mem(address)
+    }
+
     fn set(&mut self, address: u16, value: u8) {
+        self.last_op = format!("MEM_SET: {:x} -> ${:x}", value, address);
+        debug!("{}", self.last_op);
         match address {
             0x0000..=0x7fff => self.cartridge.set(address, value),
             0x8000..=0x9fff => {}

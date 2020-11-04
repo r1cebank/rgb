@@ -43,12 +43,11 @@ fn main() {
 
     let system = support::init(file!());
     let mut address_value: String = String::from("0");
-    let mut address = ImString::with_capacity(32);
+    let mut address = ImString::new("0");
+    let mut boot_rom_toggle: bool = false;
 
     system.main_loop(move |_, ui| {
         dmg.tick();
-        let cartridge = &dmg.mmu.borrow().cartridge;
-        let cpu = &dmg.cpu;
         Window::new(&im_str!(
             "cartridge: [{}]",
             dmg.mmu.borrow().cartridge.title
@@ -56,18 +55,21 @@ fn main() {
         .size([700.0, 160.0], Condition::FirstUseEver)
         .position([10.0, 10.0], Condition::FirstUseEver)
         .build(ui, || {
-            ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
+            ui.text(im_str!(
+                "cartridge_type: {:?}",
+                dmg.mmu.borrow().cartridge.cartridge_type
+            ));
             ui.text(im_str!(
                 "cartridge_rom_size: {:?}",
-                cartridge.cartridge_rom_size
+                dmg.mmu.borrow().cartridge.cartridge_rom_size
             ));
             ui.text(im_str!(
                 "cartridge_ram_size: {:?}",
-                cartridge.cartridge_ram_size
+                dmg.mmu.borrow().cartridge.cartridge_ram_size
             ));
             ui.separator();
-            let mbc_state = &cartridge.mbc_state;
-            match cartridge.cartridge_type {
+            let mbc_state = &dmg.mmu.borrow().cartridge.mbc_state;
+            match dmg.mmu.borrow().cartridge.cartridge_type {
                 CartridgeType::MBC3 {
                     ram: _,
                     battery: _,
@@ -82,47 +84,89 @@ fn main() {
             }
         });
 
-        Window::new(&im_str!("cpu: {}hz, speed: {}x", cpu.frequency, cpu.speed))
-            .size([700.0, 150.0], Condition::FirstUseEver)
-            .position([10.0, 180.0], Condition::FirstUseEver)
-            .build(ui, || {
-                ui.text(im_str!("cartridge_type: {:?}", cartridge.cartridge_type));
-                ui.text(im_str!(
-                    "wait_time: {}, cycle_duration: {}ms",
-                    cpu.wait_time,
-                    cpu.cycle_duration,
-                ));
-                ui.text(im_str!(
-                    "registers: {}",
-                    cpu.cpu.registers.get_register_overview()
-                ));
-                ui.text(im_str!(
-                    "16 bit registers: {}",
-                    cpu.cpu.registers.get_word_register_overview()
-                ));
-                ui.text(im_str!(
-                    "flags: {}",
-                    cpu.cpu.registers.get_flag_register_overview()
-                ));
-                ui.text(im_str!("last instruction: {:?}", cpu.cpu.last_instruction));
-            });
-        Window::new(&im_str!("memory : {:?}", cartridge.cartridge_ram_size))
-            .size([250.0, 160.0], Condition::FirstUseEver)
-            .position([720.0, 10.0], Condition::FirstUseEver)
-            .build(ui, || {
-                ui.input_text(im_str!("address"), &mut address).build();
-                if ui.button(im_str!("lookup"), [100.0, 20.0]) {
-                    let address =
-                        u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16).unwrap();
-                    address_value = format!("{:x}", dmg.mmu.borrow().get(address));
+        Window::new(&im_str!(
+            "cpu: {}hz, speed: {}x paused: {}",
+            dmg.cpu.frequency,
+            dmg.cpu.speed,
+            dmg.is_paused()
+        ))
+        .size([700.0, 160.0], Condition::FirstUseEver)
+        .position([10.0, 180.0], Condition::FirstUseEver)
+        .build(ui, || {
+            ui.text(im_str!(
+                "cartridge_type: {:?}",
+                dmg.mmu.borrow().cartridge.cartridge_type
+            ));
+            ui.text(im_str!(
+                "wait_time: {}, cycle_duration: {}ms",
+                dmg.cpu.wait_time,
+                dmg.cpu.cycle_duration,
+            ));
+            ui.text(im_str!(
+                "registers: {}",
+                dmg.cpu.cpu.registers.get_register_overview()
+            ));
+            ui.text(im_str!(
+                "16 bit registers: {}",
+                dmg.cpu.cpu.registers.get_word_register_overview()
+            ));
+            ui.text(im_str!(
+                "flags: {}",
+                dmg.cpu.cpu.registers.get_flag_register_overview()
+            ));
+            ui.text(im_str!(
+                "last instruction: {:?}",
+                dmg.cpu.cpu.last_instruction
+            ));
+            if dmg.is_paused() {
+                if ui.button(im_str!("resume"), [100.0, 20.0]) {
+                    dmg.resume();
                 }
-                if ui.button(im_str!("lookup word"), [100.0, 20.0]) {
-                    let address =
-                        u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16).unwrap();
-                    address_value = format!("{:x}", dmg.mmu.borrow().get_word(address));
+            } else {
+                if ui.button(im_str!("pause"), [100.0, 20.0]) {
+                    dmg.pause();
                 }
-                ui.text(im_str!("value: {}", address_value.to_uppercase()));
+            }
+        });
+        Window::new(&im_str!(
+            "memory : {:?}",
+            dmg.mmu.borrow().cartridge.cartridge_ram_size
+        ))
+        .size([250.0, 160.0], Condition::FirstUseEver)
+        .position([720.0, 10.0], Condition::FirstUseEver)
+        .build(ui, || {
+            ui.input_text(im_str!("address"), &mut address).build();
+            ui.checkbox(im_str!("bootrom"), &mut boot_rom_toggle);
+            ui.popup(im_str!("overflow_popup"), || {
+                ui.text("address overflow");
             });
+            let address = u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16)
+                .unwrap_or_default();
+            if ui.button(im_str!("lookup"), [100.0, 20.0]) {
+                if boot_rom_toggle {
+                    if address > 0x100 {
+                        ui.open_popup(im_str!("overflow_popup"));
+                    } else {
+                        address_value = format!("{:x}", dmg.mmu.borrow().get(address));
+                    }
+                } else {
+                    address_value = format!("{:x}", dmg.mmu.borrow().get_mem(address));
+                }
+            }
+            if ui.button(im_str!("lookup word"), [100.0, 20.0]) {
+                if boot_rom_toggle {
+                    if address > 0x100 {
+                        ui.open_popup(im_str!("overflow_popup"));
+                    } else {
+                        address_value = format!("{:x}", dmg.mmu.borrow().get_word(address));
+                    }
+                } else {
+                    address_value = format!("{:x}", dmg.mmu.borrow().get_mem_word(address));
+                }
+            }
+            ui.text(im_str!("value: {}", address_value.to_uppercase()));
+            ui.text(im_str!("last_op: {}", dmg.mmu.borrow().last_op));
+        });
     });
 }
 
