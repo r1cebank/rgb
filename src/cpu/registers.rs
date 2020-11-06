@@ -14,54 +14,23 @@ pub struct FlagsRegister {
 pub enum Flag {
     // Zero Flag. This bit is set when the result of a math operationis zero or two values match when using the CP
     // instruction.
-    Z,
+    Z = 0b1000_0000,
     // Subtract Flag. This bit is set if a subtraction was performed in the last math instruction.
-    N,
+    N = 0b0100_0000,
     // Half Carry Flag. This bit is set if a carry occurred from the lowernibble in the last math operation.
-    H,
+    H = 0b0010_0000,
     // Carry Flag. This bit is set if a carry occurred from the last math operation or if register A is the smaller
     // valuewhen executing the CP instruction.
-    C,
+    C = 0b0001_0000,
 }
 
-const ZERO_FLAG_BYTE_POSITION: u8 = 7;
-const SUBTRACT_FLAG_BYTE_POSITION: u8 = 6;
-const HALF_CARRY_FLAG_BYTE_POSITION: u8 = 5;
-const CARRY_FLAG_BYTE_POSITION: u8 = 4;
-
-impl FlagsRegister {
-    pub fn new() -> FlagsRegister {
-        FlagsRegister {
-            zero: false,
-            subtract: false,
-            half_carry: false,
-            carry: false,
-        }
+impl Flag {
+    pub fn og(self) -> u8 {
+        self as u8
     }
-}
 
-impl std::convert::From<FlagsRegister> for u8 {
-    fn from(flag: FlagsRegister) -> u8 {
-        (if flag.zero { 1 } else { 0 }) << ZERO_FLAG_BYTE_POSITION
-            | (if flag.subtract { 1 } else { 0 }) << SUBTRACT_FLAG_BYTE_POSITION
-            | (if flag.half_carry { 1 } else { 0 }) << HALF_CARRY_FLAG_BYTE_POSITION
-            | (if flag.carry { 1 } else { 0 }) << CARRY_FLAG_BYTE_POSITION
-    }
-}
-
-impl std::convert::From<u8> for FlagsRegister {
-    fn from(byte: u8) -> Self {
-        let zero = ((byte >> ZERO_FLAG_BYTE_POSITION) & 0b1) != 0;
-        let subtract = ((byte >> SUBTRACT_FLAG_BYTE_POSITION) & 0b1) != 0;
-        let half_carry = ((byte >> HALF_CARRY_FLAG_BYTE_POSITION) & 0b1) != 0;
-        let carry = ((byte >> CARRY_FLAG_BYTE_POSITION) & 0b1) != 0;
-
-        FlagsRegister {
-            zero,
-            subtract,
-            half_carry,
-            carry,
-        }
+    pub fn bw(self) -> u8 {
+        !self.og()
     }
 }
 
@@ -77,7 +46,7 @@ pub struct Registers {
     pub c: u8,
     pub d: u8,
     pub e: u8,
-    pub f: FlagsRegister,
+    pub f: u8,
     pub h: u8,
     pub l: u8,
     pub pc: u16,
@@ -92,7 +61,7 @@ impl Registers {
             c: 0x00,
             d: 0x00,
             e: 0x00,
-            f: FlagsRegister::new(),
+            f: 0x00,
             h: 0x00,
             l: 0x00,
             pc: 0x00,
@@ -109,17 +78,23 @@ impl Registers {
 
     pub fn get_word_register_overview(&self) -> String {
         format!(
-            "AF: {:04x}, BC: {:04x}, DE: {:04x}, HL: {:04x}, AF: {:04x}",
+            "AF: {:04x}, BC: {:04x}, DE: {:04x}, HL: {:04x}, SP: {:04x}",
             self.get_af(),
             self.get_bc(),
             self.get_de(),
             self.get_hl(),
-            self.get_af(),
+            self.sp
         )
     }
 
     pub fn get_flag_register_overview(&self) -> String {
-        format!("{:?}", self.f)
+        format!(
+            "Z: {}, N: {}, H: {}, C: {}",
+            self.get_flag(Flag::Z),
+            self.get_flag(Flag::N),
+            self.get_flag(Flag::H),
+            self.get_flag(Flag::C)
+        )
     }
 
     pub fn get_af(&self) -> u16 {
@@ -138,9 +113,9 @@ impl Registers {
         (u16::from(self.h) << 8) | u16::from(self.l)
     }
 
-    pub fn set_af(&mut self, value: u16) {
-        self.a = (value >> 8) as u8;
-        self.f = FlagsRegister::from((value & 0x00f0) as u8);
+    pub fn set_af(&mut self, v: u16) {
+        self.a = (v >> 8) as u8;
+        self.f = (v & 0x00f0) as u8;
     }
 
     pub fn set_bc(&mut self, value: u16) {
@@ -158,43 +133,15 @@ impl Registers {
         self.l = (value & 0x00ff) as u8;
     }
 
-    pub fn get_flag(&self, flag: Flag) -> bool {
-        match flag {
-            Flag::C => self.f.zero,
-            Flag::H => self.f.half_carry,
-            Flag::N => self.f.half_carry,
-            Flag::Z => self.f.zero,
+    pub fn get_flag(&self, f: Flag) -> bool {
+        (self.f & f as u8) != 0
+    }
+
+    pub fn set_flag(&mut self, f: Flag, v: bool) {
+        if v {
+            self.f |= f.og();
+        } else {
+            self.f &= f.bw();
         }
-    }
-
-    pub fn set_flag(&mut self, flag: Flag, value: bool) {
-        match flag {
-            Flag::C => self.f.zero = value,
-            Flag::H => self.f.half_carry = value,
-            Flag::N => self.f.half_carry = value,
-            Flag::Z => self.f.zero = value,
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn can_be_converted_to_u8() {
-        let mut flags = FlagsRegister::new();
-        flags.zero = true;
-        flags.carry = true;
-        let result: u8 = flags.into();
-        assert_eq!(result, 0b1001_0000u8);
-    }
-
-    #[test]
-    fn can_be_converted_from_u8() {
-        let result: FlagsRegister = 0b1001_0000.into();
-        assert_eq!(result.zero, true);
-        assert_eq!(result.carry, true);
-        assert_eq!(result.half_carry, false);
-        assert_eq!(result.subtract, false);
     }
 }

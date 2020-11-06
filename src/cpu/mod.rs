@@ -829,24 +829,9 @@ impl CPU {
     }
 
     fn print_registers(&self) {
-        debug!(
-            "a: {:04x}, b: {:04x}, c: {:04x}, d: {:04x}, e: {:04x}",
-            self.registers.a,
-            self.registers.b,
-            self.registers.c,
-            self.registers.d,
-            self.registers.e
-        );
-        debug!(
-            "af: {:04x}, bc: {:04x}, de: {:04x}, hl: {:04x}, sp: {:04x}, pc: {:04x}",
-            self.registers.get_af(),
-            self.registers.get_bc(),
-            self.registers.get_de(),
-            self.registers.get_hl(),
-            self.registers.sp,
-            self.registers.pc
-        );
-        debug!("{:?}", self.registers.f);
+        debug!("{}", self.registers.get_register_overview());
+        debug!("{}", self.registers.get_word_register_overview());
+        debug!("{}", self.registers.get_flag_register_overview());
     }
 }
 

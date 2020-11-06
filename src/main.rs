@@ -60,11 +60,11 @@ fn main() {
             Config::default(),
             File::create("warnings.log").unwrap(),
         ),
-        WriteLogger::new(
-            LevelFilter::Trace,
-            Config::default(),
-            File::create("trace.log").unwrap(),
-        ),
+        // WriteLogger::new(
+        //     LevelFilter::Trace,
+        //     Config::default(),
+        //     File::create("trace.log").unwrap(),
+        // ),
     ])
     .unwrap();
 
