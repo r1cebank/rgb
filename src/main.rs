@@ -4,19 +4,65 @@ extern crate log;
 
 pub mod cartridge;
 pub mod cpu;
+pub mod debug;
 pub mod dmg01;
 pub mod memory;
+pub mod ppu;
+pub mod timer;
 
-use cartridge::CartridgeType;
 use clap::{App, Arg};
-use imgui::*;
-use memory::Memory;
+use ppu::{FB_H, FB_W};
+
+#[cfg(feature = "repl")]
+use debug::{setup_repl, DebugResult};
+#[cfg(feature = "tui")]
+use debug::{setup_tui, DebugCommand, DebugResult};
+use minifb::{Key, Window, WindowOptions};
 use simplelog::*;
+use std::fs::File;
 use std::io::Read;
+use std::process;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
-mod support;
+#[cfg(feature = "audio")]
+fn initialize_audio() {
+    let device = cpal::default_output_device().unwrap();
+    info!("Open the audio player: {}", device.name());
+    let format = device.default_output_format().unwrap();
+    let format = cpal::Format {
+        channels: 2,
+        sample_rate: format.sample_rate,
+        data_type: cpal::SampleFormat::F32,
+    };
 
+    let event_loop = cpal::EventLoop::new();
+    let stream_id = event_loop.build_output_stream(&device, &format).unwrap();
+    event_loop.play_stream(stream_id);
+
+    // Setup APU here
+
+    std::thread::spawn(move || {
+        event_loop.run(move |_, stream_data| {
+            // Audio thread
+        })
+    });
+}
+
+#[cfg(feature = "gui")]
 fn main() {
+    let mut config = ConfigBuilder::new();
+    config.add_filter_ignore(format!("{}", "rustyline"));
+    CombinedLogger::init(vec![
+        TermLogger::new(LevelFilter::Info, config.build(), TerminalMode::Mixed).unwrap(),
+        WriteLogger::new(
+            LevelFilter::Warn,
+            Config::default(),
+            File::create("trace.log").unwrap(),
+        ),
+    ])
+    .unwrap();
+
     let matches = App::new("rgb")
         .author("Siyuan Gao <rbnk@elica.io>")
         .arg(
@@ -31,143 +77,188 @@ fn main() {
                 .required(false)
                 .value_name("FILE"),
         )
+        .arg(
+            Arg::with_name("audio")
+                .long("audio")
+                .short("a")
+                .required(false)
+                .takes_value(false)
+                .help("Enable audio"),
+        )
+        .arg(
+            Arg::with_name("scale")
+                .short("s")
+                .long("scale")
+                .takes_value(true)
+                .required(false)
+                .default_value("2")
+                .help("UI scale factor"),
+        )
         .get_matches();
 
-    let _ = SimpleLogger::init(LevelFilter::Trace, Config::default());
+    // Initialize audio related
+    if matches.is_present("audio") {
+        info!("Audio is enabled");
+        initialize_audio();
+    }
+
+    #[cfg(feature = "repl")]
+    // repl consumer producer
+    let (repl_sender, repl_receiver) = flume::unbounded();
+    // repl results channel
+    #[cfg(feature = "repl")]
+    let (ui_sender, ui_receiver) = flume::unbounded();
+
+    #[cfg(feature = "tui")]
+    // repl consumer producer
+    let (tui_sender, tui_receiver) = flume::unbounded();
+    // repl results channel
+    #[cfg(feature = "tui")]
+    let (ui_sender, ui_receiver) = flume::unbounded();
+
+    #[cfg(feature = "tui")]
+    setup_tui(tui_sender, ui_receiver);
+    #[cfg(feature = "repl")]
+    setup_repl(repl_sender, ui_receiver);
 
     let boot_buffer = matches.value_of("boot").map(|path| buffer_from_file(path));
     let rom_buffer = matches.value_of("rom").map(|path| buffer_from_file(path));
 
     // let test_cpu = cpu::CPU::new(boot_buffer);
-    let mut dmg = dmg01::dmg01::new(boot_buffer, rom_buffer);
+    let mut emulator = dmg01::Dmg01::new(boot_buffer, rom_buffer);
 
-    let system = support::init(file!());
-    let mut address_value: String = String::from("0");
-    let mut address = ImString::new("0");
-    let mut boot_rom_toggle: bool = false;
+    let mut option = minifb::WindowOptions::default();
+    option.resize = true;
+    let scale_factor = matches.value_of("scale").unwrap().parse::<i32>().unwrap();
+    option.scale = match scale_factor {
+        1 => minifb::Scale::X1,
+        2 => minifb::Scale::X2,
+        4 => minifb::Scale::X4,
+        8 => minifb::Scale::X8,
+        _ => panic!("Supported scale: 1, 2, 4 or 8"),
+    };
+    info!("Scale factor is set to: {:?}", option.scale);
 
-    system.main_loop(move |_, ui| {
-        dmg.tick();
-        Window::new(&im_str!(
-            "cartridge: [{}]",
-            dmg.mmu.borrow().cartridge.title
-        ))
-        .size([700.0, 160.0], Condition::FirstUseEver)
-        .position([10.0, 10.0], Condition::FirstUseEver)
-        .build(ui, || {
-            ui.text(im_str!(
-                "cartridge_type: {:?}",
-                dmg.mmu.borrow().cartridge.cartridge_type
-            ));
-            ui.text(im_str!(
-                "cartridge_rom_size: {:?}",
-                dmg.mmu.borrow().cartridge.cartridge_rom_size
-            ));
-            ui.text(im_str!(
-                "cartridge_ram_size: {:?}",
-                dmg.mmu.borrow().cartridge.cartridge_ram_size
-            ));
-            ui.separator();
-            let mbc_state = &dmg.mmu.borrow().cartridge.mbc_state;
-            match dmg.mmu.borrow().cartridge.cartridge_type {
-                CartridgeType::MBC3 {
-                    ram: _,
-                    battery: _,
-                    rtc: _,
-                } => {
-                    ui.text(im_str!("rtc: {:?}", mbc_state.mbc3.rtc));
-                    ui.text(im_str!("rom_bank: {:x}", mbc_state.mbc3.rom_bank));
-                    ui.text(im_str!("ram_bank: {:x}", mbc_state.mbc3.ram_bank));
-                    ui.text(im_str!("ram_enable: {:?}", mbc_state.mbc3.ram_enable));
-                }
-                _ => {}
-            }
-        });
+    let mut window = minifb::Window::new(
+        format!("Gameboy - {}", emulator.mmu.borrow().cartridge.title).as_str(),
+        FB_W,
+        FB_H,
+        option,
+    )
+    .unwrap();
 
-        Window::new(&im_str!(
-            "cpu: {}hz, speed: {}x paused: {}",
-            dmg.cpu.frequency,
-            dmg.cpu.speed,
-            dmg.is_paused()
-        ))
-        .size([700.0, 160.0], Condition::FirstUseEver)
-        .position([10.0, 180.0], Condition::FirstUseEver)
-        .build(ui, || {
-            ui.text(im_str!(
-                "cartridge_type: {:?}",
-                dmg.mmu.borrow().cartridge.cartridge_type
-            ));
-            ui.text(im_str!(
-                "wait_time: {}, cycle_duration: {}ms",
-                dmg.cpu.wait_time,
-                dmg.cpu.cycle_duration,
-            ));
-            ui.text(im_str!(
-                "registers: {}",
-                dmg.cpu.cpu.registers.get_register_overview()
-            ));
-            ui.text(im_str!(
-                "16 bit registers: {}",
-                dmg.cpu.cpu.registers.get_word_register_overview()
-            ));
-            ui.text(im_str!(
-                "flags: {}",
-                dmg.cpu.cpu.registers.get_flag_register_overview()
-            ));
-            ui.text(im_str!(
-                "last instruction: {:?}",
-                dmg.cpu.cpu.last_instruction
-            ));
-            if dmg.is_paused() {
-                if ui.button(im_str!("resume"), [100.0, 20.0]) {
-                    dmg.resume();
-                }
-            } else {
-                if ui.button(im_str!("pause"), [100.0, 20.0]) {
-                    dmg.pause();
-                }
+    run(emulator, window);
+
+    // let mut tiles_window = minifb::Window::new(
+    //     format!("Tiles - {}", emulator.mmu.borrow().cartridge.title).as_str(),
+    //     FB_W,
+    //     FB_H,
+    //     option,
+    // )
+    // .unwrap();
+
+    // let mut window_buffer = vec![0x00; FB_W * FB_H];
+    // window
+    //     .update_with_buffer(window_buffer.as_slice(), FB_W, FB_H)
+    //     .unwrap();
+
+    // loop {
+    //     // Get repl results
+    //     #[cfg(feature = "repl")]
+    //     {
+    //         match repl_receiver.try_recv() {
+    //             Ok(command) => match command.as_str() {
+    //                 "r" => {
+    //                     ui_sender
+    //                         .send(DebugResult::Registers(emulator.cpu.registers))
+    //                         .unwrap();
+    //                 }
+    //                 "pause" => {
+    //                     emulator.pause();
+    //                 }
+    //                 "resume" => {
+    //                     emulator.resume();
+    //                 }
+    //                 _ => {
+    //                     ui_sender.send(DebugResult::NotACommand).unwrap();
+    //                 }
+    //             },
+    //             Err(_) => {}
+    //         }
+    //     }
+    //     #[cfg(feature = "tui")]
+    //     {
+    //         match tui_receiver.try_recv() {
+    //             Ok(command) => match command {
+    //                 DebugCommand::ShowRegister => {
+    //                     ui_sender.send(DebugResult::Registers(emulator.cpu.registers));
+    //                 }
+    //             },
+    //             Err(_) => {}
+    //         }
+    //     }
+    //     // Stop the program, if the GUI is closed by the user
+    //     if !window.is_open() {
+    //         break;
+    //     }
+    //     if window.is_key_down(minifb::Key::Escape) {
+    //         break;
+    //     }
+
+    //     emulator.cpu.tick();
+    //     window
+    //         .update_with_buffer(window_buffer.as_slice(), FB_W, FB_H)
+    //         .unwrap();
+    // }
+
+    // process::exit(0x000);
+}
+
+const ONE_SECOND_IN_MICROS: usize = 1000000000;
+const ONE_SECOND_IN_CYCLES: usize = 4190000;
+const ONE_FRAME_IN_CYCLES: usize = 70224;
+const NUMBER_OF_PIXELS: usize = 23040;
+
+fn run(mut emulator: dmg01::Dmg01, mut window: Window) {
+    let mut buffer = [0; NUMBER_OF_PIXELS];
+    let mut cycles_elapsed_in_frame = 0usize;
+    let mut now = Instant::now();
+    while window.is_open() && !window.is_key_down(Key::Escape) {
+        let time_delta = now.elapsed().subsec_nanos();
+        now = Instant::now();
+        let delta = time_delta as f64 / ONE_SECOND_IN_MICROS as f64;
+        let cycles_to_run = delta * ONE_SECOND_IN_CYCLES as f64;
+
+        info!("running #{} cycles", cycles_to_run);
+
+        let mut cycles_elapsed = 0;
+        while cycles_elapsed <= cycles_to_run as usize {
+            cycles_elapsed += emulator.tick() as usize;
+        }
+        cycles_elapsed_in_frame += cycles_elapsed;
+
+        // TODO: Consider updating buffer after every line is rendered.
+        if cycles_elapsed_in_frame >= ONE_FRAME_IN_CYCLES {
+            for (i, pixel) in emulator
+                .mmu
+                .borrow()
+                .ppu
+                .borrow()
+                .framebuffer
+                .chunks(4)
+                .enumerate()
+            {
+                buffer[i] = (pixel[3] as u32) << 24
+                    | (pixel[2] as u32) << 16
+                    | (pixel[1] as u32) << 8
+                    | (pixel[0] as u32)
             }
-        });
-        Window::new(&im_str!(
-            "memory : {:?}",
-            dmg.mmu.borrow().cartridge.cartridge_ram_size
-        ))
-        .size([250.0, 160.0], Condition::FirstUseEver)
-        .position([720.0, 10.0], Condition::FirstUseEver)
-        .build(ui, || {
-            ui.input_text(im_str!("address"), &mut address).build();
-            ui.checkbox(im_str!("bootrom"), &mut boot_rom_toggle);
-            ui.popup(im_str!("overflow_popup"), || {
-                ui.text("address overflow");
-            });
-            let address = u16::from_str_radix(address.to_str().trim_start_matches("0x"), 16)
-                .unwrap_or_default();
-            if ui.button(im_str!("lookup"), [100.0, 20.0]) {
-                if boot_rom_toggle {
-                    if address > 0x100 {
-                        ui.open_popup(im_str!("overflow_popup"));
-                    } else {
-                        address_value = format!("{:x}", dmg.mmu.borrow().get(address));
-                    }
-                } else {
-                    address_value = format!("{:x}", dmg.mmu.borrow().get_mem(address));
-                }
-            }
-            if ui.button(im_str!("lookup word"), [100.0, 20.0]) {
-                if boot_rom_toggle {
-                    if address > 0x100 {
-                        ui.open_popup(im_str!("overflow_popup"));
-                    } else {
-                        address_value = format!("{:x}", dmg.mmu.borrow().get_word(address));
-                    }
-                } else {
-                    address_value = format!("{:x}", dmg.mmu.borrow().get_mem_word(address));
-                }
-            }
-            ui.text(im_str!("value: {}", address_value.to_uppercase()));
-            ui.text(im_str!("last_op: {}", dmg.mmu.borrow().last_op));
-        });
-    });
+            window.update_with_buffer(&buffer, FB_W, FB_H).unwrap();
+            cycles_elapsed_in_frame = 0;
+        } else {
+            sleep(Duration::from_nanos(2))
+        }
+    }
 }
 
 fn buffer_from_file(path: &str) -> Vec<u8> {

@@ -333,9 +333,11 @@ impl CPU {
 
         self.last_instruction = instruction;
 
-        debug!(
+        trace!(
             "HEX: {:x} Decoded: {:?} Prefixed: {}",
-            instruction_byte, instruction, prefixed
+            instruction_byte,
+            instruction,
+            prefixed
         );
 
         match instruction {
@@ -615,7 +617,7 @@ impl CPU {
         }
     }
     fn print_registers(&self) {
-        debug!("{:?}", self.registers);
+        trace!("{:?}", self.registers);
     }
 }
 
@@ -635,7 +637,7 @@ impl ClockedCPU {
         ClockedCPU {
             frequency,
             cpu: CPU::new(memory),
-            cycle_time: (1 as u128 / frequency as u128) * (1_000_000_000 as u128), // Cycletime in nano seconds
+            cycle_time: ((1 as f64 / frequency as f64) * (1_000_000_000 as f64)) as u128, // Cycletime in nano seconds
             last_ran: SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .unwrap()
@@ -677,7 +679,7 @@ impl ClockedCPU {
                 - self.last_ran;
             let expected_cycle_time = cycles as u128 * self.cycle_time;
             if delta < expected_cycle_time {
-                self.wait_time = ((expected_cycle_time - delta) as f32 / self.speed as f32) as u128;
+                self.wait_time = ((expected_cycle_time - delta) as f64 / self.speed as f64) as u128;
             }
             self.last_ran = SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)

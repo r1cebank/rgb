@@ -275,10 +275,10 @@ impl Cartridge {
             },
         };
 
-        debug!("Loading ROM [{}]", title);
-        debug!("ROM type is {:?}", cartridge_type);
-        debug!("ROM size is {:?}", cartridge_rom_size);
-        debug!("RAM size is {:?}", cartridge_ram_size);
+        info!("Loading ROM [{}]", title);
+        info!("ROM type is {:?}", cartridge_type);
+        info!("ROM size is {:?}", cartridge_rom_size);
+        info!("RAM size is {:?}", cartridge_ram_size);
 
         Cartridge {
             rom,
