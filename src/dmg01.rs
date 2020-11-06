@@ -36,10 +36,10 @@ impl Dmg01 {
             // self.mmu.borrow_mut().input.interrupt_flags = 0x00;
 
             // Update ppu
-            // self.mmu.borrow().ppu.borrow_mut().tick(cycles);
-            // self.mmu.borrow_mut().interrupt_flags |=
-            //     self.mmu.borrow().ppu.borrow_mut().interrupt_flags;
-            // self.mmu.borrow().ppu.borrow_mut().interrupt_flags = 0x00;
+            self.mmu.borrow().ppu.borrow_mut().tick(cycles as i32);
+            let interrupt_flags = self.mmu.borrow().ppu.borrow_mut().interrupt_flags;
+            self.mmu.borrow_mut().interrupt_flags |= interrupt_flags;
+            self.mmu.borrow().ppu.borrow_mut().interrupt_flags = 0x00;
         }
         cycles
     }

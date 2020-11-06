@@ -3,6 +3,8 @@ use crate::memory::Memory;
 pub const FB_W: usize = 160;
 pub const FB_H: usize = 144;
 
+// https://github.com/chrisbutcher/gameboy/blob/ac1093be58/src/ppu.rs
+
 #[derive(Clone, Copy, Debug)]
 pub struct Sprite {
     y_pos: i32,
@@ -128,7 +130,7 @@ impl PPU {
         let base_address = address & 0x1FFE;
         if value != 0x00 {
             // Nothing but zeros being written, in infinite loop.
-            trace!("Writing data to VRAM!: {:#X}", value);
+            debug!("Writing data to VRAM!: {:#X}", value);
         }
         // Work out which tile and row was updated
         let tile = (base_address >> 4) & 511;
@@ -152,7 +154,181 @@ impl PPU {
         }
     }
 
-    pub fn tick(&mut self, cycles: u32) {}
+    fn render_scanline(&mut self) {
+        self.render_background();
+        self.render_sprites();
+    }
+
+    fn render_sprites(&mut self) {
+        for sprite in self.sprites.iter() {
+            let line = self.line as i32;
+
+            if self.lcdc_obj_sprite_size {
+                panic!("Double-sized sprites not yet supported");
+            }
+
+            // If the sprite falls within the scanline
+            // TODO account for double-sized sprites
+            if sprite.y_pos <= line && (sprite.y_pos + 8) > line {
+                let mut canvas_offset = ((line * 160) + sprite.x_pos) * 4;
+                let tile_row;
+
+                if sprite.y_flip {
+                    tile_row =
+                        self.tileset[sprite.tile as usize][7 - (line - sprite.y_pos) as usize];
+                } else {
+                    tile_row = self.tileset[sprite.tile as usize][(line - sprite.y_pos) as usize];
+                }
+
+                let mut colour;
+
+                for x in 0..8 {
+                    // TODO don't draw pixel if OAM doesn't have priority over BG and BG has non-zero colour pixel already drawn
+                    if sprite.x_pos + x >= 0 && sprite.x_pos + x < 160 {
+                        let palette_index = if sprite.x_flip {
+                            7 - x as usize
+                        } else {
+                            x as usize
+                        };
+                        colour = self.palette[tile_row[palette_index] as usize];
+
+                        self.framebuffer[canvas_offset as usize] = colour[0];
+                        self.framebuffer[canvas_offset as usize + 1] = colour[1];
+                        self.framebuffer[canvas_offset as usize + 2] = colour[2];
+                        self.framebuffer[canvas_offset as usize + 3] = colour[3];
+
+                        canvas_offset += 4;
+                    }
+                }
+            }
+        }
+    }
+
+    // NOTE github.com/alexcrichton/jba
+    fn render_background(&mut self) {
+        // tiles: 8x8 pixels
+        // two maps: 32x32 each
+
+        let mapbase: usize = if self.lcdc_bg_tilemap_base {
+            0x1C00
+        } else {
+            0x1800
+        };
+        let line = self.line as usize + self.scroll_y as usize;
+        let mapbase = mapbase + ((line % 256) >> 3) * 32;
+        let y = (self.line.wrapping_add(self.scroll_y)) % 8;
+        let mut x = self.scroll_x % 8;
+        let mut canvas_offset = (self.line as usize) * 160 * 4;
+        let mut i = 0;
+        let tilebase = if !self.lcdc_bg_and_windown_tile_base {
+            256
+        } else {
+            0
+        };
+        loop {
+            let mapoff = ((i as usize + self.scroll_x as usize) % 256) >> 3;
+            let tilei = self.video_ram[mapbase + mapoff];
+
+            let tilebase = if self.lcdc_bg_and_windown_tile_base {
+                tilebase + tilei as usize
+            } else {
+                (tilebase as isize + (tilei as i8 as isize)) as usize
+            };
+
+            let row;
+            row = self.tileset[tilebase as usize][y as usize];
+
+            while x < 8 && i < 160 as u8 {
+                let palette_index = row[x as usize];
+                let colour = self.palette[palette_index as usize];
+
+                self.framebuffer[canvas_offset] = colour[0];
+                self.framebuffer[canvas_offset + 1] = colour[1];
+                self.framebuffer[canvas_offset + 2] = colour[2];
+                self.framebuffer[canvas_offset + 3] = colour[3];
+
+                x += 1;
+                i += 1;
+                canvas_offset += 4;
+            }
+
+            x = 0;
+            if i >= 160 as u8 {
+                break;
+            }
+        }
+    }
+
+    fn change_mode(&mut self, mode: u8) {
+        self.mode = mode;
+        if match self.mode {
+            0 => {
+                self.render_scanline();
+                self.horiz_blanking = true;
+                self.mode_0_interrupt_enabled
+            }
+            1 => {
+                self.interrupt_flags |= 0x01;
+                self.mode_1_interrupt_enabled
+            }
+            2 => self.mode_2_interrupt_enabled,
+            _ => false,
+        } {
+            self.interrupt_flags |= 0x02;
+        }
+    }
+
+    pub fn tick(&mut self, cycles: i32) {
+        self.tick_counter += 1;
+
+        debug!(
+            "lcdc_display_enabled: {}, line: {}",
+            self.lcdc_display_enabled, self.line
+        );
+
+        if !self.lcdc_display_enabled {
+            return;
+        }
+        self.horiz_blanking = false;
+        let mut ticks_remaining = cycles;
+        while ticks_remaining > 0 {
+            let current_ticks = if ticks_remaining >= 80 {
+                80
+            } else {
+                ticks_remaining
+            };
+            self.mode_clock += current_ticks;
+            ticks_remaining -= current_ticks;
+
+            if self.mode_clock >= 456 {
+                self.mode_clock -= 456;
+                self.line = (self.line + 1) % 154;
+                if self.ly_coincidence_interrupt_enabled && self.line == self.ly_coincidence {
+                    self.interrupt_flags |= 0x02;
+                }
+
+                if self.line >= 144 && self.mode != 1 {
+                    self.change_mode(1);
+                }
+            }
+
+            if self.line < 144 {
+                if self.mode_clock <= 80 {
+                    if self.mode != 2 {
+                        self.change_mode(2);
+                    }
+                } else if self.mode_clock <= (80 + 172) {
+                    if self.mode != 3 {
+                        self.change_mode(3);
+                    }
+                } else {
+                    if self.mode != 0 {
+                        self.change_mode(0);
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl Memory for PPU {
