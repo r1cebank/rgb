@@ -14,6 +14,9 @@
 //
 // See: http://bgb.bircd.org/pandocs.htm#cgbregisters
 use crate::cartridge::Cartridge;
+use crate::ppu::PPU;
+use crate::timer::Timer;
+use std::cell::RefCell;
 
 pub trait Memory {
     fn get(&self, a: u16) -> u8;
@@ -36,7 +39,10 @@ const BOOT_ROM_SIZE: usize = 0x100;
 pub struct MMU {
     pub last_op: String,
     pub cartridge: Cartridge,
+    pub ppu: RefCell<PPU>,
+    pub timer: Timer,
     boot_rom: [u8; BOOT_ROM_SIZE],
+    pub interrupt_flags: u8,
     interrupt_enable: u8,
     work_ram: [u8; 0x8000],
     high_ram: [u8; 0x7f],
@@ -64,27 +70,22 @@ impl MMU {
         MMU {
             boot_rom,
             cartridge,
+            timer: Timer::new(),
+            ppu: RefCell::new(PPU::new()),
             last_op: String::from("null"),
             interrupt_enable: 0x00,
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],
             work_ram_bank: 0x01,
+            interrupt_flags: 0x00,
             boot_rom_enabled: true,
         }
-    }
-
-    pub fn switch_speed(&mut self) {
-        // Switching speed for CGB
-    }
-
-    pub fn next(&mut self, cycles: u32) -> u32 {
-        1
     }
 
     pub fn get_mem(&self, address: u16) -> u8 {
         match address {
             0x0000..=0x7fff => self.cartridge.get(address),
-            0x8000..=0x9fff => 1,
+            0x8000..=0x9fff => self.ppu.borrow_mut().video_ram[address as usize - 0x8000],
             0xa000..=0xbfff => self.cartridge.get(address),
             0xc000..=0xcfff => self.work_ram[address as usize - 0xc000],
             0xd000..=0xdfff => {
@@ -94,12 +95,12 @@ impl MMU {
             0xf000..=0xfdff => {
                 self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank]
             }
-            0xfe00..=0xfe9f => 1,
+            0xfe00..=0xfe9f => self.ppu.borrow_mut().oam[address as usize - 0xfe00],
             0xfea0..=0xfeff => 0x00,
             0xff00 => 1,
             0xff01..=0xff02 => 1,
-            0xff04..=0xff07 => 1,
-            0xff0f => 1,
+            0xff04..=0xff07 => self.timer.read(address),
+            0xff0f => self.interrupt_flags,
             0xff10..=0xff3f => 1,
             0xff4d => 1,
             0xff40..=0xff45 | 0xff47..=0xff4b | 0xff4f => 1,
@@ -115,6 +116,16 @@ impl MMU {
     pub fn get_mem_word(&self, a: u16) -> u16 {
         u16::from(self.get_mem(a)) | (u16::from(self.get_mem(a + 1)) << 8)
     }
+
+    fn oam_dma(&mut self, source_address_high_byte: u8) {
+        let source_base_address = (source_address_high_byte as u16) << 8;
+        const OAM_START_ADDRESS: u16 = 0xfe00;
+
+        for index in 0x00..0xa0 {
+            let source_byte = self.get(source_base_address + index);
+            self.set(OAM_START_ADDRESS + index, source_byte);
+        }
+    }
 }
 
 impl Memory for MMU {
@@ -127,10 +138,17 @@ impl Memory for MMU {
 
     fn set(&mut self, address: u16, value: u8) {
         self.last_op = format!("MEM_SET: {:x} -> ${:x}", value, address);
-        debug!("{}", self.last_op);
+        trace!("{}", self.last_op);
         match address {
             0x0000..=0x7fff => self.cartridge.set(address, value),
-            0x8000..=0x9fff => {}
+            0x8000..=0x9fff => {
+                let mut borrowed_ppu = self.ppu.borrow_mut();
+                borrowed_ppu.video_ram[address as usize - 0x8000] = value;
+
+                if address <= 0x97ff {
+                    borrowed_ppu.update_tile(address, value)
+                }
+            }
             0xa000..=0xbfff => self.cartridge.set(address, value),
             0xc000..=0xcfff => self.work_ram[address as usize - 0xc000] = value,
             0xd000..=0xdfff => {
@@ -140,19 +158,26 @@ impl Memory for MMU {
             0xf000..=0xfdff => {
                 self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank] = value
             }
-            0xfe00..=0xfe9f => {}
+            0xfe00..=0xfe9f => {
+                self.ppu.borrow_mut().oam[address as usize - 0xfe00] = value;
+            }
             0xfea0..=0xfeff => {}
             0xff00 => {}
             0xff01..=0xff02 => {}
-            0xff04..=0xff07 => {}
+            0xff04..=0xff07 => self.timer.write(address, value),
             0xff10..=0xff3f => {}
-            0xff46 => {}
+            0xff46 => self.oam_dma(value),
             0xff4d => {}
-            0xff40..=0xff45 | 0xff47..=0xff4b | 0xff4f => {}
-            0xff51..=0xff55 => {}
-            0xff68..=0xff6b => {}
-            0xff0f => {}
-            0xff70 => {}
+            0xff40..=0xff45 | 0xff47..=0xff7f => {
+                if address == 0xFF50 {
+                    self.boot_rom_enabled = false;
+                }
+
+                self.ppu.borrow_mut().set(address, value);
+            }
+            0xff0f => {
+                self.interrupt_flags = value;
+            }
             0xff80..=0xfffe => self.high_ram[address as usize - 0xff80] = value,
             0xffff => self.interrupt_enable = value,
             _ => {}

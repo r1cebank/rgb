@@ -333,9 +333,11 @@ impl CPU {
 
         self.last_instruction = instruction;
 
-        debug!(
+        trace!(
             "HEX: {:x} Decoded: {:?} Prefixed: {}",
-            instruction_byte, instruction, prefixed
+            instruction_byte,
+            instruction,
+            prefixed
         );
 
         match instruction {
@@ -615,7 +617,7 @@ impl CPU {
         }
     }
     fn print_registers(&self) {
-        debug!("{:?}", self.registers);
+        trace!("{:?}", self.registers);
     }
 }
 

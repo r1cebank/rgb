@@ -1,20 +1,19 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::cpu::ClockedCPU;
-use crate::memory::Memory;
+use crate::cpu::CPU;
 use crate::memory::MMU;
 
-pub struct dmg01 {
+pub struct Dmg01 {
     pub mmu: Rc<RefCell<MMU>>,
     paused: bool,
-    pub cpu: ClockedCPU,
+    pub cpu: CPU,
 }
 
-impl dmg01 {
+impl Dmg01 {
     pub fn new(boot_rom_buffer: Option<Vec<u8>>, rom_buffer: Option<Vec<u8>>) -> Self {
         let mmu = Rc::new(RefCell::new(MMU::new(boot_rom_buffer, rom_buffer)));
-        let cpu = ClockedCPU::new(1, 1.0, mmu.clone());
+        let cpu = CPU::new(mmu.clone());
         Self {
             mmu,
             cpu,
@@ -28,7 +27,19 @@ impl dmg01 {
         let mut cycles = 0;
         if !self.paused {
             cycles = self.cpu.tick();
-            self.mmu.borrow_mut().next(cycles);
+
+            // Update the mmu and rest with cycles
+            // self.mmu.borrow_mut().timer.tick(cycles);
+
+            // Update interrupt flags
+            // self.mmu.borrow_mut().interrupt_flags |= self.mmu.input.interrupt_flags;
+            // self.mmu.borrow_mut().input.interrupt_flags = 0x00;
+
+            // Update ppu
+            // self.mmu.borrow().ppu.borrow_mut().tick(cycles);
+            // self.mmu.borrow_mut().interrupt_flags |=
+            //     self.mmu.borrow().ppu.borrow_mut().interrupt_flags;
+            // self.mmu.borrow().ppu.borrow_mut().interrupt_flags = 0x00;
         }
         cycles
     }

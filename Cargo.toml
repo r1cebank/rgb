@@ -1,15 +1,19 @@
 [package]
-name = "gba-emulator"
+name = "rgb"
 version = "0.1.0"
-authors = ["r1cebank <siyuangao@gmail.com>"]
+authors = ["r1cebank <rbnk@elica.io>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-opengl = ["imgui-gfx-renderer/opengl"]
-directx = ["imgui-gfx-renderer/directx"]
-default = ["opengl"]
+default = ["gui", "audio", "repl"]
+gui = ["minifb", "cpal"]
+tty = ["blockish"]
+audio = ["cpal"]
+repl = ["rustyline", "flume"]
+tui = ["cursive", "flume"]
+
 
 [dependencies]
 log = "0.4"
@@ -17,14 +21,13 @@ strum = "0.19"
 strum_macros = "0.19"
 simplelog = "^0.7.6"
 clap = "2.33.3"
-imgui = "0.5.0"
-clipboard = "0.5"
-gfx = "0.18"
-glutin = "0.21"
-gfx_device_gl = "0.16.2"
-gfx_window_glutin = "0.31.0"
-imgui-winit-support = { version = "0.5.0", default-features = false, features = ["winit-19"]}
-imgui-gfx-renderer = "0.5.0"
+prettytable-rs = "^0.8"
+minifb = { version = "0.19.1", optional = true }
+cpal = { version = "0.8.0", optional = true }
+blockish = { version = "0.0.8", optional = true }
+flume = { version = "0.9.1", optional = true }
+rustyline = { version = "6.3.0", optional = true }
+cursive = { version = "0.15", optional = true, features = ["pancurses-backend"], default-features = false }
 
 [dev-dependencies]
 serde = { version = "1.0.117", features = ["derive"] }
