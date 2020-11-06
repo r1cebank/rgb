@@ -102,14 +102,14 @@ impl Registers {
 
     pub fn get_register_overview(&self) -> String {
         format!(
-            "A: {:x}, B: {:x}, C: {:x}, D: {:x}, E: {:x}, H: {:x}, L: {:x}",
+            "A: {:04x}, B: {:04x}, C: {:04x}, D: {:04x}, E: {:04x}, H: {:04x}, L: {:04x}",
             self.a, self.b, self.c, self.d, self.e, self.h, self.l
         )
     }
 
     pub fn get_word_register_overview(&self) -> String {
         format!(
-            "AF: {:x}, BC: {:x}, DE: {:x}, HL: {:x}, AF: {:x}",
+            "AF: {:04x}, BC: {:04x}, DE: {:04x}, HL: {:04x}, AF: {:04x}",
             self.get_af(),
             self.get_bc(),
             self.get_de(),

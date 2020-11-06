@@ -58,6 +58,11 @@ fn main() {
         WriteLogger::new(
             LevelFilter::Warn,
             Config::default(),
+            File::create("warnings.log").unwrap(),
+        ),
+        WriteLogger::new(
+            LevelFilter::Trace,
+            Config::default(),
             File::create("trace.log").unwrap(),
         ),
     ])
@@ -229,7 +234,7 @@ fn run(mut emulator: dmg01::Dmg01, mut window: Window) {
         let delta = time_delta as f64 / ONE_SECOND_IN_MICROS as f64;
         let cycles_to_run = delta * ONE_SECOND_IN_CYCLES as f64;
 
-        info!("running #{} cycles", cycles_to_run);
+        info!("running {} cycles", cycles_to_run);
 
         let mut cycles_elapsed = 0;
         while cycles_elapsed <= cycles_to_run as usize {
