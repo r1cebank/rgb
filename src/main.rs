@@ -4,6 +4,7 @@ extern crate log;
 
 mod apu;
 mod cpu;
+mod debug;
 mod display;
 mod emulator;
 mod io;
@@ -13,6 +14,7 @@ mod util;
 
 use apu::start_apu_thread;
 use clap::{App, Arg};
+use debug::start_debug_thread;
 use display::start_display_thread;
 use emulator::start_emulator_thread;
 use io::start_io_thread;
@@ -76,9 +78,13 @@ fn main() {
 
     /////////////////flume sender receivers////////////////////////
     let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
+    // Debug channels
+    // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
+    // let (debug_result_sender, debug_result_receiver) = flume::unbounded();
 
     let emulator_thread = start_emulator_thread(bootrom.to_vec(), rom, framebuffer_sender);
     let io_thread = start_io_thread();
+    let debug_thread = start_debug_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<i32>().unwrap(),
         String::from("test rom"),
@@ -88,6 +94,7 @@ fn main() {
 
     emulator_thread.join().unwrap();
     io_thread.join().unwrap();
+    debug_thread.join().unwrap();
     apu_thread.join().unwrap();
     display_thread.join().unwrap();
 }
