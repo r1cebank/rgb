@@ -74,11 +74,15 @@ fn main() {
     let bootrom = get_bootrom(matches.value_of("boot").unwrap());
     let rom = get_rom(matches.value_of("rom").unwrap());
 
-    let emulator_thread = start_emulator_thread();
+    /////////////////flume sender receivers////////////////////////
+    let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
+
+    let emulator_thread = start_emulator_thread(bootrom.to_vec(), rom, framebuffer_sender);
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<i32>().unwrap(),
         String::from("test rom"),
+        framebuffer_receiver,
     );
     let apu_thread = start_apu_thread();
 

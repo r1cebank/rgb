@@ -4,12 +4,12 @@ use std::rc::Rc;
 
 use super::registers::Registers;
 
-pub struct sm80 {
+pub struct Core {
     pub registers: Registers,
 }
 
-impl sm80 {
-    pub fn new(memory: Rc<RefCell<dyn Memory>>) -> sm80 {
+impl Core {
+    pub fn new(memory: Rc<RefCell<dyn Memory>>) -> Core {
         Self {
             registers: Registers::new(),
         }

@@ -3,6 +3,7 @@ pub mod sm80;
 use crate::memory::Memory;
 use std::time::{Duration, Instant};
 
+use sm80::Core;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::thread;
@@ -17,7 +18,7 @@ pub const STEP_CYCLES: u32 = (STEP_TIME as f64 / (1000_f64 / CLOCK_FREQUENCY as 
 /// Because the speed Gameboy is running at, there is no accurate way to time each clock cycle
 /// We are slicing the cycles in 16 ms chunks
 pub struct ClockedCPU {
-    pub cpu: sm80::sm80,
+    pub cpu: Core,
     step_cycles: u32,   // How many cycles in the step (around 67108)
     step_zero: Instant, // Begin step
     step_flip: bool,    // When this is set to true, we want to handle events
@@ -25,7 +26,7 @@ pub struct ClockedCPU {
 
 impl ClockedCPU {
     pub fn new(memory: Rc<RefCell<dyn Memory>>) -> Self {
-        let cpu = sm80::sm80::new(memory);
+        let cpu = Core::new(memory);
         Self {
             cpu,
             step_cycles: 0,

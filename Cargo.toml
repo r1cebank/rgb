@@ -16,6 +16,8 @@ repl = ["rustyline"]
 
 [dependencies]
 log = "0.4"
+time = "0.2.22"
+rand = "0.7.3"
 strum = "0.19"
 strum_macros = "0.19"
 simplelog = "^0.7.6"
