@@ -1,3 +1,5 @@
+mod debuggable;
+
 use std::thread::{Builder, JoinHandle};
 
 pub fn start_debug_thread() -> JoinHandle<()> {
