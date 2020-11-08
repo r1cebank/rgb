@@ -3,6 +3,7 @@ extern crate clap;
 extern crate log;
 
 mod apu;
+mod cartridge;
 mod cpu;
 mod debug;
 mod display;
@@ -10,6 +11,7 @@ mod emulator;
 mod io;
 mod memory;
 mod ppu;
+mod save;
 mod util;
 
 use apu::start_apu_thread;

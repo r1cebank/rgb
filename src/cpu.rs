@@ -1,3 +1,6 @@
+pub mod cycles;
+pub mod instruction;
+pub mod opcodes;
 pub mod registers;
 pub mod sm80;
 use crate::memory::Memory;
@@ -47,7 +50,7 @@ impl ClockedCPU {
             // Time passed since last run time
             let time_passed = now.duration_since(self.step_zero);
 
-            // Substract the time passed from the expected step time to get the time thread needs to sleep
+            // Subtract the time passed from the expected step time to get the time thread needs to sleep
             let sleep_time = u64::from(STEP_TIME.saturating_sub(time_passed.as_millis() as u32));
 
             debug!("CPU: sleep {} millis", sleep_time);

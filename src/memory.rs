@@ -1,3 +1,5 @@
+pub mod mmu;
+
 pub trait Memory {
     fn get(&self, a: u16) -> u8;
 
