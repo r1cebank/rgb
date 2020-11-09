@@ -18,7 +18,7 @@ This project written with most of the stuff broken up so future developer can us
 as a reference.
 
 ## Run
-To run this project, you will need to have a copy of the DMG-01 bootrom. If you don't want to obtain the bootrom, you can also use the `no_bootrom` option, but you won't be able to see the nintendo logo scroll up with the iconic beep.
+To run this project, you will need to have a copy of the DMG-01 bootrom. If you don't want to run with the bootrom simply remove the boot room parameter, but you won't be able to see the nintendo logo scroll up with the iconic beep.
 
 To run:
 
@@ -29,7 +29,7 @@ cargo run -- -b DMG-01.bin -r [your game rom]
 To run without bootrom
 
 ```
-cargo run -- -no_bootrom -r [your game rom]
+cargo run -- -r [your game rom]
 ```
 
 ## Special Thanks
@@ -44,3 +44,4 @@ https://blog.ryanlevick.com/DMG-01/
 ### Repos
 https://github.com/mohanson/gameboy
 https://github.com/rylev/DMG-01
+https://github.com/mvdnes/rboy

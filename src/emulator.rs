@@ -1,3 +1,4 @@
+use crate::cartridge::load_cartridge;
 use crate::cpu::ClockedCPU;
 use crate::ppu::{random_framebuffer, PPUFramebuffer, SCREEN_H, SCREEN_W};
 use flume::{Sender, TrySendError};
@@ -12,6 +13,7 @@ pub fn start_emulator_thread(
         .name("emulator".to_string())
         .spawn(move || {
             debug!("thread spawned");
+            let cartridge = load_cartridge(rom);
             'emulator: loop {
                 std::thread::sleep(std::time::Duration::from_millis(130));
                 let mut gpu_framebuffer = random_framebuffer();
