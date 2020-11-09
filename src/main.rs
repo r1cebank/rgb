@@ -22,7 +22,7 @@ use emulator::start_emulator_thread;
 use io::start_io_thread;
 use simplelog::*;
 use std::fs::File;
-use util::{get_bootrom, get_rom};
+use util::{get_boot_rom, get_rom};
 
 fn main() {
     let mut config = ConfigBuilder::new();
@@ -47,7 +47,7 @@ fn main() {
         .arg(
             Arg::with_name("boot")
                 .short("b")
-                .required(true)
+                .required(false)
                 .value_name("FILE"),
         )
         .arg(
@@ -75,7 +75,7 @@ fn main() {
         )
         .get_matches();
 
-    let bootrom = get_bootrom(matches.value_of("boot").unwrap());
+    let boot_rom = matches.value_of("boot").map(|path| get_boot_rom(path));
     let rom = get_rom(matches.value_of("rom").unwrap());
 
     /////////////////flume sender receivers////////////////////////
@@ -84,7 +84,7 @@ fn main() {
     // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
     // let (debug_result_sender, debug_result_receiver) = flume::unbounded();
 
-    let emulator_thread = start_emulator_thread(bootrom.to_vec(), rom, framebuffer_sender);
+    let emulator_thread = start_emulator_thread(boot_rom, rom, framebuffer_sender);
     let io_thread = start_io_thread();
     let debug_thread = start_debug_thread();
     let display_thread = start_display_thread(
