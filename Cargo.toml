@@ -11,7 +11,7 @@ default = ["gui", "audio"]
 gui = ["minifb"]
 tty = ["blockish"]
 audio = ["cpal"]
-repl = ["rustyline"]
+debug = ["rustyline"]
 
 
 [dependencies]

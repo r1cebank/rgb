@@ -8,6 +8,7 @@ use rom::Rom;
 
 use super::memory::Memory;
 use super::save::Savable;
+use crate::cartridge::mbc3::Mbc3;
 
 /// ROM size in  bytes
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -139,6 +140,7 @@ pub fn load_cartridge(rom: Vec<u8>) -> Box<dyn Cartridge> {
     let cartridge: Box<dyn Cartridge> = match rom[0x147] {
         0x00 => Box::new(Rom::new(rom)),
         0x01 => Box::new(Mbc1::new(rom, ram_size as usize)),
+        0x13 => Box::new(Mbc3::new(rom, ram_size as usize)),
         _ => unimplemented!(),
     };
 

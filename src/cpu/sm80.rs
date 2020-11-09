@@ -18,6 +18,19 @@ impl Core {
             registers: Registers::new(),
         }
     }
+    /// When not boot rom is supplied, we call this to make sure the following state is set
+    pub fn simulate_boot_rom(&mut self) {
+        self.registers.a = 0x01;
+        self.registers.f = 0xb0;
+        self.registers.b = 0x00;
+        self.registers.c = 0x13;
+        self.registers.d = 0x00;
+        self.registers.e = 0xd8;
+        self.registers.h = 0x01;
+        self.registers.l = 0x4d;
+        self.registers.pc = 0x0100;
+        self.registers.sp = 0xfffe;
+    }
     /// Get the next byte in the memory location
     fn get_next(&mut self) -> u8 {
         let value = self.memory.borrow().get(self.registers.pc);

@@ -26,6 +26,42 @@ impl MMU {
             cartridge: load_cartridge(rom),
         }
     }
+    pub fn tick(&mut self, cycles: u32) {}
+
+    /// When no boot rom is supplied, we set the following states in memory just like the boot rom
+    pub fn simulate_boot_rom(&mut self) {
+        self.set(0xff05, 0x00);
+        self.set(0xff06, 0x00);
+        self.set(0xff07, 0x00);
+        self.set(0xff10, 0x80);
+        self.set(0xff11, 0xbf);
+        self.set(0xff12, 0xf3);
+        self.set(0xff14, 0xbf);
+        self.set(0xff16, 0x3f);
+        self.set(0xff17, 0x00);
+        self.set(0xff19, 0xbf);
+        self.set(0xff1a, 0x7f);
+        self.set(0xff1b, 0xff);
+        self.set(0xff1c, 0x9f);
+        self.set(0xff1e, 0xbf);
+        self.set(0xff20, 0xff);
+        self.set(0xff21, 0x00);
+        self.set(0xff22, 0x00);
+        self.set(0xff23, 0xbf);
+        self.set(0xff24, 0x77);
+        self.set(0xff25, 0xf3);
+        self.set(0xff26, 0xf1);
+        self.set(0xff40, 0x91);
+        self.set(0xff42, 0x00);
+        self.set(0xff43, 0x00);
+        self.set(0xff45, 0x00);
+        self.set(0xff47, 0xfc);
+        self.set(0xff48, 0xff);
+        self.set(0xff49, 0xff);
+        self.set(0xff4a, 0x00);
+        self.set(0xff4b, 0x00);
+        self.set(0xffff, 0x00);
+    }
 }
 
 impl Memory for MMU {

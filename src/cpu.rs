@@ -3,6 +3,7 @@ pub mod instruction;
 pub mod opcodes;
 pub mod registers;
 pub mod sm80;
+
 use crate::memory::Memory;
 use std::time::{Duration, Instant};
 
@@ -22,8 +23,10 @@ pub const STEP_CYCLES: u32 = (STEP_TIME as f64 / (1000_f64 / CLOCK_FREQUENCY as 
 /// We are slicing the cycles in 16 ms chunks
 pub struct ClockedCPU {
     pub cpu: Core,
-    step_cycles: u32,   // How many cycles in the step (around 67108)
-    step_zero: Instant, // Begin step
+    step_cycles: u32,
+    // How many cycles in the step (around 67108)
+    step_zero: Instant,
+    // Begin step
     step_flip: bool,    // When this is set to true, we want to handle events
 }
 
@@ -75,6 +78,10 @@ impl ClockedCPU {
         // Increment the step cycles with the cpu tick cycles
         self.step_cycles += cycles;
         cycles
+    }
+
+    pub fn simulate_boot_rom(&mut self) {
+        self.simulate_boot_rom();
     }
 
     pub fn flip(&mut self) -> bool {
