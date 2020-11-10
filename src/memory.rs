@@ -1,4 +1,5 @@
 pub mod mmu;
+mod timer;
 
 pub trait Memory {
     fn get(&self, address: u16) -> u8;
