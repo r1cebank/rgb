@@ -418,7 +418,7 @@ mod tests {
                     );
                 }
                 OperationType::AddressToAddress(_, _) => {
-                    panic!("This is not supposed to happend {:?}", instruction);
+                    panic!("This is not supposed to happen {:?}", instruction);
                 }
             }
         } else {
@@ -524,7 +524,7 @@ mod tests {
                     );
                 }
                 OperationType::AddressToAddress(_, _) => {
-                    panic!("This is not supposed to happend {:?}", instruction);
+                    panic!("This is not supposed to happen {:?}", instruction);
                 }
             }
         }
@@ -627,6 +627,7 @@ mod tests {
             }
         }
     }
+
     #[test]
     /// Use the opcode json from https://gbdev.io/gb-opcodes//optables/classic
     /// to ensure the opcode is decoded correctly

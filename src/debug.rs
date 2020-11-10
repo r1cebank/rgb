@@ -1,4 +1,6 @@
 pub mod command;
+pub mod debug_logger;
+pub mod debug_state;
 pub mod debuggable;
 pub mod message;
 

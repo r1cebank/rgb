@@ -23,14 +23,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
-      <change afterPath="$PROJECT_DIR$/src/debug/message.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/debug/debug_logger.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/debug/debug_state.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/debug.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/debug/command.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug/command.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/debug/debuggable.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug/debuggable.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/debug/message.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug/message.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/display/debug_canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/debug_canvas.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display/fps.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/fps.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -69,6 +71,11 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="settings.saveactions" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\siyua\Documents\GitHub\rgb\src\debug" />
+    </key>
+  </component>
   <component name="RunManager" selected="Cargo.Run">
     <configuration name="Format" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
@@ -95,10 +102,28 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test cpu::instruction::tests::can_correctly_decode_opcode" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package rgb --bin rgb cpu::instruction::tests::can_correctly_decode_opcode -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Format" />
+      <item itemvalue="Cargo.Test cpu::instruction::tests::can_correctly_decode_opcode" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Test cpu::instruction::tests::can_correctly_decode_opcode" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -155,7 +180,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604971945609</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Debug message channel">
+      <created>1604975882642</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1604975882642</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -176,37 +208,38 @@
     <MESSAGE value="Adding mmu" />
     <MESSAGE value="Adding no boot rom option" />
     <MESSAGE value="Refactored a bunch of stuff, adding debug display" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored a bunch of stuff, adding debug display" />
+    <MESSAGE value="Debug message channel" />
+    <option name="LAST_COMMIT_MESSAGE" value="Debug message channel" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604864615773">
+    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604982645474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604864615773" />
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1604817069946">
+    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604982645474" />
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1604983184402">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604817069946" />
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604983184402" />
     <state x="907" y="268" key="CommitChangelistDialog2" timestamp="1604816964608">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1604975854603">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1604987606307">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604975854603" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1604975854603">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604987606307" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1604987606307">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604975854603" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1604975854603">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604987606307" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1604987606307">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604975854603" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1604975854603">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604987606307" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1604987606307">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604975854603" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604987606307" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

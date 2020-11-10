@@ -1,5 +1,7 @@
+use crate::debug;
 use crate::debug::message::DebugMessage;
 use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
+use debug::debug_state::DebugState;
 use flume::{Receiver, TryRecvError};
 use piston_window::*;
 use std::thread::{Builder, JoinHandle};
@@ -20,6 +22,7 @@ pub fn start_display_thread(
     rom_name: String,
     framebuffer_receiver: Receiver<PPUFramebuffer>,
     debug_result_receiver: Receiver<DebugMessage>,
+    log_message_receiver: Receiver<DebugMessage>,
 ) -> JoinHandle<()> {
     Builder::new()
         .name("display".to_string())
@@ -27,6 +30,9 @@ pub fn start_display_thread(
             debug!("thread spawned");
             // Grab the actual screen size to draw our window in
             let (screen_width, screen_height) = get_actual_window_size(scale_factor);
+
+            // Set the debug state, this is persisted
+            let mut debug_state = DebugState::new();
 
             // Create the piston window, this will be the window to to draw everything in our emulator
             let mut window: PistonWindow = WindowSettings::new(
@@ -83,11 +89,13 @@ pub fn start_display_thread(
                         .update(&mut game_texture_context, &game_image)
                         .unwrap();
 
-                    // Draw the debug info
+                    // Draw the debug info, if this function returns false, break the loop
                     if !debug_canvas::draw_debug_info(
                         &e,
                         &mut window,
                         debug_result_receiver.clone(),
+                        log_message_receiver.clone(),
+                        &mut debug_state,
                     ) {
                         break 'display;
                     }

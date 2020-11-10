@@ -20,6 +20,7 @@ mod util;
 
 use apu::start_apu_thread;
 use clap::{App, Arg};
+use debug::debug_logger::DebugLogger;
 #[cfg(feature = "debug")]
 use debug::start_debug_thread;
 use display::start_display_thread;
@@ -30,6 +31,17 @@ use std::fs::File;
 use util::{get_boot_rom, get_rom};
 
 fn main() {
+    /////////////////flume sender receivers////////////////////////
+    let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
+    // Debug channels
+    // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
+    let (debug_message_sender, debug_message_receiver) = flume::unbounded();
+    let (log_message_sender, log_message_receiver) = flume::unbounded();
+
+    // Logger configurations
+    let mut debug_logger =
+        DebugLogger::new(LevelFilter::Debug, Config::default(), log_message_sender);
+    debug_logger.add_filter_allow(format!("{}", "rgb"));
     let mut config = ConfigBuilder::new();
     config.add_filter_allow(format!("{}", "rgb"));
     CombinedLogger::init(vec![
@@ -39,6 +51,7 @@ fn main() {
             Config::default(),
             File::create("warnings.log").unwrap(),
         ),
+        debug_logger
         // WriteLogger::new(
         //     LevelFilter::Trace,
         //     Config::default(),
@@ -83,20 +96,15 @@ fn main() {
     let boot_rom = matches.value_of("boot").map(|path| get_boot_rom(path));
     let rom = get_rom(matches.value_of("rom").unwrap());
 
-    /////////////////flume sender receivers////////////////////////
-    let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
-    // Debug channels
-    // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
-    let (debug_result_sender, debug_result_receiver) = flume::unbounded();
-
     let emulator_thread =
-        start_emulator_thread(boot_rom, rom, framebuffer_sender, debug_result_sender);
+        start_emulator_thread(boot_rom, rom, framebuffer_sender, debug_message_sender);
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         String::from("test rom"),
         framebuffer_receiver,
-        debug_result_receiver,
+        debug_message_receiver,
+        log_message_receiver,
     );
     let apu_thread = start_apu_thread();
 

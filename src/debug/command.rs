@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum DebugCommand {
     PeekValue(u16),
 }

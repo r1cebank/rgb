@@ -23,7 +23,7 @@ impl FPSCounter {
         self.frames += 1;
         if current_time - self.last_time >= 1000000000 {
             self.last_fps = self.frames;
-            debug!("fps: {}", self.frames);
+            trace!("fps: {}", self.frames);
             self.frames = 0;
             self.last_time =
                 (OffsetDateTime::now_utc() - OffsetDateTime::unix_epoch()).whole_nanoseconds();
