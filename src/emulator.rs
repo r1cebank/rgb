@@ -1,5 +1,6 @@
 use crate::cartridge::load_cartridge;
 use crate::cpu::ClockedCPU;
+use crate::debug::message::DebugMessage;
 use crate::memory::mmu::MMU;
 use crate::ppu::{random_framebuffer, PPUFramebuffer};
 use flume::{Sender, TrySendError};
@@ -40,6 +41,7 @@ pub fn start_emulator_thread(
     boot_rom: Option<Vec<u8>>,
     rom: Vec<u8>,
     framebuffer_sender: Sender<PPUFramebuffer>,
+    debug_result_sender: Sender<DebugMessage>,
 ) -> JoinHandle<()> {
     Builder::new()
         .name("emulator".to_string())
@@ -51,6 +53,13 @@ pub fn start_emulator_thread(
                 // emulator.tick();
                 let mut gpu_framebuffer = random_framebuffer();
                 match framebuffer_sender.try_send(gpu_framebuffer) {
+                    Ok(_) => {}
+                    Err(TrySendError::Full(_)) => {}
+                    Err(TrySendError::Disconnected(_)) => break 'emulator,
+                }
+                match debug_result_sender
+                    .try_send(DebugMessage::RegisterUpdate(emulator.cpu.cpu.registers))
+                {
                     Ok(_) => {}
                     Err(TrySendError::Full(_)) => {}
                     Err(TrySendError::Disconnected(_)) => break 'emulator,

@@ -87,14 +87,16 @@ fn main() {
     let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
     // Debug channels
     // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
-    // let (debug_result_sender, debug_result_receiver) = flume::unbounded();
+    let (debug_result_sender, debug_result_receiver) = flume::unbounded();
 
-    let emulator_thread = start_emulator_thread(boot_rom, rom, framebuffer_sender);
+    let emulator_thread =
+        start_emulator_thread(boot_rom, rom, framebuffer_sender, debug_result_sender);
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         String::from("test rom"),
         framebuffer_receiver,
+        debug_result_receiver,
     );
     let apu_thread = start_apu_thread();
 

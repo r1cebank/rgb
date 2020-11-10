@@ -1,3 +1,4 @@
+use crate::debug::message::DebugMessage;
 use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
 use flume::{Receiver, TryRecvError};
 use piston_window::*;
@@ -18,6 +19,7 @@ pub fn start_display_thread(
     scale_factor: u32,
     rom_name: String,
     framebuffer_receiver: Receiver<PPUFramebuffer>,
+    debug_result_receiver: Receiver<DebugMessage>,
 ) -> JoinHandle<()> {
     Builder::new()
         .name("display".to_string())
@@ -82,7 +84,13 @@ pub fn start_display_thread(
                         .unwrap();
 
                     // Draw the debug info
-                    debug_canvas::draw_debug_info(&e, &mut window);
+                    if !debug_canvas::draw_debug_info(
+                        &e,
+                        &mut window,
+                        debug_result_receiver.clone(),
+                    ) {
+                        break 'display;
+                    }
 
                     // Draw on the window.
                     window.draw_2d(&e, |c, g, device| {

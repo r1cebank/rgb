@@ -1,5 +1,6 @@
-mod command;
-mod debuggable;
+pub mod command;
+pub mod debuggable;
+pub mod message;
 
 use std::thread::{Builder, JoinHandle};
 

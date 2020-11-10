@@ -1,6 +1,5 @@
+use super::message::DebugMessage;
 use flume::Sender;
-
-pub enum DebugMessage {}
 
 pub trait Debuggable {
     fn peek(address: u16) -> u8;
