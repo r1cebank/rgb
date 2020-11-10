@@ -1,6 +1,10 @@
 extern crate clap;
 #[macro_use]
 extern crate log;
+extern crate find_folder;
+extern crate gfx_device_gl;
+extern crate image as im;
+extern crate piston_window;
 
 mod apu;
 mod cartridge;
@@ -27,7 +31,7 @@ use util::{get_boot_rom, get_rom};
 
 fn main() {
     let mut config = ConfigBuilder::new();
-    config.add_filter_ignore(format!("{}", "rustyline"));
+    config.add_filter_allow(format!("{}", "rgb"));
     CombinedLogger::init(vec![
         TermLogger::new(LevelFilter::Debug, config.build(), TerminalMode::Mixed).unwrap(),
         WriteLogger::new(
@@ -88,7 +92,7 @@ fn main() {
     let emulator_thread = start_emulator_thread(boot_rom, rom, framebuffer_sender);
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
-        matches.value_of("scale").unwrap().parse::<i32>().unwrap(),
+        matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         String::from("test rom"),
         framebuffer_receiver,
     );

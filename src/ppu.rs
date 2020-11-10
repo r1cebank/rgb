@@ -1,7 +1,7 @@
 use rand::Rng;
 
-pub const SCREEN_W: usize = 160;
-pub const SCREEN_H: usize = 144;
+pub const FB_W: usize = 160;
+pub const FB_H: usize = 144;
 
 // Digital image with mode RGB. Size = 144 * 160 * 3.
 // 3---------
@@ -9,10 +9,10 @@ pub const SCREEN_H: usize = 144;
 // ----------
 // ---------- 160
 //        144
-pub type PPUFramebuffer = [[[u8; 3]; SCREEN_W]; SCREEN_H];
+pub type PPUFramebuffer = [[[u8; 3]; FB_W]; FB_H];
 
 pub fn random_framebuffer() -> PPUFramebuffer {
-    let mut framebuffer = [[[0x00; 3]; SCREEN_W]; SCREEN_H];
+    let mut framebuffer = [[[0x00; 3]; FB_W]; FB_H];
     let mut rng = rand::thread_rng();
     for i in 0..framebuffer.len() {
         let random_color = [

@@ -1,12 +1,21 @@
-use crate::ppu::{PPUFramebuffer, SCREEN_H, SCREEN_W};
+use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
 use flume::{Receiver, TryRecvError};
+use piston_window::*;
 use std::thread::{Builder, JoinHandle};
 
+mod debug_canvas;
+mod draw_logs;
 pub mod fps;
+mod game_canvas;
+
+/// The actual window size factored in scaling and debug windows
+pub fn get_actual_window_size(scale: u32) -> (u32, u32) {
+    return (FB_W as u32 * scale * 2, FB_H as u32 * scale * 2);
+}
 
 /// Start the display thread, will be in charge of displaying graphics to screen
 pub fn start_display_thread(
-    scale_factor: i32,
+    scale_factor: u32,
     rom_name: String,
     framebuffer_receiver: Receiver<PPUFramebuffer>,
 ) -> JoinHandle<()> {
@@ -14,61 +23,91 @@ pub fn start_display_thread(
         .name("display".to_string())
         .spawn(move || {
             debug!("thread spawned");
-            let mut option = minifb::WindowOptions::default();
-            option.resize = true;
-            option.scale = match scale_factor {
-                1 => minifb::Scale::X1,
-                2 => minifb::Scale::X2,
-                4 => minifb::Scale::X4,
-                8 => minifb::Scale::X8,
-                _ => panic!("Supported scale: 1, 2, 4 or 8"),
+            // Grab the actual screen size to draw our window in
+            let (screen_width, screen_height) = get_actual_window_size(scale_factor);
+
+            // Create the piston window, this will be the window to to draw everything in our emulator
+            let mut window: PistonWindow = WindowSettings::new(
+                format!("rgb [{}] - {} FPS", rom_name, -1).as_str(),
+                (screen_width, screen_height),
+            )
+            .resizable(false)
+            .exit_on_esc(true)
+            .build()
+            .unwrap_or_else(|e| panic!("Failed to build window: {}", e));
+
+            // The canvas to draw our emulator framebuffer
+            let mut game_image = im::ImageBuffer::new(FB_W as u32, FB_H as u32);
+
+            // Create a texture context for our texture
+            let mut game_texture_context = TextureContext {
+                factory: window.factory.clone(),
+                encoder: window.factory.create_command_buffer().into(),
             };
 
-            // Create a new window with the given title
-            let mut window = minifb::Window::new(
-                format!("rgb [{}] - {} FPS", rom_name, -1).as_str(),
-                SCREEN_W,
-                SCREEN_H,
-                option,
+            // Create a texture from the image that stores our framebuffer
+            let mut game_texture: G2dTexture = Texture::from_image(
+                &mut game_texture_context,
+                &game_image,
+                &TextureSettings::new(),
             )
             .unwrap();
 
-            // The window buffer for rendering
-            let mut window_buffer = vec![0x00; SCREEN_W * SCREEN_H];
+            // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
-            window
-                .update_with_buffer(window_buffer.as_slice(), SCREEN_W, SCREEN_H)
-                .unwrap();
-            'display: loop {
-                if !window.is_open() {
-                    break;
+
+            // Create a texture context for our texture
+            let mut game_texture_context = TextureContext {
+                factory: window.factory.clone(),
+                encoder: window.factory.create_command_buffer().into(),
+            };
+
+            // Create a texture from the image that stores our framebuffer
+            let mut game_texture: G2dTexture = Texture::from_image(
+                &mut game_texture_context,
+                &game_image,
+                &TextureSettings::new(),
+            )
+            .unwrap();
+
+            // Our display loop
+            'display: while let Some(e) = window.next() {
+                if let Some(_) = e.render_args() {
+                    window.draw_2d(&e, |_, g, _| {
+                        clear([0.0, 0.0, 0.0, 1.0], g);
+                    });
+                    // Update the game texture with the game image
+                    game_texture
+                        .update(&mut game_texture_context, &game_image)
+                        .unwrap();
+
+                    // Draw the debug info
+                    debug_canvas::draw_debug_info(&e, &mut window);
+
+                    // Draw on the window.
+                    window.draw_2d(&e, |c, g, device| {
+                        // Update texture before rendering.
+                        game_texture_context.encoder.flush(device);
+                        image(
+                            &game_texture,
+                            c.transform.scale(scale_factor as f64, scale_factor as f64),
+                            g,
+                        );
+                    });
                 }
-                // Update framebuffer when the reciver receive new framebuffer
+                // Update framebuffer when the receiver receive new framebuffer
                 match framebuffer_receiver.try_recv() {
                     Ok(framebuffer) => {
-                        window.set_title(
-                            format!("rgb [{}] - {} FPS", rom_name, fps_counter.get_fps()).as_str(),
-                        );
-                        let mut i: usize = 0;
-                        for l in framebuffer.iter() {
-                            for w in l.iter() {
-                                let b = u32::from(w[0]) << 16;
-                                let g = u32::from(w[1]) << 8;
-                                let r = u32::from(w[2]);
-                                let a = 0xff00_0000;
-                                window_buffer[i] = a | b | g | r;
-                                i += 1;
-                            }
-                        }
+                        window.set_title(format!(
+                            "rgb [{}] - {} FPS",
+                            rom_name,
+                            fps_counter.get_fps()
+                        ));
+                        game_canvas::update_game_canvas(framebuffer, &mut game_image);
                     }
                     Err(TryRecvError::Empty) => (),
                     Err(TryRecvError::Disconnected) => break 'display,
                 }
-
-                // Refresh window with the new buffers
-                window
-                    .update_with_buffer(window_buffer.as_slice(), SCREEN_W, SCREEN_H)
-                    .unwrap();
             }
         })
         .unwrap()

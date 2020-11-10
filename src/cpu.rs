@@ -27,7 +27,7 @@ pub struct ClockedCPU {
     // How many cycles in the step (around 67108)
     step_zero: Instant,
     // Begin step
-    step_flip: bool,    // When this is set to true, we want to handle events
+    step_flip: bool, // When this is set to true, we want to handle events
 }
 
 impl ClockedCPU {

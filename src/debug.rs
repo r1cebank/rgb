@@ -3,6 +3,9 @@ mod debuggable;
 
 use std::thread::{Builder, JoinHandle};
 
+pub const FB_W: usize = 160;
+pub const FB_H: usize = 144;
+
 #[cfg(feature = "debug")]
 pub fn start_debug_thread() -> JoinHandle<()> {
     use rustyline::error::ReadlineError;
