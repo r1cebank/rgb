@@ -344,12 +344,21 @@ impl Core {
     }
     // Logical OR n with register A, result in A.
     fn alu_or(&mut self, n: u8) {
-        let r = self.registers.a | n;
+        let result = self.registers.a | n;
         self.registers.set_flag(Flag::C, false);
         self.registers.set_flag(Flag::H, false);
         self.registers.set_flag(Flag::N, false);
-        self.registers.set_flag(Flag::Z, r == 0x00);
-        self.registers.a = r;
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
+    }
+    // Logical exclusive OR n with register A, result in A.
+    fn alu_xor(&mut self, n: u8) {
+        let result = self.registers.a ^ n;
+        self.registers.set_flag(Flag::C, false);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
     }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
@@ -665,6 +674,33 @@ impl Core {
                     }
                 }
             }
+            Instruction::XOR(source_type) => {
+                // Finished ✔
+                match source_type {
+                    SourceType::Register(source) => {
+                        let register_value = self.get_register(source);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("XOR A, {}", source);
+                                self.alu_xor(value);
+                            }
+                            _ => {
+                                panic!("Invalid datatype u16 for XOR");
+                            }
+                        }
+                    }
+                    SourceType::Address(address) => {
+                        trace!("XOR A, ({})", address);
+                        let address_value = self.get_address(address);
+                        self.alu_xor(address_value);
+                    }
+                    SourceType::Value(_) => {
+                        trace!("XOR A, d8");
+                        let value = self.get_next();
+                        self.alu_xor(value);
+                    }
+                }
+            }
             Instruction::OR(source_type) => {
                 // Finished ✔
                 match source_type {
@@ -676,7 +712,7 @@ impl Core {
                                 self.alu_or(value);
                             }
                             _ => {
-                                panic!("Invalid datatype u16 for AND");
+                                panic!("Invalid datatype u16 for OR");
                             }
                         }
                     }
@@ -766,7 +802,7 @@ impl Core {
                         let address_value = self.get_address(address);
                         self.alu_adc(address_value);
                     }
-                    _ => unimplemented!(),
+                    _ => panic!("Invalid operation {} for ADC A", operation_type),
                 }
             }
             Instruction::SUB(operation_type) => {
@@ -872,7 +908,7 @@ impl Core {
                             self.registers.sp = sp.wrapping_add(b);
                         }
                     }
-                    _ => unimplemented!(),
+                    _ => panic!("Invalid operation {} for AND A", operation_type),
                 }
             }
             _ => unimplemented!(),
@@ -991,6 +1027,47 @@ mod tests {
             Value::D8,
         )));
         assert_eq!(cpu.registers.a, 0b0000_0111);
+    }
+
+    #[test]
+    fn can_correctly_run_xor_instructions() {
+        // Instruction::XOR(SourceType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0001_0100;
+        cpu.registers.b = 0b0001_0101;
+        cpu.execute_instruction(Instruction::XOR(SourceType::Register(
+            Register::B,
+        )));
+        assert_eq!(cpu.registers.a, 0b0000_0001);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::XOR(SourceType::Register(Register::B)) Zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_1111;
+        cpu.registers.b = 0b0000_1111;
+        cpu.execute_instruction(Instruction::XOR(SourceType::Register(
+            Register::B,
+        )));
+        assert_eq!(cpu.registers.a, 0b0000_0000);
+        assert!(cpu.registers.get_flag(Flag::Z));
+        // Instruction::XOR(SourceType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        cpu.registers.set_hl(0x0001);
+        prepare_memory(&mut cpu, 0x0001, 0b0000_0111);
+        cpu.execute_instruction(Instruction::XOR(SourceType::Address(
+            Address::HL,
+        )));
+        assert_eq!(cpu.registers.a, 0b0000_0011);
+        // Instruction::XOR(SourceType::Value(Value::D8))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        prepare_memory(&mut cpu, 0x0000, 0b0000_0111);
+        cpu.execute_instruction(Instruction::XOR(SourceType::Value(
+            Value::D8,
+        )));
+        assert_eq!(cpu.registers.a, 0b0000_0011);
     }
 
     #[test]
