@@ -70,7 +70,6 @@ pub enum SourceType {
 pub enum OperationType {
     RegisterToRegister(Register, Register),
     RegisterToAddress(Address, Register),
-    AddressToAddress(Address, Address),
     AddressToRegister(Register, Address),
     ValueToRegister(Register, Value),
     ValueToAddress(Address, Value),
@@ -417,9 +416,6 @@ mod tests {
                         format!("{:?} failed assert", instruction),
                     );
                 }
-                OperationType::AddressToAddress(_, _) => {
-                    panic!("This is not supposed to happen {:?}", instruction);
-                }
             }
         } else {
             match operation_type {
@@ -522,9 +518,6 @@ mod tests {
                         source.to_string(),
                         format!("{:?} failed assert", instruction),
                     );
-                }
-                OperationType::AddressToAddress(_, _) => {
-                    panic!("This is not supposed to happen {:?}", instruction);
                 }
             }
         }

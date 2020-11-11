@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="BranchesTreeState">
     <expand>
       <path>
@@ -23,9 +26,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
-      <change afterPath="$PROJECT_DIR$/src/memory/timer.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/registers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/registers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/sm80.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/sm80.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -69,7 +74,7 @@
       <recent name="C:\Users\siyua\Documents\GitHub\rgb\src\debug" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run">
+  <component name="RunManager" selected="Cargo.Test">
     <configuration name="Format" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="fmt" />
@@ -95,9 +100,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test cpu::instruction::tests::can_correctly_decode_opcode" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package rgb --bin rgb cpu::instruction::tests::can_correctly_decode_opcode -- --exact" />
+      <option name="command" value="test" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -110,13 +115,8 @@
     <list>
       <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Format" />
-      <item itemvalue="Cargo.Test cpu::instruction::tests::can_correctly_decode_opcode" />
+      <item itemvalue="Cargo.Test" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Cargo.Test cpu::instruction::tests::can_correctly_decode_opcode" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -194,7 +194,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604988078224</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="MMU bootrom + cart read">
+      <created>1604990605832</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1604990605832</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -218,48 +225,53 @@
     <MESSAGE value="Debug message channel" />
     <MESSAGE value="Debug logger and message displaying" />
     <MESSAGE value="Using register methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="Using register methods" />
+    <MESSAGE value="MMU bootrom + cart read" />
+    <option name="LAST_COMMIT_MESSAGE" value="MMU bootrom + cart read" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604982645474">
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605060430774">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604982645474" />
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1604983184402">
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060430774" />
+    <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1605060578568">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604983184402" />
+    <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060578568" />
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1605035982240">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605035982240" />
     <state x="907" y="268" key="CommitChangelistDialog2" timestamp="1604816964608">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1604990576545">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605060390088">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604990576545" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1604990576545">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060390088" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605060390088">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604990576545" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1604990576545">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060390088" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605060390088">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604990576545" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1604990576545">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060390088" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605060390088">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604990576545" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060390088" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="473" y="300" key="SettingsEditor/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604822853474" />
-    <state x="936" y="330" key="run.anything.popup" timestamp="1604897321499">
+    <state x="936" y="330" key="run.anything.popup" timestamp="1605048547490">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604897321499" />
-    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1604967396221">
+    <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605048547490" />
+    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1605035113578">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604967396221" />
+    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605035113578" />
   </component>
 </project>

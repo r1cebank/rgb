@@ -6,7 +6,7 @@ use crate::util::BOOT_ROM_SIZE;
 pub struct MMU {
     pub boot_rom: Option<[u8; 256]>,
     pub cartridge: Box<dyn Cartridge>,
-    pub boot_rom_enabled: bool,
+    boot_rom_enabled: bool,
     timer: Timer,
     work_ram: [u8; 0x8000],
     high_ram: [u8; 0x7f],
@@ -32,7 +32,7 @@ impl MMU {
         Self {
             boot_rom,
             timer: Timer::new(),
-            boot_rom_enabled: true,
+            boot_rom_enabled: boot_rom != None,
             cartridge: load_cartridge(rom),
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],

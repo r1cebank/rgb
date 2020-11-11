@@ -27,7 +27,7 @@ impl Flag {
 /// flag register f
 /// pc for pc counter  16-bit
 /// sp for stack pointer  16-bit
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Registers {
     pub a: u8,
     pub b: u8,

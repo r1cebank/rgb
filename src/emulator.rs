@@ -49,8 +49,8 @@ pub fn start_emulator_thread(
             debug!("thread spawned");
             let mut emulator = Emulator::new(boot_rom, rom);
             'emulator: loop {
-                std::thread::sleep(std::time::Duration::from_millis(13));
-                // emulator.tick();
+                std::thread::sleep(std::time::Duration::from_millis(10));
+                emulator.tick();
                 let mut gpu_framebuffer = random_framebuffer();
                 match framebuffer_sender.try_send(gpu_framebuffer) {
                     Ok(_) => {}
