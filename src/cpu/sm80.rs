@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::cycles::{CB_CYCLES, OP_CYCLES};
-use super::instruction::{Address, Instruction, OperationType, Register, TargetType, Value};
+use super::instruction::{Address, Condition, Instruction, OperationType, Register, TargetType, Value};
 use super::registers::{Flag, Registers};
 use piston_window::math::add;
 use crate::cpu::instruction::OperationType::RegisterToRegister;
@@ -155,6 +155,12 @@ impl Core {
             }
         }
     }
+    // Add n to current address and jump to it.
+    // n = one byte signed immediate value
+    fn alu_jr(&mut self, n: u8) {
+        let n = n as i8;
+        self.registers.pc = ((u32::from(self.registers.pc) as i32) + i32::from(n)) as u16;
+    }
     // Rotate n right. Old bit 0 to Carry flag.
     fn alu_rrc(&mut self, n: u8) -> u8 {
         let carry = n & 0x01 == 0x01;
@@ -242,6 +248,16 @@ impl Core {
                 self.set_address_value_16(address, value);
             }
         }
+    }
+    fn get_condition(&self, condition: Condition) -> bool {
+        let is_condition = match condition {
+            Condition::NotZero => !self.registers.get_flag(Flag::Z),
+            Condition::Zero => self.registers.get_flag(Flag::Z),
+            Condition::Carry => self.registers.get_flag(Flag::C),
+            Condition::NotCarry => !self.registers.get_flag(Flag::C),
+            Condition::Always => true,
+        };
+        is_condition
     }
     fn get_address(&mut self, address: Address) -> u8 {
         match address {
@@ -503,6 +519,16 @@ impl Core {
                 self.registers.a = self.alu_rl(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
+            Instruction::RRA => {}
+            Instruction::JR(condition, value) => {
+                // Finished ✔
+                let can_jump = self.get_condition(condition);
+                let address = self.get_next();
+                trace!("JR {}, ${:04x}", condition, address);
+                if can_jump {
+                    self.alu_jr(address);
+                }
+            }
             Instruction::STOP => {}
             Instruction::ADD(operation_type) => {
                 // Finished ❌
@@ -629,6 +655,37 @@ mod tests {
         assert_eq!(cpu.registers.a, 0b0000_0101);
         assert_eq!(cpu.registers.get_flag(Flag::Z), false);
         assert_eq!(cpu.registers.get_flag(Flag::C), true);
+    }
+
+    #[test]
+    fn can_correctly_run_jr_instructions() {
+        // Instruction::JR(Condition::Always, Address::R8)
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0010);
+        cpu.execute_instruction(Instruction::JR(Condition::Always, Address::R8));
+        assert_eq!(cpu.registers.pc, 0x0011);
+        // Instruction::JR(Condition::Carry, Address::R8)
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0010);
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::JR(Condition::Carry, Address::R8));
+        assert_eq!(cpu.registers.pc, 0x0011);
+        // Instruction::JR(Condition::NotCarry, Address::R8)
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0010);
+        cpu.execute_instruction(Instruction::JR(Condition::NotCarry, Address::R8));
+        assert_eq!(cpu.registers.pc, 0x0011);
+        // Instruction::JR(Condition::Zero, Address::R8)
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0010);
+        cpu.registers.set_flag(Flag::Z, true);
+        cpu.execute_instruction(Instruction::JR(Condition::Zero, Address::R8));
+        assert_eq!(cpu.registers.pc, 0x0011);
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0010);
+        cpu.registers.set_flag(Flag::Z, false);
+        cpu.execute_instruction(Instruction::JR(Condition::Zero, Address::R8));
+        assert_eq!(cpu.registers.pc, 0x0001);
     }
 
     #[test]
