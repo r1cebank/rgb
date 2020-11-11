@@ -11,6 +11,7 @@ use crate::cpu::instruction::OperationType::RegisterToRegister;
 pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
     pub registers: Registers,
+    halted: bool,
 }
 
 enum DataType {
@@ -23,6 +24,7 @@ impl Core {
         Self {
             memory,
             registers: Registers::new(),
+            halted: false,
         }
     }
     /// When not boot rom is supplied, we call this to make sure the following state is set
@@ -259,6 +261,27 @@ impl Core {
         self.registers.set_flag(Flag::N, false);
         self.registers.set_flag(Flag::Z, result == 0x00);
         result
+    }
+    // Add n + Carry flag to A.
+    fn alu_adc(&mut self, n: u8) {
+        let a = self.registers.a;
+        let carry = u8::from(self.registers.get_flag(Flag::C));
+        let result = a.wrapping_add(n).wrapping_add(carry);
+        self.registers.set_flag(Flag::C, u16::from(a) + u16::from(n) + u16::from(carry) > 0xff);
+        self.registers.set_flag(Flag::H, (a & 0x0f) + (n & 0x0f) + (carry & 0x0f) > 0x0f);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
+    }
+    // Add n to A.
+    fn alu_add(&mut self, n: u8) {
+        let a = self.registers.a;
+        let result = a.wrapping_add(n);
+        self.registers.set_flag(Flag::C, u16::from(a) + u16::from(n) > 0xff);
+        self.registers.set_flag(Flag::H, (a & 0x0f) + (n & 0x0f) > 0x0f);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
     }
     // Add n to HL
     fn alu_add_hl(&mut self, n: u16) {
@@ -569,14 +592,17 @@ impl Core {
                 self.registers.set_flag(Flag::Z, false);
             }
             Instruction::RLA => {
+                trace!("RLA");
                 self.registers.a = self.alu_rl(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
             Instruction::RRA => {
+                trace!("RRA");
                 self.registers.a = self.alu_rr(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
             Instruction::DAA => {
+                trace!("DAA");
                 self.alu_daa();
             }
             Instruction::JR(condition, value) => {
@@ -589,15 +615,47 @@ impl Core {
                 }
             }
             Instruction::CPL => {
+                trace!("CPL");
                 self.alu_cpl();
             }
             Instruction::SCF => {
+                trace!("SCF");
                 self.alu_scf();
             }
             Instruction::CCF => {
+                trace!("CCF");
                 self.alu_ccf();
             }
-            Instruction::STOP => {}
+            Instruction::HALT => {
+                trace!("HALT");
+                self.halted = true;
+            }
+            Instruction::STOP => {
+                trace!("STOP");
+            }
+            Instruction::ADC(operation_type) => {
+                // Finished ✔
+                match operation_type {
+                    OperationType::RegisterToRegister(_, source) => {
+                        let register_value = self.get_register(source);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("ADC A, {}", source);
+                                self.alu_adc(value);
+                            }
+                            _ => {
+                                panic!("Invalid {} for ADC A", source);
+                            }
+                        }
+                    }
+                    OperationType::AddressToRegister(_, address) => {
+                        trace!("ADC A, ({})", address);
+                        let address_value = self.get_address(address);
+                        self.alu_adc(address_value);
+                    }
+                    _ => unimplemented!()
+                }
+            }
             Instruction::ADD(operation_type) => {
                 // Finished ❌
                 match operation_type {
@@ -615,11 +673,25 @@ impl Core {
                             }
                         }
                         if target == Register::A {
-                            unimplemented!()
+                            let register_value = self.get_register(source);
+                            match register_value {
+                                DataType::U8(value) => {
+                                    trace!("ADD A, {}", source);
+                                    self.alu_add(value);
+                                }
+                                _ => {
+                                    panic!("Invalid {} for ADD A", source);
+                                }
+                            }
                         }
                         if target == Register::SP {
                             unimplemented!()
                         }
+                    }
+                    OperationType::AddressToRegister(_, address) => {
+                        trace!("ADD A, ({})", address);
+                        let address_value = self.get_address(address);
+                        self.alu_add(address_value);
                     }
                     _ => unimplemented!()
                 }
@@ -752,6 +824,40 @@ mod tests {
     }
 
     #[test]
+    fn can_correctly_run_adc_instructions() {
+        // Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x01;
+        cpu.registers.b = 0x01;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x03);
+        // Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x01;
+        cpu.registers.b = 0x01;
+        cpu.execute_instruction(Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x02);
+        // Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B)) carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x01;
+        cpu.registers.b = 0xfe;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::ADC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x00);
+        assert!(cpu.registers.get_flag(Flag::C));
+        // Instruction::ADC(OperationType::AddressToRegister(Register::A, Address::HL))
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0xfe);
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.registers.set_hl(0x0000);
+        cpu.registers.a = 0x01;
+        cpu.execute_instruction(Instruction::ADC(OperationType::AddressToRegister(Register::A, Address::HL)));
+        assert_eq!(cpu.registers.a, 0x00);
+        assert!(cpu.registers.get_flag(Flag::C));
+    }
+
+    #[test]
     fn can_correctly_run_add_instructions() {
         // Instruction::ADD(OperationType::RegisterToRegister Register::HL
         let mut cpu = get_new_cpu();
@@ -762,6 +868,34 @@ mod tests {
             Register::BC,
         )));
         assert_eq!(cpu.registers.get_hl(), 0x0111);
+        // Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0x0c;
+        cpu.registers.a = 0x10;
+        cpu.execute_instruction(Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x1c);
+        // Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)) zero carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0xff;
+        cpu.registers.a = 0x01;
+        cpu.execute_instruction(Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x00);
+        assert!(cpu.registers.get_flag(Flag::Z));
+        assert!(cpu.registers.get_flag(Flag::C));
+        // Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)) half carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_1111;
+        cpu.registers.a = 0b0000_0001;
+        cpu.execute_instruction(Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0b0001_0000);
+        assert!(cpu.registers.get_flag(Flag::H));
+        // Instruction::ADD(OperationType::AddressToRegister(Register::A, Address::HL))
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0c);
+        cpu.registers.set_hl(0x0000);
+        cpu.registers.a = 0x10;
+        cpu.execute_instruction(Instruction::ADD(OperationType::AddressToRegister(Register::A, Address::HL)));
+        assert_eq!(cpu.registers.a, 0x1c);
     }
 
     #[test]
