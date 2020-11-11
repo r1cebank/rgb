@@ -8,10 +8,10 @@ pub enum Instruction {
     OR(SourceType),
     CP(OperationType),
     ADD(OperationType),
-    AND(OperationType),
     SUB(OperationType),
     ADC(OperationType),
     SBC(OperationType),
+    AND(SourceType),
     XOR(SourceType),
     JR(Condition, Address),
     JP(Condition, Address),
@@ -646,9 +646,9 @@ mod tests {
                     assert_eq!(reference_opcode.mnemonic, "INC");
                     assert_target(reference_opcode, target_type, instruction);
                 }
-                Instruction::AND(operation_type) => {
+                Instruction::AND(source_type) => {
                     assert_eq!(reference_opcode.mnemonic, "AND");
-                    assert_operation(reference_opcode, operation_type, true, instruction);
+                    assert_source(reference_opcode, source_type, instruction);
                 }
                 Instruction::OR(source_type) => {
                     assert_eq!(reference_opcode.mnemonic, "OR");
