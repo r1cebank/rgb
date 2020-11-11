@@ -313,6 +313,15 @@ impl Core {
         self.registers.set_flag(Flag::N, false);
         self.registers.set_hl(result);
     }
+    // Logically AND n with A, result in A.
+    fn alu_and(&mut self, n: u8) {
+        let result = self.registers.a & n;
+        self.registers.set_flag(Flag::C, false);
+        self.registers.set_flag(Flag::H, true);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
+    }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
             Address::A16 => {
@@ -528,7 +537,7 @@ impl Core {
                                 self.set_register(target, value);
                             }
                             _ => {
-                                panic!("Invalid datatype u16");
+                                panic!("Invalid datatype u16 for LD");
                             }
                         }
                     }
@@ -597,6 +606,33 @@ impl Core {
                                 panic!("Invalid address {} for INC", address);
                             }
                         }
+                    }
+                }
+            }
+            Instruction::AND(operation_type) => {
+                // Finished ✔
+                match operation_type {
+                    OperationType::RegisterToRegister(_, source) => {
+                        let register_value = self.get_register(source);
+                        match register_value {
+                            DataType::U8(value) => {
+                                self.alu_and(value);
+                            }
+                            _ => {
+                                panic!("Invalid datatype u16 for AND");
+                            }
+                        }
+                    }
+                    OperationType::AddressToRegister(_, address) => {
+                        let address_value = self.get_address(address);
+                        self.alu_and(address_value);
+                    }
+                    OperationType::ValueToRegister(_, _) => {
+                        let value = self.get_next();
+                        self.alu_and(value);
+                    }
+                    _ => {
+                        panic!("Invalid operation type {} for AND", operation_type);
                     }
                 }
             }
@@ -856,6 +892,39 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_and_instructions() {
+        // Instruction::AND(OperationType::RegisterToRegister(Register::A, Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        cpu.registers.b = 0b0001_0101;
+        cpu.execute_instruction(Instruction::AND(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0b0000_0100);
+        assert!(cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::AND(OperationType::RegisterToRegister(Register::A, Register::B)) Zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        cpu.registers.b = 0b0001_0001;
+        cpu.execute_instruction(Instruction::AND(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0b0000_0000);
+        assert!(cpu.registers.get_flag(Flag::Z));
+        // Instruction::AND(OperationType::AddressToRegister(Register::A, Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        cpu.registers.set_hl(0x0001);
+        prepare_memory(&mut cpu, 0x0001, 0b0000_0111);
+        cpu.execute_instruction(Instruction::AND(OperationType::AddressToRegister(Register::A, Address::HL)));
+        assert_eq!(cpu.registers.a, 0b0000_0100);
+        // Instruction::AND(OperationType::ValueToRegister(Register::A, Value::D8))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0100;
+        prepare_memory(&mut cpu, 0x0000, 0b0000_0111);
+        cpu.execute_instruction(Instruction::AND(OperationType::ValueToRegister(Register::A, Value::D8)));
+        assert_eq!(cpu.registers.a, 0b0000_0100);
     }
 
     #[test]
