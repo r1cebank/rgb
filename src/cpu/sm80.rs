@@ -6,6 +6,7 @@ use super::cycles::{CB_CYCLES, OP_CYCLES};
 use super::instruction::{Address, Instruction, OperationType, Register, TargetType, Value};
 use super::registers::{Flag, Registers};
 use piston_window::math::add;
+use crate::cpu::instruction::OperationType::RegisterToRegister;
 
 pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
@@ -154,6 +155,16 @@ impl Core {
             }
         }
     }
+    // Rotate n right. Old bit 0 to Carry flag.
+    fn alu_rrc(&mut self, n: u8) -> u8 {
+        let carry = n & 0x01 == 0x01;
+        let result = if carry { 0x80 | (n >> 1) } else { n >> 1 };
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
     // Rotate n left. Old bit 7 to Carry flag.
     fn alu_rlc(&mut self, n: u8) -> u8 {
         let carry = (n & 0x80) >> 7 == 0x01;
@@ -179,6 +190,15 @@ impl Core {
         self.registers.set_flag(Flag::N, false);
         self.registers.set_flag(Flag::Z, result == 0x00);
         result
+    }
+    // Add n to HL
+    fn alu_add_hl(&mut self, n: u16) {
+        let value = self.registers.get_hl();
+        let result = value.wrapping_add(n);
+        self.registers.set_flag(Flag::C, value > 0xffff - n);
+        self.registers.set_flag(Flag::H, (value & 0x0fff) + (n & 0x0fff) > 0x0fff);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_hl(result);
     }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
@@ -359,7 +379,9 @@ impl Core {
             Instruction::NAI => {
                 panic!("Not supposed to run the NAI instruction");
             }
-            Instruction::NOP => {} // Not doing anything in NOP
+            Instruction::NOP => {
+                trace!("NOP");
+            } // Not doing anything in NOP
             Instruction::LD(operation_type) => {
                 // Finished ✔
                 match operation_type {
@@ -456,8 +478,36 @@ impl Core {
                 }
             }
             Instruction::RLCA => {
+                // Finished ✔
+                trace!("RLCA");
                 self.registers.a = self.alu_rlc(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
+            }
+            Instruction::RRCA => {
+                // Finished ✔
+                trace!("RRCA");
+                self.registers.a = self.alu_rrc(self.registers.a);
+                self.registers.set_flag(Flag::Z, false);
+            }
+            Instruction::ADD(operation_type) => {
+                // Finished ❌
+                match operation_type {
+                    OperationType::RegisterToRegister(target, source) => {
+                        if target == Register::HL {
+                            let register_value = self.get_register(source);
+                            match register_value {
+                                DataType::U16(value) => {
+                                    trace!("ADD HL, {}", source);
+                                    self.alu_add_hl(value);
+                                }
+                                _ => {
+                                    panic!("Invalid {} for ADD HL", source);
+                                }
+                            }
+                        }
+                    }
+                    _ => unimplemented!()
+                }
             }
             _ => unimplemented!(),
         }
@@ -537,6 +587,19 @@ mod tests {
     }
 
     #[test]
+    fn can_correctly_run_add_instructions() {
+        // Instruction::ADD(OperationType::RegisterToRegister Register::HL
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_bc(0x0100);
+        cpu.registers.set_hl(0x0011);
+        cpu.execute_instruction(Instruction::ADD(OperationType::RegisterToRegister(
+            Register::HL,
+            Register::BC,
+        )));
+        assert_eq!(cpu.registers.get_hl(), 0x0111);
+    }
+
+    #[test]
     fn can_correctly_run_rlca_instructions() {
         // Instruction::RLCA
         let mut cpu = get_new_cpu();
@@ -549,6 +612,23 @@ mod tests {
         cpu.registers.a = 0b1000_0010;
         cpu.execute_instruction(Instruction::RLCA);
         assert_eq!(cpu.registers.a, 0b0000_0101);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        assert_eq!(cpu.registers.get_flag(Flag::C), true);
+    }
+
+    #[test]
+    fn can_correctly_run_rrca_instructions() {
+        // Instruction::RRCA
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_1000;
+        cpu.execute_instruction(Instruction::RRCA);
+        assert_eq!(cpu.registers.a, 0b0000_0100);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        // Instruction::RRCA Carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0011;
+        cpu.execute_instruction(Instruction::RRCA);
+        assert_eq!(cpu.registers.a, 0b1000_0001);
         assert_eq!(cpu.registers.get_flag(Flag::Z), false);
         assert_eq!(cpu.registers.get_flag(Flag::C), true);
     }
