@@ -155,6 +155,25 @@ impl Core {
             }
         }
     }
+    // Complement carry flag. If C flag is set, then reset it. If C flag is reset, then set it.
+    fn alu_ccf(&mut self) {
+        let carry = !self.registers.get_flag(Flag::C);
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+    }
+    // Set Carry flag.
+    fn alu_scf(&mut self) {
+        self.registers.set_flag(Flag::C, true);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+    }
+    // Complement A register. (Flip all bits.)
+    fn alu_cpl(&mut self) {
+        self.registers.a = !self.registers.a;
+        self.registers.set_flag(Flag::H, true);
+        self.registers.set_flag(Flag::N, true);
+    }
     // Add n to current address and jump to it.
     // n = one byte signed immediate value
     fn alu_jr(&mut self, n: u8) {
@@ -569,6 +588,15 @@ impl Core {
                     self.alu_jr(address);
                 }
             }
+            Instruction::CPL => {
+                self.alu_cpl();
+            }
+            Instruction::SCF => {
+                self.alu_scf();
+            }
+            Instruction::CCF => {
+                self.alu_ccf();
+            }
             Instruction::STOP => {}
             Instruction::ADD(operation_type) => {
                 // Finished ❌
@@ -585,6 +613,12 @@ impl Core {
                                     panic!("Invalid {} for ADD HL", source);
                                 }
                             }
+                        }
+                        if target == Register::A {
+                            unimplemented!()
+                        }
+                        if target == Register::SP {
+                            unimplemented!()
                         }
                     }
                     _ => unimplemented!()
@@ -665,6 +699,44 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_cpl_instructions() {
+        let mut cpu = get_new_cpu();
+        // Instruction::CPL
+        cpu.registers.a = 0b1010_0010;
+        cpu.execute_instruction(Instruction::CPL);
+        assert_eq!(cpu.registers.a, 0b0101_1101);
+        assert!(cpu.registers.get_flag(Flag::H));
+        assert!(cpu.registers.get_flag(Flag::N));
+    }
+
+    #[test]
+    fn can_correctly_run_ccf_instructions() {
+        let mut cpu = get_new_cpu();
+        // Instruction::CCF carry false
+        cpu.execute_instruction(Instruction::CCF);
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::CCF carry true
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::CCF);
+        assert!(!cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+    }
+
+    #[test]
+    fn can_correctly_run_scf_instructions() {
+        let mut cpu = get_new_cpu();
+        // Instruction::SCF
+        cpu.execute_instruction(Instruction::SCF);
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
     }
 
     #[test]
