@@ -165,6 +165,16 @@ impl Core {
         self.registers.set_flag(Flag::Z, result == 0x00);
         result
     }
+    // Rotate n left through Carry flag.
+    fn alu_rl(&mut self, n: u8) -> u8 {
+        let carry = (n & 0x80) >> 7 == 0x01;
+        let result = (n << 1) + u8::from(self.registers.get_flag(Flag::C));
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
     // Rotate n left. Old bit 7 to Carry flag.
     fn alu_rlc(&mut self, n: u8) -> u8 {
         let carry = (n & 0x80) >> 7 == 0x01;
@@ -489,6 +499,11 @@ impl Core {
                 self.registers.a = self.alu_rrc(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
+            Instruction::RLA => {
+                self.registers.a = self.alu_rl(self.registers.a);
+                self.registers.set_flag(Flag::Z, false);
+            }
+            Instruction::STOP => {}
             Instruction::ADD(operation_type) => {
                 // Finished ❌
                 match operation_type {
@@ -612,6 +627,23 @@ mod tests {
         cpu.registers.a = 0b1000_0010;
         cpu.execute_instruction(Instruction::RLCA);
         assert_eq!(cpu.registers.a, 0b0000_0101);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        assert_eq!(cpu.registers.get_flag(Flag::C), true);
+    }
+
+    #[test]
+    fn can_correctly_run_rla_instructions() {
+        // Instruction::RLA
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RLA);
+        assert_eq!(cpu.registers.a, 0b0000_0100);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        // Instruction::RLA Carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b1000_0010;
+        cpu.execute_instruction(Instruction::RLA);
+        assert_eq!(cpu.registers.a, 0b0000_0100);
         assert_eq!(cpu.registers.get_flag(Flag::Z), false);
         assert_eq!(cpu.registers.get_flag(Flag::C), true);
     }
