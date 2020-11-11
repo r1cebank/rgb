@@ -728,7 +728,7 @@ impl Core {
                 }
             }
             Instruction::ADD(operation_type) => {
-                // Finished ❌
+                // Finished ✔
                 match operation_type {
                     OperationType::RegisterToRegister(target, source) => {
                         if target == Register::HL {
@@ -755,14 +755,28 @@ impl Core {
                                 }
                             }
                         }
-                        if target == Register::SP {
-                            unimplemented!()
-                        }
                     }
                     OperationType::AddressToRegister(_, address) => {
                         trace!("ADD A, ({})", address);
                         let address_value = self.get_address(address);
                         self.alu_add(address_value);
+                    }
+                    OperationType::ValueToRegister(register, _) => {
+                        if register == Register::A {
+                            trace!("ADD A, d8");
+                            let next_byte = self.get_next();
+                            self.alu_add(next_byte);
+                        }
+                        if register == Register::SP {
+                            trace!("ADD SP, r8");
+                            let sp = self.registers.sp;
+                            let b = i16::from(self.get_next() as i8) as u16;
+                            self.registers.set_flag(Flag::C, (sp & 0x00ff) + (b & 0x00ff) > 0x00ff);
+                            self.registers.set_flag(Flag::H, (sp & 0x000f) + (b & 0x000f) > 0x000f);
+                            self.registers.set_flag(Flag::N, false);
+                            self.registers.set_flag(Flag::Z, false);
+                            self.registers.sp = sp.wrapping_add(b);
+                        }
                     }
                     _ => unimplemented!()
                 }
@@ -1054,6 +1068,36 @@ mod tests {
         cpu.registers.a = 0x10;
         cpu.execute_instruction(Instruction::ADD(OperationType::AddressToRegister(Register::A, Address::HL)));
         assert_eq!(cpu.registers.a, 0x1c);
+        // Instruction::ADD(OperationType::ValueToRegister(Register::A, Value::D8))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x01;
+        prepare_memory(&mut cpu, 0x0000, 0x0c);
+        cpu.execute_instruction(Instruction::ADD(OperationType::ValueToRegister(Register::A, Value::D8)));
+        assert_eq!(cpu.registers.a, 0x0d);
+        // Instruction::ADD(OperationType::ValueToRegister(Register::SP, Value::R8))
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x01);
+        cpu.registers.sp = 0x00ff;
+        cpu.execute_instruction(Instruction::ADD(OperationType::ValueToRegister(Register::SP, Value::R8)));
+        assert_eq!(cpu.registers.sp, 0x0100);
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(!cpu.registers.get_flag(Flag::Z));
+        // Instruction::ADD(OperationType::ValueToRegister(Register::SP, Value::R8)) carry
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x01);
+        cpu.registers.sp = 0xffff;
+        cpu.execute_instruction(Instruction::ADD(OperationType::ValueToRegister(Register::SP, Value::R8)));
+        assert_eq!(cpu.registers.sp, 0x0000);
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(!cpu.registers.get_flag(Flag::Z));
+        // Instruction::ADD(OperationType::RegisterToRegister(Register::A, Register::B)) half carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0b0000_0000_1111_1111;
+        prepare_memory(&mut cpu, 0x0000, 0x01);
+        cpu.execute_instruction(Instruction::ADD(OperationType::ValueToRegister(Register::SP, Value::R8)));
+        assert_eq!(cpu.registers.sp, 0b0000_0001_0000_0000);
+        assert!(cpu.registers.get_flag(Flag::H));
     }
 
     #[test]
