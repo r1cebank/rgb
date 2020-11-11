@@ -3,6 +3,11 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="AutoTestManager">
+    <enabled-run-configurations>
+      <run-configuration type="CargoCommandRunConfiguration" name="Test" />
+    </enabled-run-configurations>
+  </component>
   <component name="BranchesTreeState">
     <expand>
       <path>
@@ -232,7 +237,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605076130393</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="RRA">
+      <created>1605076705443</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1605076705443</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -262,7 +274,8 @@
     <MESSAGE value="RRCA" />
     <MESSAGE value="RLA" />
     <MESSAGE value="JP" />
-    <option name="LAST_COMMIT_MESSAGE" value="JP" />
+    <MESSAGE value="RRA" />
+    <option name="LAST_COMMIT_MESSAGE" value="RRA" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605073732005">
@@ -281,22 +294,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605076578373">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605080716395">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605076578373" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605076578372">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605080716395" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605080716394">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605076578372" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605076578372">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605080716394" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605080716394">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605076578372" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605076578373">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605080716394" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605080716395">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605076578373" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605080716395" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

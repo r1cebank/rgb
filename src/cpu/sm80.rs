@@ -171,6 +171,30 @@ impl Core {
         self.registers.set_flag(Flag::Z, result == 0x00);
         result
     }
+    // Decimal adjust register A. This instruction adjusts register A so that the correct representation of Binary
+    // Coded Decimal (BCD) is obtained.
+    fn alu_daa(&mut self) {
+        let mut a = self.registers.a;
+        let mut adjust = if self.registers.get_flag(Flag::C) { 0x60 } else { 0x00 };
+        if self.registers.get_flag(Flag::H) {
+            adjust |= 0x06;
+        };
+        if !self.registers.get_flag(Flag::N) {
+            if a & 0x0f > 0x09 {
+                adjust |= 0x06;
+            };
+            if a > 0x99 {
+                adjust |= 0x60;
+            };
+            a = a.wrapping_add(adjust);
+        } else {
+            a = a.wrapping_sub(adjust);
+        }
+        self.registers.set_flag(Flag::C, adjust >= 0x60);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::Z, a == 0x00);
+        self.registers.a = a;
+    }
     // Rotate n right. Old bit 0 to Carry flag.
     fn alu_rrc(&mut self, n: u8) -> u8 {
         let carry = n & 0x01 == 0x01;
@@ -533,6 +557,9 @@ impl Core {
                 self.registers.a = self.alu_rr(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
+            Instruction::DAA => {
+                self.alu_daa();
+            }
             Instruction::JR(condition, value) => {
                 // Finished ✔
                 let can_jump = self.get_condition(condition);
@@ -638,6 +665,18 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_daa_instructions() {
+        let mut cpu = get_new_cpu();
+        // Simulate 0x90 + 0x90 = 0x120 (0x20 + carry)
+        // BCD needs to adjust to 0x180 with carry to true
+        cpu.registers.a = 0x20;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::DAA);
+        assert_eq!(cpu.registers.a, 0x80);
+        assert!(cpu.registers.get_flag(Flag::C));
     }
 
     #[test]
