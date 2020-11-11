@@ -161,6 +161,16 @@ impl Core {
         let n = n as i8;
         self.registers.pc = ((u32::from(self.registers.pc) as i32) + i32::from(n)) as u16;
     }
+    // Rotate n right through Carry flag.
+    fn alu_rr(&mut self, n: u8) -> u8 {
+        let carry = n & 0x01 == 0x01;
+        let result = if self.registers.get_flag(Flag::C) { 0x80 | (n >> 1) } else { n >> 1 };
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
     // Rotate n right. Old bit 0 to Carry flag.
     fn alu_rrc(&mut self, n: u8) -> u8 {
         let carry = n & 0x01 == 0x01;
@@ -519,7 +529,10 @@ impl Core {
                 self.registers.a = self.alu_rl(self.registers.a);
                 self.registers.set_flag(Flag::Z, false);
             }
-            Instruction::RRA => {}
+            Instruction::RRA => {
+                self.registers.a = self.alu_rr(self.registers.a);
+                self.registers.set_flag(Flag::Z, false);
+            }
             Instruction::JR(condition, value) => {
                 // Finished ✔
                 let can_jump = self.get_condition(condition);
@@ -701,6 +714,23 @@ mod tests {
         cpu.registers.a = 0b1000_0010;
         cpu.execute_instruction(Instruction::RLA);
         assert_eq!(cpu.registers.a, 0b0000_0100);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        assert_eq!(cpu.registers.get_flag(Flag::C), true);
+    }
+
+    #[test]
+    fn can_correctly_run_rra_instructions() {
+        // Instruction::RRA
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RRA);
+        assert_eq!(cpu.registers.a, 0b0000_0001);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        // Instruction::RRA Carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0000_0011;
+        cpu.execute_instruction(Instruction::RRA);
+        assert_eq!(cpu.registers.a, 0b0000_0001);
         assert_eq!(cpu.registers.get_flag(Flag::Z), false);
         assert_eq!(cpu.registers.get_flag(Flag::C), true);
     }
