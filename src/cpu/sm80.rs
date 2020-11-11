@@ -544,6 +544,13 @@ mod tests {
         cpu.execute_instruction(Instruction::RLCA);
         assert_eq!(cpu.registers.a, 0b0000_0100);
         assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        // Instruction::RLCA Carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b1000_0010;
+        cpu.execute_instruction(Instruction::RLCA);
+        assert_eq!(cpu.registers.a, 0b0000_0101);
+        assert_eq!(cpu.registers.get_flag(Flag::Z), false);
+        assert_eq!(cpu.registers.get_flag(Flag::C), true);
     }
 
     #[test]
