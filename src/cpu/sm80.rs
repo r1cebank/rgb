@@ -272,6 +272,17 @@ impl Core {
         self.registers.set_flag(Flag::Z, result == 0x00);
         self.registers.a = result;
     }
+    // Subtract n + Carry flag from A.
+    fn alu_sbc(&mut self, n: u8) {
+        let a = self.registers.a;
+        let carry = u8::from(self.registers.get_flag(Flag::C));
+        let result = a.wrapping_sub(n).wrapping_sub(carry);
+        self.registers.set_flag(Flag::C, u16::from(a) < u16::from(n) + u16::from(carry));
+        self.registers.set_flag(Flag::H, (a & 0x0f) < (n & 0x0f) + carry);
+        self.registers.set_flag(Flag::N, true);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        self.registers.a = result;
+    }
     // Add n + Carry flag to A.
     fn alu_adc(&mut self, n: u8) {
         let a = self.registers.a;
@@ -673,6 +684,7 @@ impl Core {
                         let register_value = self.get_register(source);
                         match register_value {
                             DataType::U8(value) => {
+                                trace!("SUB A, {}", source);
                                 self.alu_sub(value);
                             }
                             _ => {
@@ -687,6 +699,31 @@ impl Core {
                     }
                     _ => {
                         panic!("Invalid operation {} for SUB A", operation_type);
+                    }
+                }
+            }
+            Instruction::SBC(operation_type) => {
+                // Finished ✔
+                match operation_type {
+                    OperationType::RegisterToRegister(_, source) => {
+                        let register_value = self.get_register(source);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SBC A, {}", source);
+                                self.alu_sbc(value);
+                            }
+                            _ => {
+                                panic!("Invalid {} for SBC A", source);
+                            }
+                        }
+                    }
+                    OperationType::AddressToRegister(_, address) => {
+                        trace!("SBC A, ({})", address);
+                        let address_value = self.get_address(address);
+                        self.alu_sbc(address_value);
+                    }
+                    _ => {
+                        panic!("Invalid operation {} for SBC A", operation_type);
                     }
                 }
             }
@@ -889,6 +926,50 @@ mod tests {
         cpu.execute_instruction(Instruction::ADC(OperationType::AddressToRegister(Register::A, Address::HL)));
         assert_eq!(cpu.registers.a, 0x00);
         assert!(cpu.registers.get_flag(Flag::C));
+    }
+
+    #[test]
+    fn can_correctly_run_sbc_instructions() {
+        // Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x0c;
+        cpu.registers.b = 0x01;
+        cpu.execute_instruction(Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x0b);
+        assert!(cpu.registers.get_flag(Flag::N));
+        // Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)) carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x0c;
+        cpu.registers.b = 0x01;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x0a);
+        assert!(cpu.registers.get_flag(Flag::N));
+        // Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)) half carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0b0001_0000;
+        cpu.registers.b = 0b0000_0001;
+        cpu.execute_instruction(Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0b0000_1111);
+        assert!(cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::H));
+        // Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)) zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x02;
+        cpu.registers.b = 0x01;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::SBC(OperationType::RegisterToRegister(Register::A, Register::B)));
+        assert_eq!(cpu.registers.a, 0x00);
+        assert!(cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::Z));
+        // Instruction::SBC(OperationType::AddressToRegister(Register::A, Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x0c;
+        cpu.registers.set_hl(0x0002);
+        prepare_memory(&mut cpu, 0x0002, 0x01);
+        cpu.execute_instruction(Instruction::SBC(OperationType::AddressToRegister(Register::A, Address::HL)));
+        assert_eq!(cpu.registers.a, 0x0b);
+        assert!(cpu.registers.get_flag(Flag::N));
     }
 
     #[test]
