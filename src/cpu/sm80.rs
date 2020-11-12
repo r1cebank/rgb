@@ -775,6 +775,19 @@ impl Core {
                 let value = self.stack_pop();
                 self.set_register_16(register, value);
             }
+            Instruction::PUSH(register) => {
+                // Finished ✔
+                trace!("PUSH {}", register);
+                let register_value = self.get_register(register);
+                match register_value {
+                    DataType::U16(value) => {
+                        self.stack_push(value);
+                    }
+                    _ => {
+                        panic!("Invalid datatype u16 for PUSH");
+                    }
+                }
+            }
             Instruction::RLCA => {
                 // Finished ✔
                 trace!("RLCA");
@@ -817,6 +830,16 @@ impl Core {
                 let can_jump = self.get_condition(condition);
                 if can_jump {
                     self.registers.pc = jump_location;
+                }
+            }
+            Instruction::CALL(condition, _) => {
+                // Finished ✔
+                let call_location = self.get_next_word();
+                trace!("CALL {}, ${:04x}", condition, call_location);
+                let can_call = self.get_condition(condition);
+                if can_call {
+                    self.stack_push(self.registers.pc);
+                    self.registers.pc = call_location;
                 }
             }
             Instruction::CPL => {
@@ -1042,6 +1065,38 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_push_instructions() {
+        // Instruction::PUSH(Register::BC)
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x0002;
+        cpu.registers.set_bc(0x0011);
+        cpu.execute_instruction(Instruction::PUSH(Register::BC));
+        assert_eq!(cpu.memory.borrow().get_word(0x0000), 0x0011);
+        assert_eq!(cpu.registers.sp, 0x0000);
+    }
+
+    #[test]
+    fn can_correctly_run_call_instructions() {
+        // Instruction::CALL(Condition::NotZero, Address::A16)
+        let mut cpu = get_new_cpu();
+        cpu.registers.pc = 0x0004;
+        cpu.registers.sp = 0x0012;
+        prepare_memory_word(&mut cpu, 0x0004, 0x001c);
+        cpu.execute_instruction(Instruction::CALL(Condition::NotZero, Address::A16));
+        assert_eq!(cpu.registers.pc, 0x001c);
+        assert_eq!(cpu.registers.sp, 0x0010);
+        assert_eq!(cpu.memory.borrow().get_word(0x0010), 0x0006);
+        // Instruction::CALL(Condition::NotZero, Address::A16) NO jump
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::Z, true);
+        cpu.registers.pc = 0x0004;
+        cpu.registers.sp = 0x0012;
+        cpu.execute_instruction(Instruction::CALL(Condition::NotZero, Address::A16));
+        assert_eq!(cpu.registers.pc, 0x0006);
+        assert_eq!(cpu.registers.sp, 0x0012);
     }
 
     #[test]
