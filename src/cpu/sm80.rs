@@ -233,6 +233,26 @@ impl Core {
         self.registers.set_flag(Flag::Z, a == 0x00);
         self.registers.a = a;
     }
+    // Shift n right into Carry. MSB doesn't change.
+    fn alu_sra(&mut self, n: u8) -> u8 {
+        let carry = n & 0x01 == 0x01;
+        let result = (n >> 1) | (n & 0x80);
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
+    // Shift n left into Carry. LSB of n set to 0.
+    fn alu_sla(&mut self, n: u8) -> u8 {
+        let carry = (n & 0x80) >> 7 == 0x01;
+        let result = n << 1;
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
     // Rotate n right. Old bit 0 to Carry flag.
     fn alu_rrc(&mut self, n: u8) -> u8 {
         let carry = n & 0x01 == 0x01;
@@ -1067,7 +1087,7 @@ impl Core {
                 }
             }
             Instruction::RLC(target_type) => {
-                //
+                // Finished ✔
                 match target_type {
                     TargetType::Register(register) => {
                         let register_value = self.get_register(register);
@@ -1092,7 +1112,7 @@ impl Core {
                 }
             }
             Instruction::RRC(target_type) => {
-                //
+                // Finished ✔
                 match target_type {
                     TargetType::Register(register) => {
                         let register_value = self.get_register(register);
@@ -1117,7 +1137,7 @@ impl Core {
                 }
             }
             Instruction::RL(target_type) => {
-                //
+                // Finished ✔
                 match target_type {
                     TargetType::Register(register) => {
                         let register_value = self.get_register(register);
@@ -1142,7 +1162,7 @@ impl Core {
                 }
             }
             Instruction::RR(target_type) => {
-                //
+                // Finished ✔
                 match target_type {
                     TargetType::Register(register) => {
                         let register_value = self.get_register(register);
@@ -1153,7 +1173,7 @@ impl Core {
                                 self.set_register(register, result);
                             }
                             _ => {
-                                panic!("Invalid type u16 for RL");
+                                panic!("Invalid type u16 for RR");
                             }
                         }
                     }
@@ -1162,6 +1182,56 @@ impl Core {
                         let address = self.registers.get_hl();
                         let value = self.memory.borrow().get(address);
                         let result = self.alu_rr(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
+            Instruction::SLA(target_type) => {
+                // Finished ✔
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SLA {}", register);
+                                let result = self.alu_sla(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for SLA");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("SLA ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_sla(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
+            Instruction::SRA(target_type) => {
+                // Finished ✔
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SRA {}", register);
+                                let result = self.alu_sra(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for SRA");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("SRA ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_sra(value);
                         self.memory.borrow_mut().set(address, result);
                     }
                 }
@@ -1257,7 +1327,62 @@ mod tests {
         cpu.registers.set_hl(0x001c);
         prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
         cpu.execute_instruction(Instruction::RRC(TargetType::Address(Address::HL)));
-        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0001);
+    }
+
+    #[test]
+    fn can_correctly_run_sla_instructions() {
+        // Instruction::SLA(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::SLA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0100);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::SLA(TargetType::Register(Register::B)) carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b1000_0010;
+        cpu.execute_instruction(Instruction::SLA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0100);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::C));
+        // Instruction::SLA(TargetType::Register(Register::B)) zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b1000_0000;
+        cpu.execute_instruction(Instruction::SLA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0000);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(cpu.registers.get_flag(Flag::Z));
+    }
+
+    #[test]
+    fn can_correctly_run_sra_instructions() {
+        // Instruction::SRA(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::SRA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0001);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::SRA(TargetType::Register(Register::B)) carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0011;
+        cpu.execute_instruction(Instruction::SRA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0001);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::C));
+        // Instruction::SRA(TargetType::Register(Register::B)) zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0001;
+        cpu.execute_instruction(Instruction::SRA(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0000);
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(cpu.registers.get_flag(Flag::Z));
     }
 
     #[test]
