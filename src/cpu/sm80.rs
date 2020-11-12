@@ -360,6 +360,12 @@ impl Core {
         self.registers.set_flag(Flag::Z, result == 0x00);
         self.registers.a = result;
     }
+    // Compare A with n. This is basically an A - n subtraction instruction but the results are thrown away.
+    fn alu_cp(&mut self, n: u8) {
+        let r = self.registers.a;
+        self.alu_sub(n);
+        self.registers.a = r;
+    }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
             Address::A16 => {
@@ -725,6 +731,33 @@ impl Core {
                         trace!("OR A, d8");
                         let value = self.get_next();
                         self.alu_or(value);
+                    }
+                }
+            }
+            Instruction::CP(source_type) => {
+                // Finished ✔
+                match source_type {
+                    SourceType::Register(source) => {
+                        let register_value = self.get_register(source);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("CP {}", source);
+                                self.alu_cp(value);
+                            }
+                            _ => {
+                                panic!("Invalid datatype u16 for OR");
+                            }
+                        }
+                    }
+                    SourceType::Address(address) => {
+                        trace!("CP ({})", address);
+                        let address_value = self.get_address(address);
+                        self.alu_cp(address_value);
+                    }
+                    SourceType::Value(_) => {
+                        trace!("CP d8");
+                        let value = self.get_next();
+                        self.alu_cp(value);
                     }
                 }
             }
@@ -1264,6 +1297,19 @@ mod tests {
         )));
         assert_eq!(cpu.registers.a, 0x0b);
         assert!(cpu.registers.get_flag(Flag::N));
+    }
+
+    #[test]
+    fn can_correctly_run_cp_instructions() {
+        // Since cp is basically without the results, we only test it once and make sure
+        // results are thrown away
+        // Instruction::CP(SourceType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x0c;
+        cpu.registers.b = 0x0c;
+        cpu.execute_instruction(Instruction::CP(SourceType::Register(Register::B)));
+        assert_eq!(cpu.registers.a, 0x0c);
+        assert!(cpu.registers.get_flag(Flag::Z));
     }
 
     #[test]
