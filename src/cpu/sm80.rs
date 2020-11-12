@@ -763,10 +763,17 @@ impl Core {
             }
             Instruction::RET(condition) => {
                 // Finished ✔
+                trace!("RET {}", condition);
                 let can_return = self.get_condition(condition);
                 if can_return {
                     self.registers.pc = self.stack_pop();
                 }
+            }
+            Instruction::POP(register) => {
+                // Finished ✔
+                trace!("POP {}", register);
+                let value = self.stack_pop();
+                self.set_register_16(register, value);
             }
             Instruction::RLCA => {
                 // Finished ✔
@@ -1026,6 +1033,17 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_pop_instructions() {
+        // Instruction::POP(Register::BC)
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::Z, false);
+        cpu.registers.sp = 0x0002;
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::POP(Register::BC));
+        assert_eq!(cpu.registers.get_bc(), 0x0101);
     }
 
     #[test]
