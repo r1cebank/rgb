@@ -1064,6 +1064,56 @@ impl Core {
                     _ => panic!("Invalid operation {} for AND A", operation_type),
                 }
             }
+            Instruction::RLC(target_type) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("RLC {}", register);
+                                let result = self.alu_rlc(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for RLC");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("RLC ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_rlc(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
+            Instruction::RRC(target_type) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("RRC {}", register);
+                                let result = self.alu_rrc(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for RRC");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("RRC ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_rrc(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
             _ => unimplemented!(),
         }
     }
@@ -1139,6 +1189,36 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_rrc_instructions() {
+        // Instruction::RRC(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RRC(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0001);
+        // Instruction::RLC(TargetType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
+        cpu.execute_instruction(Instruction::RRC(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0001);
+    }
+
+    #[test]
+    fn can_correctly_run_rlc_instructions() {
+        // Instruction::RLC(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RLC(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0100);
+        // Instruction::RLC(TargetType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
+        cpu.execute_instruction(Instruction::RLC(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0100);
     }
 
     #[test]
