@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use super::cycles::{CB_CYCLES, OP_CYCLES};
 use super::instruction::{
-    Address, AddressLocation, BitLocation, Condition, Instruction, OperationType, Register, SourceType,
-    TargetType, Value,
+    Address, AddressLocation, BitLocation, Condition, Instruction, OperationType, Register,
+    SourceType, TargetType, Value,
 };
 use super::registers::{Flag, Registers};
 use crate::cpu::instruction::OperationType::RegisterToRegister;
@@ -1476,13 +1476,19 @@ mod tests {
         // Instruction::RES(TargetType::Register(Register::B), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.b = 0b0000_0001;
-        cpu.execute_instruction(Instruction::RES(TargetType::Register(Register::B), BitLocation::B0));
+        cpu.execute_instruction(Instruction::RES(
+            TargetType::Register(Register::B),
+            BitLocation::B0,
+        ));
         assert_eq!(cpu.registers.b, 0b0000_0000);
         // Instruction::RES(TargetType::Address(Address::HL), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.set_hl(0x00ff);
         prepare_memory(&mut cpu, 0x00ff, 0b0000_0011);
-        cpu.execute_instruction(Instruction::RES(TargetType::Address(Address::HL), BitLocation::B0));
+        cpu.execute_instruction(Instruction::RES(
+            TargetType::Address(Address::HL),
+            BitLocation::B0,
+        ));
         assert_eq!(cpu.memory.borrow().get(0x00ff), 0b0000_0010);
     }
 
@@ -1491,13 +1497,19 @@ mod tests {
         // Instruction::SET(TargetType::Register(Register::B), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.b = 0b0000_0010;
-        cpu.execute_instruction(Instruction::SET(TargetType::Register(Register::B), BitLocation::B0));
+        cpu.execute_instruction(Instruction::SET(
+            TargetType::Register(Register::B),
+            BitLocation::B0,
+        ));
         assert_eq!(cpu.registers.b, 0b0000_0011);
         // Instruction::SET(TargetType::Address(Address::HL), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.set_hl(0x00ff);
         prepare_memory(&mut cpu, 0x00ff, 0b0000_0010);
-        cpu.execute_instruction(Instruction::SET(TargetType::Address(Address::HL), BitLocation::B0));
+        cpu.execute_instruction(Instruction::SET(
+            TargetType::Address(Address::HL),
+            BitLocation::B0,
+        ));
         assert_eq!(cpu.memory.borrow().get(0x00ff), 0b0000_0011);
     }
 
@@ -1506,14 +1518,20 @@ mod tests {
         // Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.b = 0b0000_0001;
-        cpu.execute_instruction(Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0));
+        cpu.execute_instruction(Instruction::BIT(
+            TargetType::Register(Register::B),
+            BitLocation::B0,
+        ));
         assert!(!cpu.registers.get_flag(Flag::Z));
         assert!(!cpu.registers.get_flag(Flag::N));
         assert!(cpu.registers.get_flag(Flag::H));
         // Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.b = 0b0000_0000;
-        cpu.execute_instruction(Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0));
+        cpu.execute_instruction(Instruction::BIT(
+            TargetType::Register(Register::B),
+            BitLocation::B0,
+        ));
         assert!(cpu.registers.get_flag(Flag::Z));
         assert!(!cpu.registers.get_flag(Flag::N));
         assert!(cpu.registers.get_flag(Flag::H));
@@ -1521,7 +1539,10 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.set_hl(0x00ff);
         prepare_memory(&mut cpu, 0x00ff, 0b0000_0011);
-        cpu.execute_instruction(Instruction::BIT(TargetType::Address(Address::HL), BitLocation::B0));
+        cpu.execute_instruction(Instruction::BIT(
+            TargetType::Address(Address::HL),
+            BitLocation::B0,
+        ));
         assert!(!cpu.registers.get_flag(Flag::Z));
         assert!(!cpu.registers.get_flag(Flag::N));
         assert!(cpu.registers.get_flag(Flag::H));
@@ -1575,7 +1596,7 @@ mod tests {
         cpu.execute_instruction(Instruction::SRL(TargetType::Register(Register::B)));
         assert!(!cpu.registers.get_flag(Flag::H));
         assert!(!cpu.registers.get_flag(Flag::N));
-        assert_eq!(cpu.registers.b, 0b0000_0001);        // Instruction::SRL(TargetType::Register(Register::B))
+        assert_eq!(cpu.registers.b, 0b0000_0001); // Instruction::SRL(TargetType::Register(Register::B))
         let mut cpu = get_new_cpu();
         cpu.registers.b = 0b0000_0000;
         cpu.execute_instruction(Instruction::SRL(TargetType::Register(Register::B)));
