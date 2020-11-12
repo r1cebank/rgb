@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use super::cycles::{CB_CYCLES, OP_CYCLES};
 use super::instruction::{
-    AddressLocation,
-    Address, Condition, Instruction, OperationType, Register, SourceType, TargetType, Value,
+    Address, AddressLocation, Condition, Instruction, OperationType, Register, SourceType,
+    TargetType, Value,
 };
 use super::registers::{Flag, Registers};
 use crate::cpu::instruction::OperationType::RegisterToRegister;
@@ -592,8 +592,10 @@ impl Core {
                                 if source == Register::SPP && target == Register::HL {
                                     let a = self.registers.sp;
                                     let r8 = i16::from(self.get_next() as i8) as u16;
-                                    self.registers.set_flag(Flag::C, (a & 0x00ff) + (r8 & 0x00ff) > 0x00ff);
-                                    self.registers.set_flag(Flag::H, (a & 0x000f) + (r8 & 0x000f) > 0x000f);
+                                    self.registers
+                                        .set_flag(Flag::C, (a & 0x00ff) + (r8 & 0x00ff) > 0x00ff);
+                                    self.registers
+                                        .set_flag(Flag::H, (a & 0x000f) + (r8 & 0x000f) > 0x000f);
                                     self.registers.set_flag(Flag::N, false);
                                     self.registers.set_flag(Flag::Z, false);
                                     self.registers.set_hl(a.wrapping_add(r8));
@@ -1114,6 +1116,56 @@ impl Core {
                     }
                 }
             }
+            Instruction::RL(target_type) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("RL {}", register);
+                                let result = self.alu_rl(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for RL");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("RL ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_rl(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
+            Instruction::RR(target_type) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("RR {}", register);
+                                let result = self.alu_rr(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for RL");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("RR ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_rr(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
             _ => unimplemented!(),
         }
     }
@@ -1164,7 +1216,9 @@ mod tests {
 
     impl TestMemory {
         pub fn new() -> TestMemory {
-            Self { memory: [0; 0xffff] }
+            Self {
+                memory: [0; 0xffff],
+            }
         }
     }
 
@@ -1207,6 +1261,36 @@ mod tests {
     }
 
     #[test]
+    fn can_correctly_run_rl_instructions() {
+        // Instruction::RL(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RL(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0100);
+        // Instruction::RL(TargetType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
+        cpu.execute_instruction(Instruction::RL(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0100);
+    }
+
+    #[test]
+    fn can_correctly_run_rr_instructions() {
+        // Instruction::RR(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::RR(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0000_0001);
+        // Instruction::RR(TargetType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
+        cpu.execute_instruction(Instruction::RR(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0001);
+    }
+
+    #[test]
     fn can_correctly_run_rlc_instructions() {
         // Instruction::RLC(TargetType::Register(Register::B))
         let mut cpu = get_new_cpu();
@@ -1245,13 +1329,19 @@ mod tests {
         let mut cpu = get_new_cpu();
         prepare_memory(&mut cpu, 0x0000, 0x03);
         prepare_memory(&mut cpu, 0xff03, 0x1a);
-        cpu.execute_instruction(Instruction::LDH(OperationType::AddressToRegister(Register::A, Address::A8)));
+        cpu.execute_instruction(Instruction::LDH(OperationType::AddressToRegister(
+            Register::A,
+            Address::A8,
+        )));
         assert_eq!(cpu.registers.a, 0x1a);
         // Instruction::LDH(OperationType::RegisterToAddress(Address::A8, Register::A))
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0x03;
         prepare_memory(&mut cpu, 0x0000, 0x1c);
-        cpu.execute_instruction(Instruction::LDH(OperationType::RegisterToAddress(Address::A8, Register::A)));
+        cpu.execute_instruction(Instruction::LDH(OperationType::RegisterToAddress(
+            Address::A8,
+            Register::A,
+        )));
         assert_eq!(cpu.memory.borrow().get(0xff1c), 0x03);
     }
 
@@ -1385,9 +1475,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         cpu.registers.b = 0b0001_0101;
-        cpu.execute_instruction(Instruction::OR(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::OR(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0001_0101);
         assert!(!cpu.registers.get_flag(Flag::H));
         assert!(!cpu.registers.get_flag(Flag::C));
@@ -1396,9 +1484,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0000;
         cpu.registers.b = 0b0000_0000;
-        cpu.execute_instruction(Instruction::OR(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::OR(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0000_0000);
         assert!(cpu.registers.get_flag(Flag::Z));
         // Instruction::OR(SourceType::Address(Address::HL))
@@ -1406,17 +1492,13 @@ mod tests {
         cpu.registers.a = 0b0000_0100;
         cpu.registers.set_hl(0x0001);
         prepare_memory(&mut cpu, 0x0001, 0b0000_0111);
-        cpu.execute_instruction(Instruction::OR(SourceType::Address(
-            Address::HL,
-        )));
+        cpu.execute_instruction(Instruction::OR(SourceType::Address(Address::HL)));
         assert_eq!(cpu.registers.a, 0b0000_0111);
         // Instruction::OR(SourceType::Value(Value::D8))
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         prepare_memory(&mut cpu, 0x0000, 0b0000_0111);
-        cpu.execute_instruction(Instruction::OR(SourceType::Value(
-            Value::D8,
-        )));
+        cpu.execute_instruction(Instruction::OR(SourceType::Value(Value::D8)));
         assert_eq!(cpu.registers.a, 0b0000_0111);
     }
 
@@ -1426,9 +1508,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0001_0100;
         cpu.registers.b = 0b0001_0101;
-        cpu.execute_instruction(Instruction::XOR(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::XOR(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0000_0001);
         assert!(!cpu.registers.get_flag(Flag::H));
         assert!(!cpu.registers.get_flag(Flag::C));
@@ -1437,9 +1517,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_1111;
         cpu.registers.b = 0b0000_1111;
-        cpu.execute_instruction(Instruction::XOR(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::XOR(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0000_0000);
         assert!(cpu.registers.get_flag(Flag::Z));
         // Instruction::XOR(SourceType::Address(Address::HL))
@@ -1447,17 +1525,13 @@ mod tests {
         cpu.registers.a = 0b0000_0100;
         cpu.registers.set_hl(0x0001);
         prepare_memory(&mut cpu, 0x0001, 0b0000_0111);
-        cpu.execute_instruction(Instruction::XOR(SourceType::Address(
-            Address::HL,
-        )));
+        cpu.execute_instruction(Instruction::XOR(SourceType::Address(Address::HL)));
         assert_eq!(cpu.registers.a, 0b0000_0011);
         // Instruction::XOR(SourceType::Value(Value::D8))
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         prepare_memory(&mut cpu, 0x0000, 0b0000_0111);
-        cpu.execute_instruction(Instruction::XOR(SourceType::Value(
-            Value::D8,
-        )));
+        cpu.execute_instruction(Instruction::XOR(SourceType::Value(Value::D8)));
         assert_eq!(cpu.registers.a, 0b0000_0011);
     }
 
@@ -1467,9 +1541,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         cpu.registers.b = 0b0001_0101;
-        cpu.execute_instruction(Instruction::AND(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::AND(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0000_0100);
         assert!(cpu.registers.get_flag(Flag::H));
         assert!(!cpu.registers.get_flag(Flag::C));
@@ -1478,9 +1550,7 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         cpu.registers.b = 0b0001_0001;
-        cpu.execute_instruction(Instruction::AND(SourceType::Register(
-            Register::B,
-        )));
+        cpu.execute_instruction(Instruction::AND(SourceType::Register(Register::B)));
         assert_eq!(cpu.registers.a, 0b0000_0000);
         assert!(cpu.registers.get_flag(Flag::Z));
         // Instruction::AND(SourceType::Address(Address::HL))
@@ -1488,17 +1558,13 @@ mod tests {
         cpu.registers.a = 0b0000_0100;
         cpu.registers.set_hl(0x0001);
         prepare_memory(&mut cpu, 0x0001, 0b0000_0111);
-        cpu.execute_instruction(Instruction::AND(SourceType::Address(
-            Address::HL,
-        )));
+        cpu.execute_instruction(Instruction::AND(SourceType::Address(Address::HL)));
         assert_eq!(cpu.registers.a, 0b0000_0100);
         // Instruction::AND(SourceType::Value(Value::D8))
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0b0000_0100;
         prepare_memory(&mut cpu, 0x0000, 0b0000_0111);
-        cpu.execute_instruction(Instruction::AND(SourceType::Value(
-            Value::D8,
-        )));
+        cpu.execute_instruction(Instruction::AND(SourceType::Value(Value::D8)));
         assert_eq!(cpu.registers.a, 0b0000_0100);
     }
 
@@ -1601,7 +1667,10 @@ mod tests {
         prepare_memory(&mut cpu, 0x0000, 0x0011);
         cpu.registers.a = 0x0001;
         cpu.registers.set_flag(Flag::C, true);
-        cpu.execute_instruction(Instruction::ADC(OperationType::ValueToRegister(Register::A, Value::D8)));
+        cpu.execute_instruction(Instruction::ADC(OperationType::ValueToRegister(
+            Register::A,
+            Value::D8,
+        )));
         assert_eq!(cpu.registers.a, 0x0013);
     }
 
@@ -1667,7 +1736,10 @@ mod tests {
         cpu.registers.a = 0x03;
         prepare_memory(&mut cpu, 0x0000, 0x0001);
         cpu.registers.set_flag(Flag::C, true);
-        cpu.execute_instruction(Instruction::SBC(OperationType::ValueToRegister(Register::A, Value::D8)));
+        cpu.execute_instruction(Instruction::SBC(OperationType::ValueToRegister(
+            Register::A,
+            Value::D8,
+        )));
         assert_eq!(cpu.registers.a, 0x01);
     }
 
@@ -2016,7 +2088,10 @@ mod tests {
         let mut cpu = get_new_cpu();
         cpu.registers.a = 0x1c;
         prepare_memory_word(&mut cpu, 0x0000, 0x001c);
-        cpu.execute_instruction(Instruction::LD(OperationType::RegisterToAddress(Address::A16, Register::A)));
+        cpu.execute_instruction(Instruction::LD(OperationType::RegisterToAddress(
+            Address::A16,
+            Register::A,
+        )));
         assert_eq!(cpu.memory.borrow().get(0x001c), 0x1c);
         // Instruction::LD(OperationType::RegisterToRegister(
         //             Register::HL,
