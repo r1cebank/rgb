@@ -117,6 +117,7 @@ impl Core {
             Register::HL => DataType::U16(self.registers.get_hl()),
             Register::AF => DataType::U16(self.registers.get_af()),
             Register::SP => DataType::U16(self.registers.sp),
+            Register::SPP => DataType::U16(0xffff), // Value thrown away, exception case
             _ => {
                 panic!("Invalid assignment to register");
             }
@@ -587,7 +588,18 @@ impl Core {
                                 self.set_register(target, value);
                             }
                             _ => {
-                                panic!("Invalid datatype u16 for LD");
+                                // Handle weird instruction LD HL, SP + r8
+                                if source == Register::SPP && target == Register::HL {
+                                    let a = self.registers.sp;
+                                    let r8 = i16::from(self.get_next() as i8) as u16;
+                                    self.registers.set_flag(Flag::C, (a & 0x00ff) + (r8 & 0x00ff) > 0x00ff);
+                                    self.registers.set_flag(Flag::H, (a & 0x000f) + (r8 & 0x000f) > 0x000f);
+                                    self.registers.set_flag(Flag::N, false);
+                                    self.registers.set_flag(Flag::Z, false);
+                                    self.registers.set_hl(a.wrapping_add(r8));
+                                } else if source == Register::HL && target == Register::SP {
+                                    self.registers.sp = self.registers.get_hl();
+                                }
                             }
                         }
                     }
@@ -1926,6 +1938,29 @@ mod tests {
         prepare_memory_word(&mut cpu, 0x0000, 0x001c);
         cpu.execute_instruction(Instruction::LD(OperationType::RegisterToAddress(Address::A16, Register::A)));
         assert_eq!(cpu.memory.borrow().get(0x001c), 0x1c);
+        // Instruction::LD(OperationType::RegisterToRegister(
+        //             Register::HL,
+        //             Register::SPP,
+        //         ))
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x00f0;
+        prepare_memory(&mut cpu, 0x0000, 0x0003);
+        cpu.execute_instruction(Instruction::LD(OperationType::RegisterToRegister(
+            Register::HL,
+            Register::SPP,
+        )));
+        assert_eq!(cpu.registers.get_hl(), 0x00f3);
+        // Instruction::LD(OperationType::RegisterToRegister(
+        //             Register::SP,
+        //             Register::HL,
+        //         ))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x00fc);
+        cpu.execute_instruction(Instruction::LD(OperationType::RegisterToRegister(
+            Register::SP,
+            Register::HL,
+        )));
+        assert_eq!(cpu.registers.sp, 0x00fc);
     }
 
     #[test]
