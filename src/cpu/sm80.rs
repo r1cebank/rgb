@@ -14,6 +14,7 @@ pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
     pub registers: Registers,
     halted: bool,
+    ei: bool,
 }
 
 enum DataType {
@@ -26,6 +27,7 @@ impl Core {
         Self {
             memory,
             registers: Registers::new(),
+            ei: true,
             halted: false,
         }
     }
@@ -124,6 +126,10 @@ impl Core {
         match address {
             Address::A8 => {
                 let address = 0xff00 | u16::from(self.get_next());
+                self.memory.borrow_mut().set(address, value);
+            }
+            Address::A16 => {
+                let address = self.get_next_word();
                 self.memory.borrow_mut().set(address, value);
             }
             Address::C => {
@@ -787,6 +793,11 @@ impl Core {
                     self.registers.pc = self.stack_pop();
                 }
             }
+            Instruction::RETI => {
+                trace!("RETI");
+                self.registers.pc = self.stack_pop();
+                self.ei = true;
+            }
             Instruction::POP(register) => {
                 // Finished ✔
                 trace!("POP {}", register);
@@ -843,11 +854,21 @@ impl Core {
             }
             Instruction::JP(condition, address) => {
                 // Finished ✔
-                let jump_location = self.get_next_word();
-                trace!("JP {}, ${:04x}", condition, jump_location);
-                let can_jump = self.get_condition(condition);
-                if can_jump {
-                    self.registers.pc = jump_location;
+                if address == Address::A16 {
+                    let jump_location = self.get_next_word();
+                    trace!("JP {}, ${:04x}", condition, jump_location);
+                    let can_jump = self.get_condition(condition);
+                    if can_jump {
+                        self.registers.pc = jump_location;
+                    }
+                }
+                if address == Address::HL {
+                    let jump_location = self.registers.get_hl();
+                    trace!("JP {}, ${:04x}", condition, jump_location);
+                    let can_jump = self.get_condition(condition);
+                    if can_jump {
+                        self.registers.pc = jump_location;
+                    }
                 }
             }
             Instruction::CALL(condition, _) => {
@@ -859,6 +880,14 @@ impl Core {
                     self.stack_push(self.registers.pc);
                     self.registers.pc = call_location;
                 }
+            }
+            Instruction::DI => {
+                trace!("DI");
+                self.ei = false;
+            }
+            Instruction::EI => {
+                trace!("EI");
+                self.ei = true;
             }
             Instruction::CPL => {
                 trace!("CPL");
@@ -904,7 +933,8 @@ impl Core {
                         let address_value = self.get_address(address);
                         self.alu_adc(address_value);
                     }
-                    OperationType::ValueToRegister(register, value) => {
+                    OperationType::ValueToRegister(_, value) => {
+                        trace!("ADC A, {}", value);
                         let value = self.get_next();
                         self.alu_adc(value);
                     }
@@ -957,6 +987,7 @@ impl Core {
                         self.alu_sbc(address_value);
                     }
                     OperationType::ValueToRegister(_, value) => {
+                        trace!("SBC A, {}", value);
                         let value = self.get_next();
                         self.alu_sbc(value);
                     }
@@ -1099,6 +1130,24 @@ mod tests {
     }
 
     #[test]
+    fn can_correctly_run_ei_instructions() {
+        // Instruction::EI
+        let mut cpu = get_new_cpu();
+        cpu.ei = false;
+        cpu.execute_instruction(Instruction::EI);
+        assert!(cpu.ei);
+    }
+
+    #[test]
+    fn can_correctly_run_di_instructions() {
+        // Instruction::DI
+        let mut cpu = get_new_cpu();
+        cpu.ei = true;
+        cpu.execute_instruction(Instruction::DI);
+        assert!(!cpu.ei);
+    }
+
+    #[test]
     fn can_correctly_run_ldh_instructions() {
         // Instruction::LDH(OperationType::AddressToRegister(Register::A, Address::A8))
         let mut cpu = get_new_cpu();
@@ -1171,6 +1220,11 @@ mod tests {
         cpu.registers.set_flag(Flag::Z, true);
         cpu.execute_instruction(Instruction::JP(Condition::NotZero, Address::A16));
         assert_eq!(cpu.registers.pc, 0x0002);
+        // Instruction::JP(Condition::Always, Address::HL)
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        cpu.execute_instruction(Instruction::JP(Condition::Always, Address::HL));
+        assert_eq!(cpu.registers.pc, 0x001c);
     }
 
     #[test]
@@ -1182,6 +1236,19 @@ mod tests {
         prepare_memory_word(&mut cpu, 0x0002, 0x0101);
         cpu.execute_instruction(Instruction::POP(Register::BC));
         assert_eq!(cpu.registers.get_bc(), 0x0101);
+    }
+
+    #[test]
+    fn can_correctly_run_reti_instructions() {
+        // Instruction::RETI
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::Z, false);
+        cpu.registers.sp = 0x0002;
+        cpu.ei = false;
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::RETI);
+        assert_eq!(cpu.registers.pc, 0x0101);
+        assert!(cpu.ei);
     }
 
     #[test]
@@ -1853,6 +1920,12 @@ mod tests {
             Register::E,
         )));
         assert_eq!(cpu.registers.a, 0xfc);
+        // Instruction::LD(OperationType::RegisterToAddress(Address::A16, Register::A))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x1c;
+        prepare_memory_word(&mut cpu, 0x0000, 0x001c);
+        cpu.execute_instruction(Instruction::LD(OperationType::RegisterToAddress(Address::A16, Register::A)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0x1c);
     }
 
     #[test]
