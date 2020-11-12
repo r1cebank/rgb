@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use super::cycles::{CB_CYCLES, OP_CYCLES};
 use super::instruction::{
-    Address, AddressLocation, Condition, Instruction, OperationType, Register, SourceType,
+    Address, AddressLocation, BitLocation, Condition, Instruction, OperationType, Register, SourceType,
     TargetType, Value,
 };
 use super::registers::{Flag, Registers};
@@ -400,6 +400,23 @@ impl Core {
         self.registers.set_flag(Flag::N, false);
         self.registers.set_flag(Flag::Z, n == 0x00);
         (n >> 4) | (n << 4)
+    }
+    // Shift n right into Carry. MSB set to 0.
+    fn alu_srl(&mut self, n: u8) -> u8 {
+        let carry = n & 0x01 == 0x01;
+        let result = n >> 1;
+        self.registers.set_flag(Flag::C, carry);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result == 0x00);
+        result
+    }
+    // Test bit b in register r.
+    fn alu_bit(&mut self, a: u8, b: u8) {
+        let result = a & (1 << b) == 0x00;
+        self.registers.set_flag(Flag::H, true);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, result);
     }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
@@ -1269,6 +1286,54 @@ impl Core {
                     }
                 }
             }
+            Instruction::SRL(target_type) => {
+                // Finished ✔
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SRL {}", register);
+                                let result = self.alu_srl(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for SRL");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("SRL ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_srl(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
+            Instruction::BIT(target_type, location) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("BIT {}, {}", register, location as u8);
+                                self.alu_bit(value, location as u8);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for BIT");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("BIT {}, {}", address, location as u8);
+                        let address = self.registers.get_hl();
+                        let address_value = self.memory.borrow().get(address);
+                        self.alu_bit(address_value, location as u8);
+                    }
+                }
+            }
             _ => unimplemented!(),
         }
     }
@@ -1349,6 +1414,32 @@ mod tests {
     }
 
     #[test]
+    fn can_correctly_run_bit_instructions() {
+        // Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0)
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0001;
+        cpu.execute_instruction(Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0));
+        assert!(!cpu.registers.get_flag(Flag::Z));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::H));
+        // Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0)
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0000;
+        cpu.execute_instruction(Instruction::BIT(TargetType::Register(Register::B), BitLocation::B0));
+        assert!(cpu.registers.get_flag(Flag::Z));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::H));
+        // Instruction::BIT(TargetType::Address(Address::HL), BitLocation::B0)
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x00ff);
+        prepare_memory(&mut cpu, 0x00ff, 0b0000_0011);
+        cpu.execute_instruction(Instruction::BIT(TargetType::Address(Address::HL), BitLocation::B0));
+        assert!(!cpu.registers.get_flag(Flag::Z));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::H));
+    }
+
+    #[test]
     fn can_correctly_run_rrc_instructions() {
         // Instruction::RRC(TargetType::Register(Register::B))
         let mut cpu = get_new_cpu();
@@ -1386,6 +1477,33 @@ mod tests {
         cpu.execute_instruction(Instruction::SWAP(TargetType::Address(Address::HL)));
         assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0000);
         assert!(cpu.registers.get_flag(Flag::Z));
+    }
+
+    #[test]
+    fn can_correctly_run_srl_instructions() {
+        // Instruction::SRL(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::SRL(TargetType::Register(Register::B)));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert_eq!(cpu.registers.b, 0b0000_0001);        // Instruction::SRL(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0000;
+        cpu.execute_instruction(Instruction::SRL(TargetType::Register(Register::B)));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert!(cpu.registers.get_flag(Flag::Z));
+        assert_eq!(cpu.registers.b, 0b0000_0000);
+        // Instruction::SRL(TargetType::Register(Register::B)) carry
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0001;
+        cpu.execute_instruction(Instruction::SRL(TargetType::Register(Register::B)));
+        assert!(cpu.registers.get_flag(Flag::Z));
+        assert!(cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        assert_eq!(cpu.registers.b, 0b0000_0000);
     }
 
     #[test]
