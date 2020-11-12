@@ -422,6 +422,10 @@ impl Core {
     fn alu_res(&mut self, a: u8, b: u8) -> u8 {
         a & !(1 << b)
     }
+    // Set bit b in register r.
+    fn alu_set(&mut self, a: u8, b: u8) -> u8 {
+        a | (1 << b)
+    }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
             Address::A16 => {
@@ -1363,6 +1367,31 @@ impl Core {
                     }
                 }
             }
+            Instruction::SET(target_type, location) => {
+                //
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SET {}, {}", register, location as u8);
+                                let value = self.alu_set(value, location as u8);
+                                self.set_register(register, value);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for SET");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("SET {}, {}", address, location as u8);
+                        let address = self.registers.get_hl();
+                        let address_value = self.memory.borrow().get(address);
+                        let value = self.alu_set(address_value, location as u8);
+                        self.memory.borrow_mut().set(address, value);
+                    }
+                }
+            }
             _ => unimplemented!(),
         }
     }
@@ -1449,12 +1478,27 @@ mod tests {
         cpu.registers.b = 0b0000_0001;
         cpu.execute_instruction(Instruction::RES(TargetType::Register(Register::B), BitLocation::B0));
         assert_eq!(cpu.registers.b, 0b0000_0000);
-        // Instruction::BIT(TargetType::Address(Address::HL), BitLocation::B0)
+        // Instruction::RES(TargetType::Address(Address::HL), BitLocation::B0)
         let mut cpu = get_new_cpu();
         cpu.registers.set_hl(0x00ff);
         prepare_memory(&mut cpu, 0x00ff, 0b0000_0011);
         cpu.execute_instruction(Instruction::RES(TargetType::Address(Address::HL), BitLocation::B0));
         assert_eq!(cpu.memory.borrow().get(0x00ff), 0b0000_0010);
+    }
+
+    #[test]
+    fn can_correctly_run_set_instructions() {
+        // Instruction::SET(TargetType::Register(Register::B), BitLocation::B0)
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::SET(TargetType::Register(Register::B), BitLocation::B0));
+        assert_eq!(cpu.registers.b, 0b0000_0011);
+        // Instruction::SET(TargetType::Address(Address::HL), BitLocation::B0)
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x00ff);
+        prepare_memory(&mut cpu, 0x00ff, 0b0000_0010);
+        cpu.execute_instruction(Instruction::SET(TargetType::Address(Address::HL), BitLocation::B0));
+        assert_eq!(cpu.memory.borrow().get(0x00ff), 0b0000_0011);
     }
 
     #[test]
