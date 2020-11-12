@@ -810,6 +810,15 @@ impl Core {
                     self.alu_jr(address);
                 }
             }
+            Instruction::JP(condition, address) => {
+                // Finished ✔
+                let jump_location = self.get_next_word();
+                trace!("JP {}, ${:04x}", condition, jump_location);
+                let can_jump = self.get_condition(condition);
+                if can_jump {
+                    self.registers.pc = jump_location;
+                }
+            }
             Instruction::CPL => {
                 trace!("CPL");
                 self.alu_cpl();
@@ -1033,6 +1042,22 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_jp_instructions() {
+        // Instruction::JP(Condition::NotZero, Address::A16)
+        let mut cpu = get_new_cpu();
+        prepare_memory_word(&mut cpu, 0x0000, 0x1111);
+        cpu.registers.set_flag(Flag::Z, false);
+        cpu.execute_instruction(Instruction::JP(Condition::NotZero, Address::A16));
+        assert_eq!(cpu.registers.pc, 0x1111);
+        // Instruction::JP(Condition::NotZero, Address::A16) no jump
+        let mut cpu = get_new_cpu();
+        prepare_memory_word(&mut cpu, 0x0000, 0x1111);
+        cpu.registers.set_flag(Flag::Z, true);
+        cpu.execute_instruction(Instruction::JP(Condition::NotZero, Address::A16));
+        assert_eq!(cpu.registers.pc, 0x0002);
     }
 
     #[test]
