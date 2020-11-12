@@ -32,7 +32,6 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cpu/sm80.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/sm80.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -343,7 +342,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605141686293</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="RST">
+      <created>1605142300255</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1605142300255</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -359,7 +365,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Adding no boot rom option" />
     <MESSAGE value="Refactored a bunch of stuff, adding debug display" />
     <MESSAGE value="Debug message channel" />
     <MESSAGE value="Debug logger and message displaying" />
@@ -384,7 +389,8 @@
     <MESSAGE value="POP" />
     <MESSAGE value="JP" />
     <MESSAGE value="CALL, PUSH, POP" />
-    <option name="LAST_COMMIT_MESSAGE" value="CALL, PUSH, POP" />
+    <MESSAGE value="RST" />
+    <option name="LAST_COMMIT_MESSAGE" value="RST" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605073732005">

@@ -887,6 +887,10 @@ impl Core {
                         let address_value = self.get_address(address);
                         self.alu_adc(address_value);
                     }
+                    OperationType::ValueToRegister(register, value) => {
+                        let value = self.get_next();
+                        self.alu_adc(value);
+                    }
                     _ => panic!("Invalid operation {} for ADC A", operation_type),
                 }
             }
@@ -1396,6 +1400,13 @@ mod tests {
         )));
         assert_eq!(cpu.registers.a, 0x00);
         assert!(cpu.registers.get_flag(Flag::C));
+        // Instruction::ADC(OperationType::ValueToRegister(Register::A, Value::D8))
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x0011);
+        cpu.registers.a = 0x0001;
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::ADC(OperationType::ValueToRegister(Register::A, Value::D8)));
+        assert_eq!(cpu.registers.a, 0x0013);
     }
 
     #[test]
