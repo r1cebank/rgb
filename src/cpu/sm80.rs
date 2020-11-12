@@ -393,6 +393,14 @@ impl Core {
         self.alu_sub(n);
         self.registers.a = r;
     }
+    // Swap upper & lower nibles of n.
+    fn alu_swap(&mut self, n: u8) -> u8 {
+        self.registers.set_flag(Flag::C, false);
+        self.registers.set_flag(Flag::H, false);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, n == 0x00);
+        (n >> 4) | (n << 4)
+    }
     fn set_address_value_16(&mut self, address: Address, value: u16) {
         match address {
             Address::A16 => {
@@ -1236,6 +1244,31 @@ impl Core {
                     }
                 }
             }
+            Instruction::SWAP(target_type) => {
+                // Finished ✔
+                match target_type {
+                    TargetType::Register(register) => {
+                        let register_value = self.get_register(register);
+                        match register_value {
+                            DataType::U8(value) => {
+                                trace!("SWAP {}", register);
+                                let result = self.alu_swap(value);
+                                self.set_register(register, result);
+                            }
+                            _ => {
+                                panic!("Invalid type u16 for SWAP");
+                            }
+                        }
+                    }
+                    TargetType::Address(address) => {
+                        trace!("SWAP ({})", address);
+                        let address = self.registers.get_hl();
+                        let value = self.memory.borrow().get(address);
+                        let result = self.alu_swap(value);
+                        self.memory.borrow_mut().set(address, result);
+                    }
+                }
+            }
             _ => unimplemented!(),
         }
     }
@@ -1327,6 +1360,32 @@ mod tests {
         cpu.registers.set_hl(0x001c);
         prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
         cpu.execute_instruction(Instruction::RRC(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0001);
+    }
+
+    #[test]
+    fn can_correctly_run_swap_instructions() {
+        // Instruction::SWAP(TargetType::Register(Register::B))
+        let mut cpu = get_new_cpu();
+        cpu.registers.b = 0b0000_0010;
+        cpu.execute_instruction(Instruction::SWAP(TargetType::Register(Register::B)));
+        assert_eq!(cpu.registers.b, 0b0010_0000);
+        assert!(!cpu.registers.get_flag(Flag::C));
+        assert!(!cpu.registers.get_flag(Flag::H));
+        assert!(!cpu.registers.get_flag(Flag::N));
+        // Instruction::SWAP(TargetType::Address(Address::HL))
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0010);
+        cpu.execute_instruction(Instruction::SWAP(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0010_0000);
+        // Instruction::SWAP(TargetType::Address(Address::HL)) zero
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_hl(0x001c);
+        prepare_memory(&mut cpu, 0x001c, 0b0000_0000);
+        cpu.execute_instruction(Instruction::SWAP(TargetType::Address(Address::HL)));
+        assert_eq!(cpu.memory.borrow().get(0x001c), 0b0000_0000);
+        assert!(cpu.registers.get_flag(Flag::Z));
     }
 
     #[test]
