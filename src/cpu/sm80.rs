@@ -118,9 +118,6 @@ impl Core {
             Register::AF => DataType::U16(self.registers.get_af()),
             Register::SP => DataType::U16(self.registers.sp),
             Register::SPP => DataType::U16(0xffff), // Value thrown away, exception case
-            _ => {
-                panic!("Invalid assignment to register");
-            }
         }
     }
     fn set_address_value(&mut self, address: Address, value: u8) {
@@ -146,10 +143,6 @@ impl Core {
             }
             Address::HL => {
                 self.memory.borrow_mut().set(self.registers.get_hl(), value);
-            }
-            Address::A16 => {
-                let address = self.get_next_word();
-                self.memory.borrow_mut().set(address, value);
             }
             Address::HLP => {
                 let address = self.registers.get_hl();
@@ -910,7 +903,7 @@ impl Core {
                 trace!("DAA");
                 self.alu_daa();
             }
-            Instruction::JR(condition, value) => {
+            Instruction::JR(condition, _) => {
                 // Finished ✔
                 let can_jump = self.get_condition(condition);
                 let address = self.get_next();
