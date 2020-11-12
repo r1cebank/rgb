@@ -9,7 +9,6 @@ use super::instruction::{
 };
 use super::registers::{Flag, Registers};
 use crate::cpu::instruction::OperationType::RegisterToRegister;
-use piston_window::math::add;
 
 pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
@@ -588,6 +587,24 @@ impl Core {
                     }
                 }
             }
+            Instruction::LDH(operation_type) => {
+                // Finished x
+                match operation_type {
+                    OperationType::RegisterToAddress(address, register) => {
+                        trace!("LDH ({}), {}", address, register);
+                        let address = 0xff00 | u16::from(self.get_next());
+                        self.memory.borrow_mut().set(address, self.registers.a);
+                    }
+                    OperationType::AddressToRegister(register, address) => {
+                        trace!("LDH {}, ({})", register, address);
+                        let address = 0xff00 | self.get_next_word();
+                        self.registers.a = self.memory.borrow().get(address);
+                    }
+                    _ => {
+                        panic!("Invalid operation type {} for LDH", operation_type);
+                    }
+                }
+            }
             Instruction::INC(target_type) => {
                 // Finished ✔
                 match target_type {
@@ -1049,12 +1066,12 @@ mod tests {
 
     #[derive(Copy, Clone, Debug, PartialEq)]
     struct TestMemory {
-        pub memory: [u8; 0xff],
+        pub memory: [u8; 0xffff],
     }
 
     impl TestMemory {
         pub fn new() -> TestMemory {
-            Self { memory: [0; 0xff] }
+            Self { memory: [0; 0xffff] }
         }
     }
 
@@ -1079,6 +1096,22 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_ldh_instructions() {
+        // Instruction::LDH(OperationType::AddressToRegister(Register::A, Address::A8))
+        let mut cpu = get_new_cpu();
+        prepare_memory(&mut cpu, 0x0000, 0x03);
+        prepare_memory(&mut cpu, 0xff03, 0x1a);
+        cpu.execute_instruction(Instruction::LDH(OperationType::AddressToRegister(Register::A, Address::A8)));
+        assert_eq!(cpu.registers.a, 0x1a);
+        // Instruction::LDH(OperationType::RegisterToAddress(Address::A8, Register::A))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x03;
+        prepare_memory(&mut cpu, 0x0000, 0x1c);
+        cpu.execute_instruction(Instruction::LDH(OperationType::RegisterToAddress(Address::A8, Register::A)));
+        assert_eq!(cpu.memory.borrow().get(0xff1c), 0x03);
     }
 
     #[test]
