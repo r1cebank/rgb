@@ -761,6 +761,13 @@ impl Core {
                     }
                 }
             }
+            Instruction::RET(condition) => {
+                // Finished ✔
+                let can_return = self.get_condition(condition);
+                if can_return {
+                    self.registers.pc = self.stack_pop();
+                }
+            }
             Instruction::RLCA => {
                 // Finished ✔
                 trace!("RLCA");
@@ -1019,6 +1026,42 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_ret_instructions() {
+        // Instruction::RET(Condition::NotZero)
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::Z, false);
+        cpu.registers.sp = 0x0002;
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::RET(Condition::NotZero));
+        assert_eq!(cpu.registers.pc, 0x0101);
+        // Instruction::RET(Condition::NotZero) no jump
+        let mut cpu = get_new_cpu();
+        cpu.registers.set_flag(Flag::Z, true);
+        cpu.execute_instruction(Instruction::RET(Condition::NotZero));
+        assert_eq!(cpu.registers.pc, 0x0000);
+        // Instruction::RET(Condition::Always)
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x0002;
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::RET(Condition::Always));
+        assert_eq!(cpu.registers.pc, 0x0101);
+        // Instruction::RET(Condition::Carry)
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x0002;
+        cpu.registers.set_flag(Flag::C, true);
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::RET(Condition::Carry));
+        assert_eq!(cpu.registers.pc, 0x0101);
+        // Instruction::RET(Condition::NotCarry)
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x0002;
+        cpu.registers.set_flag(Flag::C, false);
+        prepare_memory_word(&mut cpu, 0x0002, 0x0101);
+        cpu.execute_instruction(Instruction::RET(Condition::NotCarry));
+        assert_eq!(cpu.registers.pc, 0x0101);
     }
 
     #[test]
@@ -1506,6 +1549,7 @@ mod tests {
         cpu.registers.set_flag(Flag::Z, true);
         cpu.execute_instruction(Instruction::JR(Condition::Zero, Address::R8));
         assert_eq!(cpu.registers.pc, 0x0011);
+        // Instruction::JR(Condition::Zero, Address::R8)
         let mut cpu = get_new_cpu();
         prepare_memory(&mut cpu, 0x0000, 0x0010);
         cpu.registers.set_flag(Flag::Z, false);
