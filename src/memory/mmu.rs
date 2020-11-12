@@ -1,11 +1,13 @@
 use super::timer::Timer;
 use super::Memory;
 use crate::cartridge::{load_cartridge, Cartridge};
+use crate::ppu::PPU;
 use crate::util::BOOT_ROM_SIZE;
 
 pub struct MMU {
     pub boot_rom: Option<[u8; 256]>,
     pub cartridge: Box<dyn Cartridge>,
+    pub ppu: PPU,
     boot_rom_enabled: bool,
     timer: Timer,
     work_ram: [u8; 0x8000],
@@ -32,6 +34,7 @@ impl MMU {
         Self {
             boot_rom,
             timer: Timer::new(),
+            ppu: PPU::new(),
             boot_rom_enabled: boot_rom != None,
             cartridge: load_cartridge(rom),
             high_ram: [0x00; 0x7f],
@@ -83,18 +86,15 @@ impl Memory for MMU {
     fn get(&self, address: u16) -> u8 {
         match address {
             // Last instruction is at 0xfe and its two bytes, therefore excluding 0xff from rom addressing
-            0x0000...0x00ff => {
-                if self.boot_rom_enabled {
-                    if let Some(boot_rom) = self.boot_rom {
-                        return boot_rom[address as usize];
-                    }
-                    return self.cartridge.get(address);
+            0x0000...0x7fff => {
+                if self.boot_rom_enabled && self.boot_rom != None && address < 0x100 {
+                    self.boot_rom.unwrap()[address as usize]
+                } else {
+                    self.cartridge.get(address)
                 }
-                self.cartridge.get(address)
             }
-            0x0000..=0x7fff => self.cartridge.get(address),
             0x8000..=0x9fff => {
-                // Get GPU
+                // Get PPU
                 0
             }
             0xa000..=0xbfff => self.cartridge.get(address),
@@ -107,7 +107,7 @@ impl Memory for MMU {
                 self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank]
             }
             0xfe00..=0xfe9f => {
-                // Get GPU
+                // Get PPU
                 0
             }
             0xfea0..=0xfeff => 0x00, // Invalid address
@@ -129,7 +129,7 @@ impl Memory for MMU {
                 0
             }
             0xf40...0xff4b => {
-                // GPU
+                // PPU
                 0
             }
             0xff80..=0xfffe => self.high_ram[address as usize - 0xff80],
@@ -139,6 +139,50 @@ impl Memory for MMU {
     }
 
     fn set(&mut self, address: u16, value: u8) {
-        unimplemented!()
+        match address {
+            0x0000..=0x7fff => self.cartridge.set(address, value),
+            0x8000..=0x9fff => {
+                // PPU
+            }
+            0xa000..=0xbfff => self.cartridge.set(address, value),
+            0xc000..=0xcfff => self.work_ram[address as usize - 0xc000] = value,
+            0xd000..=0xdfff => {
+                self.work_ram[address as usize - 0xd000 + 0x1000 * self.work_ram_bank] = value
+            }
+            0xe000..=0xefff => self.work_ram[address as usize - 0xe000] = value,
+            0xf000..=0xfdff => {
+                self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank] = value
+            }
+            0xfe00..=0xfe9f => {
+                // PPU
+            }
+            0xfea0..=0xfeff => {
+                // Not used
+            }
+            0xff00 => {
+                // Input
+            }
+            0xff01..=0xff02 => {
+                // Serial
+            }
+            0xff04..=0xff07 => self.timer.write(address, value),
+            0xff0f => self.interrupt_flags = value,
+            0xff10..=0xff3f => {
+                // Sound
+            }
+            0xff46 => {
+                // OAM dma
+            }
+            0xff40..=0xff45 | 0xff47..=0xff7f => {
+                if address == 0xff50 {
+                    self.boot_rom_enabled = false;
+                }
+
+                // PPU
+            }
+            0xff80...0xffee => self.high_ram[address as usize - 0xff80] = value,
+            0xffff => self.interrupt_enabled = value,
+            _ => {}
+        }
     }
 }

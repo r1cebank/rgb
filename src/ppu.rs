@@ -3,6 +3,18 @@ use rand::Rng;
 pub const FB_W: usize = 160;
 pub const FB_H: usize = 144;
 
+pub struct PPU {
+    pub framebuffer: PPUFramebuffer,
+}
+
+impl PPU {
+    pub fn new() -> PPU {
+        Self {
+            framebuffer: [[[0x00; 3]; FB_W]; FB_H],
+        }
+    }
+}
+
 // Digital image with mode RGB. Size = 144 * 160 * 3.
 // 3---------
 // ----------

@@ -66,12 +66,13 @@ impl Registers {
 
     pub fn get_word_register_overview(&self) -> String {
         format!(
-            "AF: {:04x}, BC: {:04x}, DE: {:04x}, HL: {:04x}, SP: {:04x}",
+            "AF: {:04x}, BC: {:04x}, DE: {:04x}, HL: {:04x}, SP: {:04x}, PC: {:04x}",
             self.get_af(),
             self.get_bc(),
             self.get_de(),
             self.get_hl(),
-            self.sp
+            self.sp,
+            self.pc
         )
     }
 

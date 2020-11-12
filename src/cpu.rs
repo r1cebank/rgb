@@ -81,7 +81,7 @@ impl ClockedCPU {
     }
 
     pub fn simulate_boot_rom(&mut self) {
-        self.simulate_boot_rom();
+        self.cpu.simulate_boot_rom();
     }
 
     pub fn flip(&mut self) -> bool {
