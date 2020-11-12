@@ -126,14 +126,14 @@ pub enum BitLocation {
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]
 pub enum AddressLocation {
-    X00H,
-    X08H,
-    X10H,
-    X18H,
-    X20H,
-    X28H,
-    X30H,
-    X38H,
+    X00H = 0x00,
+    X08H = 0x08,
+    X10H = 0x10,
+    X18H = 0x18,
+    X20H = 0x20,
+    X28H = 0x28,
+    X30H = 0x30,
+    X38H = 0x38,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Display)]

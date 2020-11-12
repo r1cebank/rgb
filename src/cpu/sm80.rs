@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use super::cycles::{CB_CYCLES, OP_CYCLES};
 use super::instruction::{
+    AddressLocation,
     Address, Condition, Instruction, OperationType, Register, SourceType, TargetType, Value,
 };
 use super::registers::{Flag, Registers};
@@ -861,6 +862,11 @@ impl Core {
             Instruction::STOP => {
                 trace!("STOP");
             }
+            Instruction::RST(location) => {
+                // Finished ✔
+                self.stack_push(self.registers.pc);
+                self.registers.pc = location as u16;
+            }
             Instruction::ADC(operation_type) => {
                 // Finished ✔
                 match operation_type {
@@ -1065,6 +1071,17 @@ mod tests {
     fn get_new_cpu() -> Core {
         let mut cpu = Core::new(Rc::new(RefCell::new(TestMemory::new())));
         cpu
+    }
+
+    #[test]
+    fn can_correctly_run_rst_instructions() {
+        // Instruction::RST(AddressLocation::X00H)
+        let mut cpu = get_new_cpu();
+        cpu.registers.sp = 0x0002;
+        cpu.registers.pc = 0x001c;
+        cpu.execute_instruction(Instruction::RST(AddressLocation::X00H));
+        assert_eq!(cpu.registers.pc, 0x00);
+        assert_eq!(cpu.stack_pop(), 0x001c);
     }
 
     #[test]
