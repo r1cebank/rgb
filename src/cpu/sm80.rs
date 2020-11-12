@@ -939,6 +939,10 @@ impl Core {
                         let address_value = self.get_address(address);
                         self.alu_sbc(address_value);
                     }
+                    OperationType::ValueToRegister(_, value) => {
+                        let value = self.get_next();
+                        self.alu_sbc(value);
+                    }
                     _ => {
                         panic!("Invalid operation {} for SBC A", operation_type);
                     }
@@ -1466,6 +1470,13 @@ mod tests {
         )));
         assert_eq!(cpu.registers.a, 0x0b);
         assert!(cpu.registers.get_flag(Flag::N));
+        // Instruction::SBC(OperationType::ValueToRegister(Register::A, Value::D8))
+        let mut cpu = get_new_cpu();
+        cpu.registers.a = 0x03;
+        prepare_memory(&mut cpu, 0x0000, 0x0001);
+        cpu.registers.set_flag(Flag::C, true);
+        cpu.execute_instruction(Instruction::SBC(OperationType::ValueToRegister(Register::A, Value::D8)));
+        assert_eq!(cpu.registers.a, 0x01);
     }
 
     #[test]

@@ -349,7 +349,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605142300255</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Finish ADC">
+      <created>1605142531463</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1605142531463</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -365,7 +372,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Refactored a bunch of stuff, adding debug display" />
     <MESSAGE value="Debug message channel" />
     <MESSAGE value="Debug logger and message displaying" />
     <MESSAGE value="Using register methods" />
@@ -390,7 +396,8 @@
     <MESSAGE value="JP" />
     <MESSAGE value="CALL, PUSH, POP" />
     <MESSAGE value="RST" />
-    <option name="LAST_COMMIT_MESSAGE" value="RST" />
+    <MESSAGE value="Finish ADC" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finish ADC" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605073732005">
@@ -409,22 +416,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605142250843">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605142764310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142250843" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605142250843">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142764310" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605142764310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142250843" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605142250842">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142764310" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605142764310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142250842" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605142250843">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142764310" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605142764310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142250843" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605142764310" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
