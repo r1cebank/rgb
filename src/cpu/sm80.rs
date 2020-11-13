@@ -1021,6 +1021,11 @@ impl Core {
                         let address_value = self.get_address(address);
                         self.alu_sub(address_value);
                     }
+                    OperationType::ValueToRegister(_, _) => {
+                        let value = self.get_next();
+                        trace!("SUB A, ${:02x}", value);
+                        self.alu_sub(value);
+                    }
                     _ => {
                         panic!("Invalid operation {} for SUB A", operation_type);
                     }

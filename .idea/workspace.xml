@@ -31,13 +31,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpu/registers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/registers.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/sm80.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/sm80.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +62,7 @@
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../gameboy" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
@@ -512,6 +506,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
+    <state x="1060" y="455" key="FileChooserDialogImpl" timestamp="1605246765425">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605246765425" />
     <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605164124447">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
