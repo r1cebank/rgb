@@ -20,6 +20,7 @@ impl Core {
             halted: false,
         }
     }
+
     /// When not boot rom is supplied, we call this to make sure the following state is set
     pub fn simulate_boot_rom(&mut self) {
         self.registers.a = 0x01;

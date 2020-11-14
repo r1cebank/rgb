@@ -1,4 +1,5 @@
 use crate::cartridge::load_cartridge;
+use crate::cpu::instruction::InstructionSet;
 use crate::cpu::ClockedCPU;
 use crate::debug::message::DebugMessage;
 use crate::memory::mmu::MMU;
@@ -10,6 +11,7 @@ use std::thread::{Builder, JoinHandle};
 
 pub struct Emulator {
     pub mmu: Rc<RefCell<MMU>>,
+    instruction_set: InstructionSet,
     pub cpu: ClockedCPU,
 }
 
@@ -28,10 +30,25 @@ impl Emulator {
             cpu.simulate_boot_rom();
         }
 
-        Self { cpu, mmu }
+        Self {
+            cpu,
+            mmu,
+            instruction_set: InstructionSet::new(),
+        }
+    }
+    fn execute_next_instruction(&mut self) -> u8 {
+        let executable_instruction = self
+            .instruction_set
+            .get_next_executable_instruction(&mut self.cpu.cpu)
+            .unwrap();
+
+        let (instruction, operand) = executable_instruction;
+        (instruction.exec)(&mut self.cpu.cpu, operand);
+
+        instruction.cycles
     }
     pub fn tick(&mut self) -> u32 {
-        let cycles = self.cpu.tick();
+        let cycles = self.execute_next_instruction() as u32;
         self.mmu.borrow_mut().tick(cycles);
         cycles
     }

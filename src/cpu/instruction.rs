@@ -12,7 +12,7 @@ pub struct Instruction {
     pub opcode: u8,
     pub operand_length: u8,
     pub cycles: u8,
-    pub exec: Box<dyn Fn(&mut Core, Operand)>,
+    pub exec: Box<dyn Fn(&mut Core, Option<Operand>)>,
 }
 
 impl Instruction {
@@ -21,7 +21,7 @@ impl Instruction {
         opcode: u8,
         operand_length: u8,
         cycles: u8,
-        exec: Box<dyn Fn(&mut Core, Operand)>,
+        exec: Box<dyn Fn(&mut Core, Option<Operand>)>,
     ) -> Instruction {
         Instruction {
             name,
@@ -153,95 +153,191 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
     );
     instruction_set.insert(
         0x13,
-        Instruction::new("INC DE", 0x13, 0, 8, Box::new(increment_de)),
+        Instruction::new("inc de", 0x13, 0, 8, Box::new(increment_de)),
+    );
+    instruction_set.insert(
+        0x14,
+        Instruction::new("inc d", 0x14, 0, 4, Box::new(increment_d)),
+    );
+    instruction_set.insert(
+        0x15,
+        Instruction::new("dec d", 0x15, 0, 4, Box::new(decrement_d)),
+    );
+    instruction_set.insert(
+        0x16,
+        Instruction::new("ld d, d8", 0x16, 1, 8, Box::new(load_d_d8)),
+    );
+    instruction_set.insert(
+        0x17,
+        Instruction::new("rla", 0x17, 0, 4, Box::new(rotate_left_a_through)),
+    );
+    instruction_set.insert(0x18, Instruction::new("jr r8", 0x18, 1, 8, Box::new(jr_r8)));
+    instruction_set.insert(
+        0x19,
+        Instruction::new("add hl, de", 0x19, 0, 8, Box::new(add_hl_de)),
+    );
+    instruction_set.insert(
+        0x1a,
+        Instruction::new("ld a, (de)", 0x1a, 0, 8, Box::new(load_a_mem_de)),
+    );
+    instruction_set.insert(
+        0x1b,
+        Instruction::new("dec de", 0x1b, 0, 8, Box::new(decrement_de)),
+    );
+    instruction_set.insert(
+        0x1c,
+        Instruction::new("inc e", 0x1c, 0, 4, Box::new(increment_e)),
+    );
+    instruction_set.insert(
+        0x1d,
+        Instruction::new("dec e", 0x1d, 0, 4, Box::new(decrement_e)),
+    );
+    instruction_set.insert(
+        0x1e,
+        Instruction::new("ld e, d8", 0x1e, 1, 8, Box::new(load_e_d8)),
+    );
+    instruction_set.insert(
+        0x1f,
+        Instruction::new("rra", 0x1f, 0, 4, Box::new(rotate_right_a_through)),
     );
 
     (instruction_set, cb_instruction_set)
 }
 
-fn nop(_: &mut Core, _: Operand) {}
+fn nop(_: &mut Core, _: Option<Operand>) {}
 
-fn stop(_: &mut Core, _: Operand) {}
+fn stop(_: &mut Core, _: Option<Operand>) {}
 
-fn load_bc_d16(core: &mut Core, operand: Operand) {
-    core.registers.set_bc(operand.word);
+fn load_bc_d16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.set_bc(operand.unwrap().word);
 }
 
-fn load_de_d16(core: &mut Core, operand: Operand) {
-    core.registers.set_de(operand.word);
+fn load_de_d16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.set_de(operand.unwrap().word);
 }
 
-fn load_mem_bc_a(core: &mut Core, _: Operand) {
+fn load_mem_bc_a(core: &mut Core, _: Option<Operand>) {
     core.memory
         .borrow_mut()
         .set(core.registers.get_bc(), core.registers.a);
 }
 
-fn load_mem_de_a(core: &mut Core, _: Operand) {
+fn load_mem_de_a(core: &mut Core, _: Option<Operand>) {
     core.memory
         .borrow_mut()
         .set(core.registers.get_de(), core.registers.a);
 }
 
-fn increment_bc(core: &mut Core, _: Operand) {
+fn increment_bc(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_bc(core.registers.get_bc().wrapping_add(1));
 }
 
-fn increment_de(core: &mut Core, _: Operand) {
+fn increment_de(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_de(core.registers.get_de().wrapping_add(1));
 }
 
-fn decrement_bc(core: &mut Core, _: Operand) {
+fn decrement_bc(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_bc(core.registers.get_bc().wrapping_sub(1));
 }
 
-fn increment_b(core: &mut Core, _: Operand) {
+fn decrement_de(core: &mut Core, _: Option<Operand>) {
+    core.registers
+        .set_de(core.registers.get_de().wrapping_sub(1));
+}
+
+fn increment_b(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.alu_inc(core.registers.b);
 }
 
-fn increment_c(core: &mut Core, _: Operand) {
+fn increment_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_inc(core.registers.d);
+}
+
+fn decrement_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_dec(core.registers.d);
+}
+
+fn decrement_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_dec(core.registers.e);
+}
+
+fn increment_c(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.alu_inc(core.registers.c);
 }
 
-fn decrement_b(core: &mut Core, _: Operand) {
+fn increment_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_inc(core.registers.e);
+}
+
+fn decrement_b(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.alu_dec(core.registers.b);
 }
 
-fn decrement_c(core: &mut Core, _: Operand) {
+fn decrement_c(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.alu_dec(core.registers.c);
 }
 
-fn load_b_d8(core: &mut Core, operand: Operand) {
-    core.registers.b = operand.byte;
+fn load_b_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.b = operand.unwrap().byte;
 }
 
-fn load_c_d8(core: &mut Core, operand: Operand) {
-    core.registers.c = operand.byte;
+fn load_c_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.c = operand.unwrap().byte;
 }
 
-fn rotate_left_carry_a(core: &mut Core, _: Operand) {
+fn load_d_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.d = operand.unwrap().byte;
+}
+
+fn load_e_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.e = operand.unwrap().byte;
+}
+
+fn rotate_left_carry_a(core: &mut Core, _: Option<Operand>) {
     core.registers.a = core.alu_rlc(core.registers.a);
     core.registers.set_flag(Flag::Z, false);
 }
 
-fn rotate_right_carry_a(core: &mut Core, _: Operand) {
+fn rotate_right_carry_a(core: &mut Core, _: Option<Operand>) {
     core.registers.a = core.alu_rrc(core.registers.a);
     core.registers.set_flag(Flag::Z, false);
 }
 
-fn load_mem_sp(core: &mut Core, operand: Operand) {
-    core.memory
-        .borrow_mut()
-        .set_word(operand.word, core.registers.sp);
+fn rotate_left_a_through(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rl(core.registers.a);
+    core.registers.set_flag(Flag::Z, false);
 }
 
-fn add_hl_bc(core: &mut Core, _: Operand) {
+fn rotate_right_a_through(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rr(core.registers.a);
+    core.registers.set_flag(Flag::Z, false);
+}
+
+fn load_mem_sp(core: &mut Core, operand: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set_word(operand.unwrap().word, core.registers.sp);
+}
+
+fn add_hl_bc(core: &mut Core, _: Option<Operand>) {
     core.alu_add_hl(core.registers.get_bc());
 }
 
-fn load_a_mem_bc(core: &mut Core, _: Operand) {
+fn add_hl_de(core: &mut Core, _: Option<Operand>) {
+    core.alu_add_hl(core.registers.get_de());
+}
+
+fn load_a_mem_bc(core: &mut Core, _: Option<Operand>) {
     core.registers.a = core.memory.borrow().get(core.registers.get_bc());
+}
+
+fn load_a_mem_de(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.memory.borrow().get(core.registers.get_de());
+}
+
+fn jr_r8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_jr(operand.unwrap().byte);
 }
