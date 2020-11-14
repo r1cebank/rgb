@@ -200,6 +200,70 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x1f,
         Instruction::new("rra", 0x1f, 0, 4, Box::new(rotate_right_a_through)),
     );
+    instruction_set.insert(
+        0x20,
+        Instruction::new("jr nz, r8", 0x20, 1, 8, Box::new(jr_nz_r8)),
+    );
+    instruction_set.insert(
+        0x21,
+        Instruction::new("ld hl, d16", 0x21, 2, 12, Box::new(load_hl_d16)),
+    );
+    instruction_set.insert(
+        0x22,
+        Instruction::new("ld (hl+), a", 0x22, 0, 8, Box::new(load_mem_hlp_a)),
+    );
+    instruction_set.insert(
+        0x23,
+        Instruction::new("inc hl", 0x23, 0, 8, Box::new(increment_hl)),
+    );
+    instruction_set.insert(
+        0x24,
+        Instruction::new("inc h", 0x24, 0, 4, Box::new(increment_h)),
+    );
+    instruction_set.insert(
+        0x25,
+        Instruction::new("dec h", 0x25, 0, 4, Box::new(decrement_h)),
+    );
+    instruction_set.insert(
+        0x26,
+        Instruction::new("ld h, d8", 0x26, 1, 8, Box::new(load_h_d8)),
+    );
+    instruction_set.insert(
+        0x27,
+        Instruction::new("daa", 0x27, 0, 4, Box::new(decimal_adjust_a)),
+    );
+    instruction_set.insert(
+        0x28,
+        Instruction::new("jr z, r8", 0x28, 1, 8, Box::new(jr_z_r8)),
+    );
+    instruction_set.insert(
+        0x29,
+        Instruction::new("add hl, hl", 0x29, 0, 8, Box::new(add_hl_hl)),
+    );
+    instruction_set.insert(
+        0x2a,
+        Instruction::new("ld a, (hl+)", 0x2a, 0, 8, Box::new(load_a_hlp_mem)),
+    );
+    instruction_set.insert(
+        0x2b,
+        Instruction::new("dec hl", 0x2b, 0, 8, Box::new(decrement_hl)),
+    );
+    instruction_set.insert(
+        0x2c,
+        Instruction::new("inc l", 0x2c, 0, 4, Box::new(increment_l)),
+    );
+    instruction_set.insert(
+        0x2d,
+        Instruction::new("dec l", 0x2d, 0, 4, Box::new(decrement_l)),
+    );
+    instruction_set.insert(
+        0x2e,
+        Instruction::new("ld l, d8", 0x2e, 1, 8, Box::new(load_l_d8)),
+    );
+    instruction_set.insert(
+        0x2f,
+        Instruction::new("cpl", 0x2f, 0, 4, Box::new(complement_a)),
+    );
 
     (instruction_set, cb_instruction_set)
 }
@@ -210,6 +274,14 @@ fn stop(_: &mut Core, _: Option<Operand>) {}
 
 fn load_bc_d16(core: &mut Core, operand: Option<Operand>) {
     core.registers.set_bc(operand.unwrap().word);
+}
+
+fn load_hl_d16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.set_hl(operand.unwrap().word);
+}
+
+fn add_hl_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.set_hl(core.registers.get_hl());
 }
 
 fn load_de_d16(core: &mut Core, operand: Option<Operand>) {
@@ -231,6 +303,16 @@ fn load_mem_de_a(core: &mut Core, _: Option<Operand>) {
 fn increment_bc(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_bc(core.registers.get_bc().wrapping_add(1));
+}
+
+fn increment_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers
+        .set_hl(core.registers.get_hl().wrapping_add(1));
+}
+
+fn decrement_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers
+        .set_hl(core.registers.get_hl().wrapping_sub(1));
 }
 
 fn increment_de(core: &mut Core, _: Option<Operand>) {
@@ -264,12 +346,28 @@ fn decrement_e(core: &mut Core, _: Option<Operand>) {
     core.registers.e = core.alu_dec(core.registers.e);
 }
 
+fn decrement_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_dec(core.registers.h);
+}
+
+fn decrement_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_dec(core.registers.l);
+}
+
 fn increment_c(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.alu_inc(core.registers.c);
 }
 
 fn increment_e(core: &mut Core, _: Option<Operand>) {
     core.registers.e = core.alu_inc(core.registers.e);
+}
+
+fn increment_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_inc(core.registers.h);
+}
+
+fn increment_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_inc(core.registers.l);
 }
 
 fn decrement_b(core: &mut Core, _: Option<Operand>) {
@@ -294,6 +392,14 @@ fn load_d_d8(core: &mut Core, operand: Option<Operand>) {
 
 fn load_e_d8(core: &mut Core, operand: Option<Operand>) {
     core.registers.e = operand.unwrap().byte;
+}
+
+fn load_h_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.h = operand.unwrap().byte;
+}
+
+fn load_l_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.l = operand.unwrap().byte;
 }
 
 fn rotate_left_carry_a(core: &mut Core, _: Option<Operand>) {
@@ -330,6 +436,18 @@ fn add_hl_de(core: &mut Core, _: Option<Operand>) {
     core.alu_add_hl(core.registers.get_de());
 }
 
+fn load_mem_hlp_a(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    core.memory.borrow_mut().set(address, core.registers.a);
+    core.registers.set_hl(address + 1);
+}
+
+fn load_a_hlp_mem(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    core.registers.a = core.memory.borrow().get(address);
+    core.registers.set_hl(address + 1);
+}
+
 fn load_a_mem_bc(core: &mut Core, _: Option<Operand>) {
     core.registers.a = core.memory.borrow().get(core.registers.get_bc());
 }
@@ -340,4 +458,24 @@ fn load_a_mem_de(core: &mut Core, _: Option<Operand>) {
 
 fn jr_r8(core: &mut Core, operand: Option<Operand>) {
     core.alu_jr(operand.unwrap().byte);
+}
+
+fn jr_nz_r8(core: &mut Core, operand: Option<Operand>) {
+    if !core.registers.get_flag(Flag::Z) {
+        core.alu_jr(operand.unwrap().byte);
+    }
+}
+
+fn jr_z_r8(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::Z) {
+        core.alu_jr(operand.unwrap().byte);
+    }
+}
+
+fn decimal_adjust_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_daa();
+}
+
+fn complement_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_cpl();
 }
