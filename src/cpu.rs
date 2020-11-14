@@ -1,6 +1,4 @@
-pub mod cycles;
 pub mod instruction;
-pub mod opcodes;
 pub mod registers;
 pub mod sm80;
 
@@ -73,11 +71,12 @@ impl ClockedCPU {
         }
 
         // Run the CPU and get the machine cycles
-        let cycles = self.cpu.tick();
+        // let cycles = self.cpu.tick();
 
         // Increment the step cycles with the cpu tick cycles
-        self.step_cycles += cycles;
-        cycles
+        // self.step_cycles += cycles;
+        // cycles
+        0
     }
 
     pub fn simulate_boot_rom(&mut self) {
