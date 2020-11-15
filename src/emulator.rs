@@ -40,7 +40,7 @@ impl Emulator {
         let executable_instruction = self
             .instruction_set
             .get_next_executable_instruction(&mut self.cpu.cpu)
-            .unwrap();
+            .expect("Error decoding next instruction");
 
         let (instruction, operand) = executable_instruction;
 
