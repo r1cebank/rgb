@@ -43,6 +43,20 @@ impl Emulator {
             .unwrap();
 
         let (instruction, operand) = executable_instruction;
+
+        match instruction.operand_length {
+            0 => {
+                trace!("{}", instruction.name);
+            }
+            1 => {
+                trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
+            }
+            2 => {
+                trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
+            }
+            _ => {}
+        }
+
         (instruction.exec)(&mut self.cpu.cpu, operand);
 
         instruction.cycles

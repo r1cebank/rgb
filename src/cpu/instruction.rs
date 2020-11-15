@@ -2,6 +2,7 @@ use super::sm80::Core;
 use crate::cpu::registers::Flag;
 use std::collections::HashMap;
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Operand {
     pub byte: u8,
     pub word: u16,
@@ -264,6 +265,70 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x2f,
         Instruction::new("cpl", 0x2f, 0, 4, Box::new(complement_a)),
     );
+    instruction_set.insert(
+        0x30,
+        Instruction::new("jr nc, r8", 0x30, 1, 8, Box::new(jr_nc_r8)),
+    );
+    instruction_set.insert(
+        0x31,
+        Instruction::new("ld sp, d16", 0x31, 2, 12, Box::new(load_sp_d16)),
+    );
+    instruction_set.insert(
+        0x32,
+        Instruction::new("ld (hl-), a", 0x32, 0, 8, Box::new(load_mem_hlm_a)),
+    );
+    instruction_set.insert(
+        0x33,
+        Instruction::new("inc sp", 0x33, 0, 8, Box::new(increment_sp)),
+    );
+    instruction_set.insert(
+        0x34,
+        Instruction::new("inc (hl)", 0x34, 0, 12, Box::new(increment_mem_hl)),
+    );
+    instruction_set.insert(
+        0x35,
+        Instruction::new("dec (hl)", 0x35, 0, 12, Box::new(decrement_mem_hl)),
+    );
+    instruction_set.insert(
+        0x36,
+        Instruction::new("ld (hl), d8", 0x36, 1, 12, Box::new(load_mem_hl_d8)),
+    );
+    instruction_set.insert(
+        0x37,
+        Instruction::new("scf", 0x37, 0, 4, Box::new(set_carry)),
+    );
+    instruction_set.insert(
+        0x38,
+        Instruction::new("jr c, r8", 0x38, 1, 8, Box::new(jr_c_r8)),
+    );
+    instruction_set.insert(
+        0x39,
+        Instruction::new("add hl, sp", 0x39, 0, 8, Box::new(add_hl_sp)),
+    );
+    instruction_set.insert(
+        0x3a,
+        Instruction::new("ld a, (hl-)", 0x3a, 0, 8, Box::new(load_a_hlm_mem)),
+    );
+    instruction_set.insert(
+        0x3b,
+        Instruction::new("dec sp", 0x3b, 0, 8, Box::new(decrement_sp)),
+    );
+    instruction_set.insert(
+        0x3c,
+        Instruction::new("inc a", 0x3c, 0, 4, Box::new(increment_a)),
+    );
+    instruction_set.insert(
+        0x3d,
+        Instruction::new("dec a", 0x3d, 0, 4, Box::new(decrement_a)),
+    );
+    instruction_set.insert(
+        0x3e,
+        Instruction::new("ld a, d8", 0x3e, 1, 8, Box::new(load_a_d8)),
+    );
+    instruction_set.insert(
+        0x3f,
+        Instruction::new("ccf", 0x3f, 0, 4, Box::new(complement_carry)),
+    );
 
     (instruction_set, cb_instruction_set)
 }
@@ -276,12 +341,20 @@ fn load_bc_d16(core: &mut Core, operand: Option<Operand>) {
     core.registers.set_bc(operand.unwrap().word);
 }
 
+fn load_sp_d16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.sp = operand.unwrap().word;
+}
+
 fn load_hl_d16(core: &mut Core, operand: Option<Operand>) {
     core.registers.set_hl(operand.unwrap().word);
 }
 
 fn add_hl_hl(core: &mut Core, _: Option<Operand>) {
     core.registers.set_hl(core.registers.get_hl());
+}
+
+fn add_hl_sp(core: &mut Core, _: Option<Operand>) {
+    core.registers.set_hl(core.registers.sp);
 }
 
 fn load_de_d16(core: &mut Core, operand: Option<Operand>) {
@@ -305,14 +378,32 @@ fn increment_bc(core: &mut Core, _: Option<Operand>) {
         .set_bc(core.registers.get_bc().wrapping_add(1));
 }
 
+fn increment_sp(core: &mut Core, _: Option<Operand>) {
+    core.registers.sp = core.registers.sp.wrapping_add(1);
+}
+
 fn increment_hl(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_hl(core.registers.get_hl().wrapping_add(1));
 }
 
+fn increment_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let hl_value = core.memory.borrow().get(address);
+    let results = core.alu_inc(hl_value);
+    core.memory.borrow_mut().set(address, results);
+}
+
 fn decrement_hl(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_hl(core.registers.get_hl().wrapping_sub(1));
+}
+
+fn decrement_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let hl_value = core.memory.borrow().get(address);
+    let results = core.alu_dec(hl_value);
+    core.memory.borrow_mut().set(address, results);
 }
 
 fn increment_de(core: &mut Core, _: Option<Operand>) {
@@ -328,6 +419,14 @@ fn decrement_bc(core: &mut Core, _: Option<Operand>) {
 fn decrement_de(core: &mut Core, _: Option<Operand>) {
     core.registers
         .set_de(core.registers.get_de().wrapping_sub(1));
+}
+
+fn decrement_sp(core: &mut Core, _: Option<Operand>) {
+    core.registers.sp = core.registers.sp.wrapping_sub(1);
+}
+
+fn increment_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_inc(core.registers.a);
 }
 
 fn increment_b(core: &mut Core, _: Option<Operand>) {
@@ -370,12 +469,20 @@ fn increment_l(core: &mut Core, _: Option<Operand>) {
     core.registers.l = core.alu_inc(core.registers.l);
 }
 
+fn decrement_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_dec(core.registers.a);
+}
+
 fn decrement_b(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.alu_dec(core.registers.b);
 }
 
 fn decrement_c(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.alu_dec(core.registers.c);
+}
+
+fn load_a_d8(core: &mut Core, operand: Option<Operand>) {
+    core.registers.a = operand.unwrap().byte;
 }
 
 fn load_b_d8(core: &mut Core, operand: Option<Operand>) {
@@ -442,10 +549,27 @@ fn load_mem_hlp_a(core: &mut Core, _: Option<Operand>) {
     core.registers.set_hl(address + 1);
 }
 
+fn load_mem_hlm_a(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    core.memory.borrow_mut().set(address, core.registers.a);
+    core.registers.set_hl(address - 1);
+}
+
+fn load_mem_hl_d8(core: &mut Core, operand: Option<Operand>) {
+    let address = core.registers.get_hl();
+    core.memory.borrow_mut().set(address, operand.unwrap().byte);
+}
+
 fn load_a_hlp_mem(core: &mut Core, _: Option<Operand>) {
     let address = core.registers.get_hl();
     core.registers.a = core.memory.borrow().get(address);
     core.registers.set_hl(address + 1);
+}
+
+fn load_a_hlm_mem(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    core.registers.a = core.memory.borrow().get(address);
+    core.registers.set_hl(address - 1);
 }
 
 fn load_a_mem_bc(core: &mut Core, _: Option<Operand>) {
@@ -466,6 +590,18 @@ fn jr_nz_r8(core: &mut Core, operand: Option<Operand>) {
     }
 }
 
+fn jr_nc_r8(core: &mut Core, operand: Option<Operand>) {
+    if !core.registers.get_flag(Flag::C) {
+        core.alu_jr(operand.unwrap().byte);
+    }
+}
+
+fn jr_c_r8(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::C) {
+        core.alu_jr(operand.unwrap().byte);
+    }
+}
+
 fn jr_z_r8(core: &mut Core, operand: Option<Operand>) {
     if core.registers.get_flag(Flag::Z) {
         core.alu_jr(operand.unwrap().byte);
@@ -478,4 +614,12 @@ fn decimal_adjust_a(core: &mut Core, _: Option<Operand>) {
 
 fn complement_a(core: &mut Core, _: Option<Operand>) {
     core.alu_cpl();
+}
+
+fn set_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_scf();
+}
+
+fn complement_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_ccf();
 }
