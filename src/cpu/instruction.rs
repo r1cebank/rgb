@@ -780,8 +780,138 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xaf,
         Instruction::new("xor a, a", 0xaf, 0, 4, Box::new(xor_a)),
     );
+    instruction_set.insert(
+        0xb0,
+        Instruction::new("or a, b", 0xb0, 0, 4, Box::new(or_b)),
+    );
+    instruction_set.insert(
+        0xb1,
+        Instruction::new("or a, c", 0xb1, 0, 4, Box::new(or_c)),
+    );
+    instruction_set.insert(
+        0xb2,
+        Instruction::new("or a, d", 0xb2, 0, 4, Box::new(or_d)),
+    );
+    instruction_set.insert(
+        0xb3,
+        Instruction::new("or a, e", 0xb3, 0, 4, Box::new(or_e)),
+    );
+    instruction_set.insert(
+        0xb4,
+        Instruction::new("or a, h", 0xb4, 0, 4, Box::new(or_h)),
+    );
+    instruction_set.insert(
+        0xb5,
+        Instruction::new("or a, l", 0xb5, 0, 4, Box::new(or_l)),
+    );
+    instruction_set.insert(
+        0xb6,
+        Instruction::new("or a, (hl)", 0xb6, 0, 8, Box::new(or_mem_hl)),
+    );
+    instruction_set.insert(
+        0xb7,
+        Instruction::new("or a, a", 0xb7, 0, 4, Box::new(or_a)),
+    );
+    instruction_set.insert(
+        0xb8,
+        Instruction::new("cp a, b", 0xb8, 0, 4, Box::new(compare_b)),
+    );
+    instruction_set.insert(
+        0xb9,
+        Instruction::new("cp a, c", 0xb9, 0, 4, Box::new(compare_c)),
+    );
+    instruction_set.insert(
+        0xba,
+        Instruction::new("cp a, d", 0xba, 0, 4, Box::new(compare_d)),
+    );
+    instruction_set.insert(
+        0xbb,
+        Instruction::new("cp a, e", 0xbb, 0, 4, Box::new(compare_e)),
+    );
+    instruction_set.insert(
+        0xbc,
+        Instruction::new("cp a, h", 0xbc, 0, 4, Box::new(compare_h)),
+    );
+    instruction_set.insert(
+        0xbd,
+        Instruction::new("cp a, l", 0xbd, 0, 4, Box::new(compare_l)),
+    );
+    instruction_set.insert(
+        0xbe,
+        Instruction::new("cp a, (hl)", 0xb6, 0, 8, Box::new(compare_mem_hl)),
+    );
+    instruction_set.insert(
+        0xbf,
+        Instruction::new("cp a, a", 0xbf, 0, 4, Box::new(compare_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn compare_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.a);
+}
+
+fn compare_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.b);
+}
+
+fn compare_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.c);
+}
+
+fn compare_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.d);
+}
+
+fn compare_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.e);
+}
+
+fn compare_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.h);
+}
+
+fn compare_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_cp(core.registers.l);
+}
+
+fn compare_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_cp(value);
+}
+
+fn or_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.a);
+}
+
+fn or_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.b);
+}
+
+fn or_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.c);
+}
+
+fn or_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.d);
+}
+
+fn or_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.e);
+}
+
+fn or_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.h);
+}
+
+fn or_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_or(core.registers.l);
+}
+
+fn or_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_or(value);
 }
 
 fn xor_a(core: &mut Core, _: Option<Operand>) {
