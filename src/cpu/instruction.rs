@@ -972,10 +972,7 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xe8,
         Instruction::new("add sp, r8", 0xe8, 1, 16, Box::new(add_sp_r8)),
     );
-    instruction_set.insert(
-        0xe9,
-        Instruction::new("jp hl", 0xe9, 0, 4, Box::new(jp_hl)),
-    );
+    instruction_set.insert(0xe9, Instruction::new("jp hl", 0xe9, 0, 4, Box::new(jp_hl)));
     instruction_set.insert(
         0xea,
         Instruction::new("ld (a16), a", 0xea, 2, 16, Box::new(load_mem_a16_a)),
@@ -1000,18 +997,12 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xf2,
         Instruction::new("ld a, (c)", 0xf2, 0, 8, Box::new(load_a_mem_c)),
     );
-    instruction_set.insert(
-        0xf3,
-        Instruction::new("di", 0xf3, 0, 4, Box::new(di)),
-    );
+    instruction_set.insert(0xf3, Instruction::new("di", 0xf3, 0, 4, Box::new(di)));
     instruction_set.insert(
         0xf5,
         Instruction::new("push af", 0xf5, 0, 16, Box::new(push_af)),
     );
-    instruction_set.insert(
-        0xf6,
-        Instruction::new("or d8", 0xf6, 1, 8, Box::new(or_d8)),
-    );
+    instruction_set.insert(0xf6, Instruction::new("or d8", 0xf6, 1, 8, Box::new(or_d8)));
     instruction_set.insert(
         0xf7,
         Instruction::new("rst 30h", 0xf7, 0, 32, Box::new(rst_30h)),
@@ -1028,10 +1019,7 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xfa,
         Instruction::new("ld a, (a16)", 0xfa, 2, 16, Box::new(load_a_mem_a16)),
     );
-    instruction_set.insert(
-        0xfb,
-        Instruction::new("ei", 0xfb, 0, 4, Box::new(ei)),
-    );
+    instruction_set.insert(0xfb, Instruction::new("ei", 0xfb, 0, 4, Box::new(ei)));
     instruction_set.insert(
         0xfe,
         Instruction::new("cp d8", 0xfe, 1, 8, Box::new(compare_d8)),
@@ -1047,8 +1035,10 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
 fn load_hl_sp_plus_r8(core: &mut Core, operand: Option<Operand>) {
     let a = core.registers.sp;
     let b = i16::from(operand.unwrap().byte as i8) as u16;
-    core.registers.set_flag(Flag::C, (a & 0x00ff) + (b & 0x00ff) > 0x00ff);
-    core.registers.set_flag(Flag::H, (a & 0x000f) + (b & 0x000f) > 0x000f);
+    core.registers
+        .set_flag(Flag::C, (a & 0x00ff) + (b & 0x00ff) > 0x00ff);
+    core.registers
+        .set_flag(Flag::H, (a & 0x000f) + (b & 0x000f) > 0x000f);
     core.registers.set_flag(Flag::N, false);
     core.registers.set_flag(Flag::Z, false);
     core.registers.set_hl(a.wrapping_add(b));
@@ -1063,11 +1053,16 @@ fn ei(core: &mut Core, _: Option<Operand>) {
 }
 
 fn load_mem_a16_a(core: &mut Core, operand: Option<Operand>) {
-    core.memory.borrow_mut().set(operand.unwrap().word, core.registers.a);
+    core.memory
+        .borrow_mut()
+        .set(operand.unwrap().word, core.registers.a);
 }
 
 fn load_a_mem_c(core: &mut Core, _: Option<Operand>) {
-    core.registers.a = core.memory.borrow().get(0xff00 | u16::from(core.registers.c));
+    core.registers.a = core
+        .memory
+        .borrow()
+        .get(0xff00 | u16::from(core.registers.c));
 }
 
 fn load_a_mem_a16(core: &mut Core, operand: Option<Operand>) {
