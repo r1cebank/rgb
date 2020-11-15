@@ -57,6 +57,16 @@ impl Core {
         self.registers.sp += 2;
         value
     }
+    // Add n to Stack Pointer (SP).
+    pub fn alu_add_sp(&mut self, n: u8) {
+        let a = self.registers.sp;
+        let b = i16::from(n as i8) as u16;
+        self.registers.set_flag(Flag::C, (a & 0x00ff) + (b & 0x00ff) > 0x00ff);
+        self.registers.set_flag(Flag::H, (a & 0x000f) + (b & 0x000f) > 0x000f);
+        self.registers.set_flag(Flag::N, false);
+        self.registers.set_flag(Flag::Z, false);
+        self.registers.sp = a.wrapping_add(b);
+    }
     // Complement carry flag. If C flag is set, then reset it. If C flag is reset, then set it.
     pub fn alu_ccf(&mut self) {
         let carry = !self.registers.get_flag(Flag::C);

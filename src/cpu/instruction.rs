@@ -956,8 +956,44 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xe2,
         Instruction::new("ld (c), a", 0xe2, 0, 8, Box::new(ld_mem_c_a)),
     );
+    instruction_set.insert(
+        0xe5,
+        Instruction::new("push hl", 0xe5, 0, 16, Box::new(push_hl)),
+    );
+    instruction_set.insert(
+        0xe6,
+        Instruction::new("and d8", 0xe6, 1, 8, Box::new(and_d8)),
+    );
+    instruction_set.insert(
+        0xe7,
+        Instruction::new("rst 20h", 0xe7, 0, 32, Box::new(rst_20h)),
+    );
+    instruction_set.insert(
+        0xe8,
+        Instruction::new("add sp, r8", 0xe8, 1, 16, Box::new(add_sp_r8)),
+    );
+    instruction_set.insert(
+        0xe9,
+        Instruction::new("jp hl", 0xe9, 0, 4, Box::new(jp_hl)),
+    );
+    instruction_set.insert(
+        0xea,
+        Instruction::new("ld (a16), a", 0xea, 2, 16, Box::new(load_mem_a16_a)),
+    );
+    instruction_set.insert(
+        0xee,
+        Instruction::new("xor d8", 0xee, 1, 8, Box::new(xor_d8)),
+    );
+    instruction_set.insert(
+        0xef,
+        Instruction::new("rst 28h", 0xef, 0, 32, Box::new(rst_28h)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn load_mem_a16_a(core: &mut Core, operand: Option<Operand>) {
+    core.memory.borrow_mut().set(operand.unwrap().word, core.registers.a);
 }
 
 fn ldh_a(core: &mut Core, operand: Option<Operand>) {
@@ -990,8 +1026,22 @@ fn rst_18h(core: &mut Core, _: Option<Operand>) {
     core.registers.pc = 0x18;
 }
 
+fn rst_20h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x20;
+}
+
+fn rst_28h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x28;
+}
+
 fn push_bc(core: &mut Core, _: Option<Operand>) {
     core.stack_push(core.registers.get_bc());
+}
+
+fn push_hl(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.get_hl());
 }
 
 fn push_de(core: &mut Core, _: Option<Operand>) {
@@ -1035,6 +1085,10 @@ fn jp_c_a16(core: &mut Core, operand: Option<Operand>) {
     if core.registers.get_flag(Flag::C) {
         core.registers.pc = operand.unwrap().word;
     }
+}
+
+fn jp_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.pc = core.registers.get_hl();
 }
 
 fn jp_nz_a16(core: &mut Core, operand: Option<Operand>) {
@@ -1173,6 +1227,10 @@ fn or_mem_hl(core: &mut Core, _: Option<Operand>) {
     core.alu_or(value);
 }
 
+fn xor_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_xor(operand.unwrap().byte);
+}
+
 fn xor_a(core: &mut Core, _: Option<Operand>) {
     core.alu_xor(core.registers.a);
 }
@@ -1204,6 +1262,10 @@ fn xor_l(core: &mut Core, _: Option<Operand>) {
 fn xor_mem_hl(core: &mut Core, _: Option<Operand>) {
     let value = core.memory.borrow().get(core.registers.get_hl());
     core.alu_xor(value);
+}
+
+fn and_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_and(operand.unwrap().byte);
 }
 
 fn and_a(core: &mut Core, _: Option<Operand>) {
@@ -1352,6 +1414,10 @@ fn adc_mem_hl(core: &mut Core, _: Option<Operand>) {
 
 fn add_d8(core: &mut Core, operand: Option<Operand>) {
     core.alu_add(operand.unwrap().byte);
+}
+
+fn add_sp_r8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_add_sp(operand.unwrap().byte);
 }
 
 fn add_a(core: &mut Core, _: Option<Operand>) {
