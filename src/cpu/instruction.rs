@@ -582,8 +582,138 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x7f,
         Instruction::new("ld a, a", 0x7f, 0, 4, Box::new(load_a_a)),
     );
+    instruction_set.insert(
+        0x80,
+        Instruction::new("add a, b", 0x80, 0, 4, Box::new(add_b)),
+    );
+    instruction_set.insert(
+        0x81,
+        Instruction::new("add a, c", 0x81, 0, 4, Box::new(add_c)),
+    );
+    instruction_set.insert(
+        0x82,
+        Instruction::new("add a, d", 0x82, 0, 4, Box::new(add_d)),
+    );
+    instruction_set.insert(
+        0x83,
+        Instruction::new("add a, e", 0x83, 0, 4, Box::new(add_e)),
+    );
+    instruction_set.insert(
+        0x84,
+        Instruction::new("add a, h", 0x84, 0, 4, Box::new(add_h)),
+    );
+    instruction_set.insert(
+        0x85,
+        Instruction::new("add a, l", 0x85, 0, 4, Box::new(add_l)),
+    );
+    instruction_set.insert(
+        0x86,
+        Instruction::new("add a, (hl)", 0x86, 0, 8, Box::new(add_mem_hl)),
+    );
+    instruction_set.insert(
+        0x87,
+        Instruction::new("add a, a", 0x87, 0, 4, Box::new(add_a)),
+    );
+    instruction_set.insert(
+        0x88,
+        Instruction::new("adc a, b", 0x88, 0, 4, Box::new(adc_b)),
+    );
+    instruction_set.insert(
+        0x89,
+        Instruction::new("adc a, c", 0x89, 0, 4, Box::new(adc_c)),
+    );
+    instruction_set.insert(
+        0x8a,
+        Instruction::new("adc a, d", 0x8a, 0, 4, Box::new(adc_d)),
+    );
+    instruction_set.insert(
+        0x8b,
+        Instruction::new("adc a, e", 0x8b, 0, 4, Box::new(adc_e)),
+    );
+    instruction_set.insert(
+        0x8c,
+        Instruction::new("adc a, h", 0x8c, 0, 4, Box::new(adc_h)),
+    );
+    instruction_set.insert(
+        0x8d,
+        Instruction::new("adc a, l", 0x8d, 0, 4, Box::new(adc_l)),
+    );
+    instruction_set.insert(
+        0x8e,
+        Instruction::new("adc a, (hl)", 0x8e, 0, 8, Box::new(adc_mem_hl)),
+    );
+    instruction_set.insert(
+        0x8f,
+        Instruction::new("adc a, a", 0x8f, 0, 4, Box::new(adc_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn adc_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.a);
+}
+
+fn adc_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.b);
+}
+
+fn adc_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.c);
+}
+
+fn adc_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.d);
+}
+
+fn adc_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.e);
+}
+
+fn adc_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.h);
+}
+
+fn adc_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_adc(core.registers.l);
+}
+
+fn adc_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_adc(value);
+}
+
+fn add_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.a);
+}
+
+fn add_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.b);
+}
+
+fn add_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.c);
+}
+
+fn add_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.d);
+}
+
+fn add_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.e);
+}
+
+fn add_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.h);
+}
+
+fn add_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_add(core.registers.l);
+}
+
+fn add_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_add(value);
 }
 
 fn load_a_a(core: &mut Core, _: Option<Operand>) {
