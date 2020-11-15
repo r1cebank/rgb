@@ -944,8 +944,30 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xdf,
         Instruction::new("rst 18h", 0xdf, 0, 32, Box::new(rst_18h)),
     );
+    instruction_set.insert(
+        0xe0,
+        Instruction::new("ldh (a8), a", 0xE0, 1, 12, Box::new(ldh_a)),
+    );
+    instruction_set.insert(
+        0xe1,
+        Instruction::new("pop hl", 0xe1, 0, 12, Box::new(pop_hl)),
+    );
+    instruction_set.insert(
+        0xe2,
+        Instruction::new("ld (c), a", 0xe2, 0, 8, Box::new(ld_mem_c_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn ldh_a(core: &mut Core, operand: Option<Operand>) {
+    let address = 0xff00 | u16::from(operand.unwrap().byte);
+    core.memory.borrow_mut().set(address, core.registers.a);
+}
+
+fn ld_mem_c_a(core: &mut Core, _: Option<Operand>) {
+    let address = 0xff00 | u16::from(core.registers.c);
+    core.memory.borrow_mut().set(address, core.registers.a);
 }
 
 fn rst_00h(core: &mut Core, _: Option<Operand>) {
@@ -973,10 +995,6 @@ fn push_bc(core: &mut Core, _: Option<Operand>) {
 }
 
 fn push_de(core: &mut Core, _: Option<Operand>) {
-    core.stack_push(core.registers.get_de());
-}
-
-fn pop_de(core: &mut Core, _: Option<Operand>) {
     core.stack_push(core.registers.get_de());
 }
 
@@ -1044,6 +1062,16 @@ fn jp_a16(core: &mut Core, operand: Option<Operand>) {
 fn pop_bc(core: &mut Core, _: Option<Operand>) {
     let value = core.stack_pop();
     core.registers.set_bc(value);
+}
+
+fn pop_de(core: &mut Core, _: Option<Operand>) {
+    let value = core.stack_pop();
+    core.registers.set_de(value);
+}
+
+fn pop_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.stack_pop();
+    core.registers.set_hl(value);
 }
 
 fn ret(core: &mut Core, _: Option<Operand>) {
@@ -1531,6 +1559,10 @@ fn load_a_mem_hl(core: &mut Core, _: Option<Operand>) {
     core.registers.a = core.memory.borrow().get(core.registers.get_hl());
 }
 
+fn load_b_mem_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.memory.borrow().get(core.registers.get_hl());
+}
+
 fn load_c_mem_hl(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.memory.borrow().get(core.registers.get_hl());
 }
@@ -1555,6 +1587,10 @@ fn load_b_a(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.registers.a;
 }
 
+fn load_b_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.b;
+}
+
 fn load_b_c(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.registers.c;
 }
@@ -1573,14 +1609,6 @@ fn load_b_h(core: &mut Core, _: Option<Operand>) {
 
 fn load_b_l(core: &mut Core, _: Option<Operand>) {
     core.registers.b = core.registers.l;
-}
-
-fn load_b_mem_hl(core: &mut Core, _: Option<Operand>) {
-    core.registers.b = core.memory.borrow().get(core.registers.get_hl());
-}
-
-fn load_b_b(core: &mut Core, _: Option<Operand>) {
-    core.registers.b = core.registers.b;
 }
 
 fn nop(_: &mut Core, _: Option<Operand>) {}
