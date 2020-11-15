@@ -132,13 +132,6 @@
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
     </task>
-    <task id="LOCAL-00002" summary="Adding necessary files">
-      <created>1604821544886</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1604821544886</updated>
-    </task>
     <task id="LOCAL-00003" summary="Adding rom, mbc1 and mbc3">
       <created>1604894738588</created>
       <option name="number" value="00003" />
@@ -475,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605401529798</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Refactor instructions">
+      <created>1605403208176</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1605403208176</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
