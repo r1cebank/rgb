@@ -648,70 +648,206 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
     );
     instruction_set.insert(
         0x90,
-        Instruction::new("sub b", 0x90, 0, 4, Box::new(subtract_b)),
+        Instruction::new("sub a, b", 0x90, 0, 4, Box::new(subtract_b)),
     );
     instruction_set.insert(
         0x91,
-        Instruction::new("sub c", 0x91, 0, 4, Box::new(subtract_c)),
+        Instruction::new("sub a, c", 0x91, 0, 4, Box::new(subtract_c)),
     );
     instruction_set.insert(
         0x92,
-        Instruction::new("sub d", 0x92, 0, 4, Box::new(subtract_d)),
+        Instruction::new("sub a, d", 0x92, 0, 4, Box::new(subtract_d)),
     );
     instruction_set.insert(
         0x93,
-        Instruction::new("sub e", 0x93, 0, 4, Box::new(subtract_e)),
+        Instruction::new("sub a, e", 0x93, 0, 4, Box::new(subtract_e)),
     );
     instruction_set.insert(
         0x94,
-        Instruction::new("sub h", 0x94, 0, 4, Box::new(subtract_h)),
+        Instruction::new("sub a, h", 0x94, 0, 4, Box::new(subtract_h)),
     );
     instruction_set.insert(
         0x95,
-        Instruction::new("sub l", 0x95, 0, 4, Box::new(subtract_l)),
+        Instruction::new("sub a, l", 0x95, 0, 4, Box::new(subtract_l)),
     );
     instruction_set.insert(
         0x96,
-        Instruction::new("sub (hl)", 0x96, 0, 8, Box::new(subtract_mem_hl)),
+        Instruction::new("sub a, (hl)", 0x96, 0, 8, Box::new(subtract_mem_hl)),
     );
     instruction_set.insert(
         0x97,
-        Instruction::new("sub a", 0x97, 0, 4, Box::new(subtract_a)),
+        Instruction::new("sub a, a", 0x97, 0, 4, Box::new(subtract_a)),
     );
     instruction_set.insert(
         0x98,
-        Instruction::new("sbc b", 0x98, 0, 4, Box::new(subtract_b_with_carry)),
+        Instruction::new("sbc a, b", 0x98, 0, 4, Box::new(subtract_b_with_carry)),
     );
     instruction_set.insert(
         0x99,
-        Instruction::new("sbc c", 0x99, 0, 4, Box::new(subtract_c_with_carry)),
+        Instruction::new("sbc a, c", 0x99, 0, 4, Box::new(subtract_c_with_carry)),
     );
     instruction_set.insert(
         0x9a,
-        Instruction::new("sbc d", 0x9a, 0, 4, Box::new(subtract_d_with_carry)),
+        Instruction::new("sbc a, d", 0x9a, 0, 4, Box::new(subtract_d_with_carry)),
     );
     instruction_set.insert(
         0x9b,
-        Instruction::new("sbc e", 0x9b, 0, 4, Box::new(subtract_e_with_carry)),
+        Instruction::new("sbc a, e", 0x9b, 0, 4, Box::new(subtract_e_with_carry)),
     );
     instruction_set.insert(
         0x9c,
-        Instruction::new("sbc h", 0x9c, 0, 4, Box::new(subtract_h_with_carry)),
+        Instruction::new("sbc a, h", 0x9c, 0, 4, Box::new(subtract_h_with_carry)),
     );
     instruction_set.insert(
         0x9d,
-        Instruction::new("sbc l", 0x9d, 0, 4, Box::new(subtract_l_with_carry)),
+        Instruction::new("sbc a, l", 0x9d, 0, 4, Box::new(subtract_l_with_carry)),
     );
     instruction_set.insert(
         0x9e,
-        Instruction::new("sbc (hl)", 0x9e, 0, 8, Box::new(subtract_mem_hl_with_carry)),
+        Instruction::new(
+            "sbc a, (hl)",
+            0x9e,
+            0,
+            8,
+            Box::new(subtract_mem_hl_with_carry),
+        ),
     );
     instruction_set.insert(
         0x9f,
-        Instruction::new("sbc a", 0x9f, 0, 4, Box::new(subtract_a_with_carry)),
+        Instruction::new("sbc a, a", 0x9f, 0, 4, Box::new(subtract_a_with_carry)),
+    );
+    instruction_set.insert(
+        0xa0,
+        Instruction::new("and a, b", 0xa0, 0, 4, Box::new(and_b)),
+    );
+    instruction_set.insert(
+        0xa1,
+        Instruction::new("and a, c", 0xa1, 0, 4, Box::new(and_c)),
+    );
+    instruction_set.insert(
+        0xa2,
+        Instruction::new("and a, d", 0xa2, 0, 4, Box::new(and_d)),
+    );
+    instruction_set.insert(
+        0xa3,
+        Instruction::new("and a, e", 0xa3, 0, 4, Box::new(and_e)),
+    );
+    instruction_set.insert(
+        0xa4,
+        Instruction::new("and a, h", 0xa4, 0, 4, Box::new(and_h)),
+    );
+    instruction_set.insert(
+        0xa5,
+        Instruction::new("and a, l", 0xa5, 0, 4, Box::new(and_l)),
+    );
+    instruction_set.insert(
+        0xa6,
+        Instruction::new("and (hl)", 0xa6, 0, 8, Box::new(and_mem_hl)),
+    );
+    instruction_set.insert(
+        0xa7,
+        Instruction::new("and a, a", 0xa7, 0, 4, Box::new(and_a)),
+    );
+    instruction_set.insert(
+        0xa8,
+        Instruction::new("xor a, b", 0xa8, 0, 4, Box::new(xor_b)),
+    );
+    instruction_set.insert(
+        0xa9,
+        Instruction::new("xor a, c", 0xa9, 0, 4, Box::new(xor_c)),
+    );
+    instruction_set.insert(
+        0xaa,
+        Instruction::new("xor a, d", 0xaa, 0, 4, Box::new(xor_d)),
+    );
+    instruction_set.insert(
+        0xab,
+        Instruction::new("xor a, e", 0xab, 0, 4, Box::new(xor_e)),
+    );
+    instruction_set.insert(
+        0xac,
+        Instruction::new("xor a, h", 0xac, 0, 4, Box::new(xor_h)),
+    );
+    instruction_set.insert(
+        0xad,
+        Instruction::new("xor a, l", 0xad, 0, 4, Box::new(xor_l)),
+    );
+    instruction_set.insert(
+        0xae,
+        Instruction::new("xor a, (hl)", 0xae, 0, 8, Box::new(xor_mem_hl)),
+    );
+    instruction_set.insert(
+        0xaf,
+        Instruction::new("xor a, a", 0xaf, 0, 4, Box::new(xor_a)),
     );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn xor_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.a);
+}
+
+fn xor_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.b);
+}
+
+fn xor_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.c);
+}
+
+fn xor_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.d);
+}
+
+fn xor_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.e);
+}
+
+fn xor_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.h);
+}
+
+fn xor_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_xor(core.registers.l);
+}
+
+fn xor_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_xor(value);
+}
+
+fn and_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.a);
+}
+
+fn and_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.b);
+}
+
+fn and_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.c);
+}
+
+fn and_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.d);
+}
+
+fn and_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.e);
+}
+
+fn and_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.h);
+}
+
+fn and_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_and(core.registers.l);
+}
+
+fn and_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_and(value);
 }
 
 fn subtract_a_with_carry(core: &mut Core, _: Option<Operand>) {
