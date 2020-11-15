@@ -844,8 +844,132 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xbf,
         Instruction::new("cp a, a", 0xbf, 0, 4, Box::new(compare_a)),
     );
+    instruction_set.insert(
+        0xc0,
+        Instruction::new("ret nz", 0xc0, 0, 8, Box::new(ret_nz)),
+    );
+    instruction_set.insert(
+        0xc1,
+        Instruction::new("pop bc", 0xc1, 0, 12, Box::new(pop_bc)),
+    );
+    instruction_set.insert(
+        0xc2,
+        Instruction::new("jp nz, a16", 0xc2, 2, 12, Box::new(jp_nz_a16)),
+    );
+    instruction_set.insert(
+        0xc3,
+        Instruction::new("JP a16", 0xc3, 2, 12, Box::new(jp_a16)),
+    );
+    instruction_set.insert(
+        0xc4,
+        Instruction::new("call nz, a16", 0xc4, 2, 12, Box::new(call_nz_a16)),
+    );
+    instruction_set.insert(
+        0xc5,
+        Instruction::new("push bc", 0xc5, 0, 16, Box::new(push_bc)),
+    );
+    instruction_set.insert(
+        0xc6,
+        Instruction::new("add d8", 0xc6, 1, 8, Box::new(add_d8)),
+    );
+    instruction_set.insert(
+        0xc7,
+        Instruction::new("rst 00h", 0xc7, 0, 32, Box::new(rst_00h)),
+    );
+    instruction_set.insert(0xc8, Instruction::new("RET Z", 0xc8, 0, 8, Box::new(ret_z)));
+    instruction_set.insert(0xc9, Instruction::new("ret", 0xc9, 0, 8, Box::new(ret)));
+    instruction_set.insert(
+        0xca,
+        Instruction::new("jp z, a16", 0xca, 2, 12, Box::new(jp_z_a16)),
+    );
+    instruction_set.insert(
+        0xcc,
+        Instruction::new("call z, a16", 0xcc, 2, 12, Box::new(call_z_a16)),
+    );
+    instruction_set.insert(
+        0xcd,
+        Instruction::new("call a16", 0xcd, 2, 12, Box::new(call_a16)),
+    );
+    instruction_set.insert(
+        0xce,
+        Instruction::new("adc a, d8", 0xce, 1, 8, Box::new(adc_d8)),
+    );
+    instruction_set.insert(
+        0xcf,
+        Instruction::new("rst 08h", 0xcf, 0, 32, Box::new(rst_08h)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn rst_00h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x00;
+}
+
+fn rst_08h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x08;
+}
+
+fn push_bc(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.get_bc());
+}
+
+fn call_nz_a16(core: &mut Core, operand: Option<Operand>) {
+    if !core.registers.get_flag(Flag::Z) {
+        core.stack_push(core.registers.pc);
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
+fn call_a16(core: &mut Core, operand: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = operand.unwrap().word;
+}
+
+fn call_z_a16(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::Z) {
+        core.stack_push(core.registers.pc);
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
+fn jp_nz_a16(core: &mut Core, operand: Option<Operand>) {
+    if !core.registers.get_flag(Flag::Z) {
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
+fn jp_z_a16(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::Z) {
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
+fn jp_a16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.pc = operand.unwrap().word;
+}
+
+fn pop_bc(core: &mut Core, _: Option<Operand>) {
+    let value = core.stack_pop();
+    core.registers.set_bc(value);
+}
+
+fn ret(core: &mut Core, _: Option<Operand>) {
+    core.registers.pc = core.stack_pop();
+}
+
+fn ret_nz(core: &mut Core, _: Option<Operand>) {
+    if !core.registers.get_flag(Flag::Z) {
+        core.registers.pc = core.stack_pop();
+    }
+}
+
+fn ret_z(core: &mut Core, _: Option<Operand>) {
+    if core.registers.get_flag(Flag::Z) {
+        core.registers.pc = core.stack_pop();
+    }
 }
 
 fn compare_a(core: &mut Core, _: Option<Operand>) {
@@ -1046,6 +1170,10 @@ fn subtract_mem_hl(core: &mut Core, _: Option<Operand>) {
     core.alu_sub(value);
 }
 
+fn adc_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_adc(operand.unwrap().byte);
+}
+
 fn adc_a(core: &mut Core, _: Option<Operand>) {
     core.alu_adc(core.registers.a);
 }
@@ -1077,6 +1205,10 @@ fn adc_l(core: &mut Core, _: Option<Operand>) {
 fn adc_mem_hl(core: &mut Core, _: Option<Operand>) {
     let value = core.memory.borrow().get(core.registers.get_hl());
     core.alu_adc(value);
+}
+
+fn add_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_add(operand.unwrap().byte);
 }
 
 fn add_a(core: &mut Core, _: Option<Operand>) {
