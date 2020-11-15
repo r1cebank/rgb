@@ -329,8 +329,136 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x3f,
         Instruction::new("ccf", 0x3f, 0, 4, Box::new(complement_carry)),
     );
+    instruction_set.insert(
+        0x40,
+        Instruction::new("ld b, b", 0x40, 0, 4, Box::new(load_b_b)),
+    );
+    instruction_set.insert(
+        0x41,
+        Instruction::new("ld b, c", 0x41, 0, 4, Box::new(load_b_c)),
+    );
+    instruction_set.insert(
+        0x42,
+        Instruction::new("ld b, d", 0x42, 0, 4, Box::new(load_b_d)),
+    );
+    instruction_set.insert(
+        0x43,
+        Instruction::new("ld b, e", 0x43, 0, 4, Box::new(load_b_e)),
+    );
+    instruction_set.insert(
+        0x44,
+        Instruction::new("ld b, h", 0x44, 0, 4, Box::new(load_b_h)),
+    );
+    instruction_set.insert(
+        0x45,
+        Instruction::new("ld b, l", 0x45, 0, 4, Box::new(load_b_l)),
+    );
+    instruction_set.insert(
+        0x46,
+        Instruction::new("ld b, (hl)", 0x46, 0, 8, Box::new(load_b_mem_hl)),
+    );
+    instruction_set.insert(
+        0x47,
+        Instruction::new("ld b, a", 0x47, 0, 4, Box::new(load_b_a)),
+    );
+    instruction_set.insert(
+        0x48,
+        Instruction::new("ld c, b", 0x48, 0, 4, Box::new(load_c_b)),
+    );
+    instruction_set.insert(
+        0x49,
+        Instruction::new("ld c, c", 0x49, 0, 4, Box::new(load_c_c)),
+    );
+    instruction_set.insert(
+        0x4a,
+        Instruction::new("ld c, d", 0x4a, 0, 4, Box::new(load_c_d)),
+    );
+    instruction_set.insert(
+        0x4b,
+        Instruction::new("ld c, e", 0x4b, 0, 4, Box::new(load_c_e)),
+    );
+    instruction_set.insert(
+        0x4c,
+        Instruction::new("ld c, h", 0x4c, 0, 4, Box::new(load_c_h)),
+    );
+    instruction_set.insert(
+        0x4d,
+        Instruction::new("ld c, l", 0x4d, 0, 4, Box::new(load_c_l)),
+    );
+    instruction_set.insert(
+        0x4e,
+        Instruction::new("ld c, (hl)", 0x4e, 0, 8, Box::new(load_c_mem_hl)),
+    );
+    instruction_set.insert(
+        0x4f,
+        Instruction::new("ld c, a", 0x4f, 0, 4, Box::new(load_c_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn load_c_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.a;
+}
+
+fn load_c_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.b;
+}
+
+fn load_c_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.c;
+}
+
+fn load_c_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.d;
+}
+
+fn load_c_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.e;
+}
+
+fn load_c_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.h;
+}
+
+fn load_c_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.registers.l;
+}
+
+fn load_c_mem_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.memory.borrow().get(core.registers.get_hl());
+}
+
+fn load_b_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.a;
+}
+
+fn load_b_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.c;
+}
+
+fn load_b_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.d;
+}
+
+fn load_b_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.e;
+}
+
+fn load_b_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.h;
+}
+
+fn load_b_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.l;
+}
+
+fn load_b_mem_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.memory.borrow().get(core.registers.get_hl());
+}
+
+fn load_b_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.registers.b;
 }
 
 fn nop(_: &mut Core, _: Option<Operand>) {}

@@ -33,8 +33,6 @@
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,13 +131,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00001" summary="Adding necessary files">
-      <created>1604817001234</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1604817001234</updated>
     </task>
     <task id="LOCAL-00002" summary="Adding necessary files">
       <created>1604821544886</created>
@@ -477,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605395997569</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="Refactor instructions">
+      <created>1605401529797</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1605401529798</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -545,22 +543,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605331242053" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605397928146">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605402813210">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605397928146" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605397928146">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605402813210" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605402813209">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605397928146" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605397928146">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605402813209" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605402813209">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605397928146" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605397928146">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605402813209" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605402813209">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605397928146" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605402813209" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
