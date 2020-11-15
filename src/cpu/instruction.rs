@@ -646,8 +646,73 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x8f,
         Instruction::new("adc a, a", 0x8f, 0, 4, Box::new(adc_a)),
     );
+    instruction_set.insert(
+        0x90,
+        Instruction::new("sub b", 0x90, 0, 4, Box::new(subtract_b)),
+    );
+    instruction_set.insert(
+        0x91,
+        Instruction::new("sub c", 0x91, 0, 4, Box::new(subtract_c)),
+    );
+    instruction_set.insert(
+        0x92,
+        Instruction::new("sub d", 0x92, 0, 4, Box::new(subtract_d)),
+    );
+    instruction_set.insert(
+        0x93,
+        Instruction::new("sub e", 0x93, 0, 4, Box::new(subtract_e)),
+    );
+    instruction_set.insert(
+        0x94,
+        Instruction::new("sub h", 0x94, 0, 4, Box::new(subtract_h)),
+    );
+    instruction_set.insert(
+        0x95,
+        Instruction::new("sub l", 0x95, 0, 4, Box::new(subtract_l)),
+    );
+    instruction_set.insert(
+        0x96,
+        Instruction::new("sub (hl)", 0x96, 0, 8, Box::new(subtract_mem_hl)),
+    );
+    instruction_set.insert(
+        0x97,
+        Instruction::new("sub a", 0x97, 0, 4, Box::new(subtract_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn subtract_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.a);
+}
+
+fn subtract_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.b);
+}
+
+fn subtract_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.c);
+}
+
+fn subtract_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.d);
+}
+
+fn subtract_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.e);
+}
+
+fn subtract_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.h);
+}
+
+fn subtract_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_sub(core.registers.l);
+}
+
+fn subtract_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_sub(value);
 }
 
 fn adc_a(core: &mut Core, _: Option<Operand>) {
