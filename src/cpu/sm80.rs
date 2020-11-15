@@ -8,7 +8,7 @@ pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
     pub registers: Registers,
     pub halted: bool,
-    ei: bool,
+    pub ei: bool,
 }
 
 impl Core {

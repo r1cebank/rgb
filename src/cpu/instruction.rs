@@ -926,9 +926,23 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xd7,
         Instruction::new("rst 10h", 0xd7, 0, 32, Box::new(rst_10h)),
     );
+    instruction_set.insert(0xd8, Instruction::new("ret c", 0xd8, 0, 8, Box::new(ret_c)));
+    instruction_set.insert(0xd9, Instruction::new("reti", 0xd9, 0, 8, Box::new(ret_i)));
     instruction_set.insert(
-        0xd8,
-        Instruction::new("ret c", 0xd8, 0, 8, Box::new(ret_c)),
+        0xda,
+        Instruction::new("jp c, a16", 0xda, 2, 12, Box::new(jp_c_a16)),
+    );
+    instruction_set.insert(
+        0xdc,
+        Instruction::new("call c, a16", 0xdc, 2, 12, Box::new(call_c_a16)),
+    );
+    instruction_set.insert(
+        0xde,
+        Instruction::new("sbc d8", 0xde, 1, 8, Box::new(subtract_d8_with_carry)),
+    );
+    instruction_set.insert(
+        0xdf,
+        Instruction::new("rst 18h", 0xdf, 0, 32, Box::new(rst_18h)),
     );
 
     (instruction_set, cb_instruction_set)
@@ -947,6 +961,11 @@ fn rst_08h(core: &mut Core, _: Option<Operand>) {
 fn rst_10h(core: &mut Core, _: Option<Operand>) {
     core.stack_push(core.registers.pc);
     core.registers.pc = 0x10;
+}
+
+fn rst_18h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x18;
 }
 
 fn push_bc(core: &mut Core, _: Option<Operand>) {
@@ -968,6 +987,13 @@ fn call_nc_a16(core: &mut Core, operand: Option<Operand>) {
     }
 }
 
+fn call_c_a16(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::C) {
+        core.stack_push(core.registers.pc);
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
 fn call_nz_a16(core: &mut Core, operand: Option<Operand>) {
     if !core.registers.get_flag(Flag::Z) {
         core.stack_push(core.registers.pc);
@@ -983,6 +1009,12 @@ fn call_a16(core: &mut Core, operand: Option<Operand>) {
 fn call_z_a16(core: &mut Core, operand: Option<Operand>) {
     if core.registers.get_flag(Flag::Z) {
         core.stack_push(core.registers.pc);
+        core.registers.pc = operand.unwrap().word;
+    }
+}
+
+fn jp_c_a16(core: &mut Core, operand: Option<Operand>) {
+    if core.registers.get_flag(Flag::C) {
         core.registers.pc = operand.unwrap().word;
     }
 }
@@ -1016,6 +1048,11 @@ fn pop_bc(core: &mut Core, _: Option<Operand>) {
 
 fn ret(core: &mut Core, _: Option<Operand>) {
     core.registers.pc = core.stack_pop();
+}
+
+fn ret_i(core: &mut Core, _: Option<Operand>) {
+    core.registers.pc = core.stack_pop();
+    core.ei = true;
 }
 
 fn ret_nz(core: &mut Core, _: Option<Operand>) {
@@ -1172,6 +1209,10 @@ fn and_l(core: &mut Core, _: Option<Operand>) {
 fn and_mem_hl(core: &mut Core, _: Option<Operand>) {
     let value = core.memory.borrow().get(core.registers.get_hl());
     core.alu_and(value);
+}
+
+fn subtract_d8_with_carry(core: &mut Core, operand: Option<Operand>) {
+    core.alu_sbc(operand.unwrap().byte);
 }
 
 fn subtract_a_with_carry(core: &mut Core, _: Option<Operand>) {
