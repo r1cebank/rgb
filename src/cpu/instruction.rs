@@ -988,17 +988,100 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0xef,
         Instruction::new("rst 28h", 0xef, 0, 32, Box::new(rst_28h)),
     );
+    instruction_set.insert(
+        0xf0,
+        Instruction::new("ldh a, (a8)", 0xf0, 1, 12, Box::new(ldh_a_a8)),
+    );
+    instruction_set.insert(
+        0xf1,
+        Instruction::new("pop af", 0xf1, 0, 12, Box::new(pop_af)),
+    );
+    instruction_set.insert(
+        0xf2,
+        Instruction::new("ld a, (c)", 0xf2, 0, 8, Box::new(load_a_mem_c)),
+    );
+    instruction_set.insert(
+        0xf3,
+        Instruction::new("di", 0xf3, 0, 4, Box::new(di)),
+    );
+    instruction_set.insert(
+        0xf5,
+        Instruction::new("push af", 0xf5, 0, 16, Box::new(push_af)),
+    );
+    instruction_set.insert(
+        0xf6,
+        Instruction::new("or d8", 0xf6, 1, 8, Box::new(or_d8)),
+    );
+    instruction_set.insert(
+        0xf7,
+        Instruction::new("rst 30h", 0xf7, 0, 32, Box::new(rst_30h)),
+    );
+    instruction_set.insert(
+        0xf8,
+        Instruction::new("ld hl, sp + r8", 0xf8, 1, 12, Box::new(load_hl_sp_plus_r8)),
+    );
+    instruction_set.insert(
+        0xf9,
+        Instruction::new("ld sp, hl", 0xf9, 0, 8, Box::new(load_sp_hl)),
+    );
+    instruction_set.insert(
+        0xfa,
+        Instruction::new("ld a, (a16)", 0xfa, 2, 16, Box::new(load_a_mem_a16)),
+    );
+    instruction_set.insert(
+        0xfb,
+        Instruction::new("ei", 0xfb, 0, 4, Box::new(ei)),
+    );
+    instruction_set.insert(
+        0xfe,
+        Instruction::new("cp d8", 0xfe, 1, 8, Box::new(compare_d8)),
+    );
+    instruction_set.insert(
+        0xff,
+        Instruction::new("rst 38h", 0xff, 0, 32, Box::new(rst_38h)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn load_hl_sp_plus_r8(core: &mut Core, operand: Option<Operand>) {
+    let a = core.registers.sp;
+    let b = i16::from(operand.unwrap().byte as i8) as u16;
+    core.registers.set_flag(Flag::C, (a & 0x00ff) + (b & 0x00ff) > 0x00ff);
+    core.registers.set_flag(Flag::H, (a & 0x000f) + (b & 0x000f) > 0x000f);
+    core.registers.set_flag(Flag::N, false);
+    core.registers.set_flag(Flag::Z, false);
+    core.registers.set_hl(a.wrapping_add(b));
+}
+
+fn di(core: &mut Core, _: Option<Operand>) {
+    core.ei = false;
+}
+
+fn ei(core: &mut Core, _: Option<Operand>) {
+    core.ei = true;
 }
 
 fn load_mem_a16_a(core: &mut Core, operand: Option<Operand>) {
     core.memory.borrow_mut().set(operand.unwrap().word, core.registers.a);
 }
 
+fn load_a_mem_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.memory.borrow().get(0xff00 | u16::from(core.registers.c));
+}
+
+fn load_a_mem_a16(core: &mut Core, operand: Option<Operand>) {
+    core.registers.a = core.memory.borrow().get(operand.unwrap().word);
+}
+
 fn ldh_a(core: &mut Core, operand: Option<Operand>) {
     let address = 0xff00 | u16::from(operand.unwrap().byte);
     core.memory.borrow_mut().set(address, core.registers.a);
+}
+
+fn ldh_a_a8(core: &mut Core, operand: Option<Operand>) {
+    let address = 0xff00 | u16::from(operand.unwrap().byte);
+    core.registers.a = core.memory.borrow().get(address);
 }
 
 fn ld_mem_c_a(core: &mut Core, _: Option<Operand>) {
@@ -1036,12 +1119,26 @@ fn rst_28h(core: &mut Core, _: Option<Operand>) {
     core.registers.pc = 0x28;
 }
 
+fn rst_30h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x30;
+}
+
+fn rst_38h(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.pc);
+    core.registers.pc = 0x38;
+}
+
 fn push_bc(core: &mut Core, _: Option<Operand>) {
     core.stack_push(core.registers.get_bc());
 }
 
 fn push_hl(core: &mut Core, _: Option<Operand>) {
     core.stack_push(core.registers.get_hl());
+}
+
+fn push_af(core: &mut Core, _: Option<Operand>) {
+    core.stack_push(core.registers.get_af());
 }
 
 fn push_de(core: &mut Core, _: Option<Operand>) {
@@ -1118,6 +1215,11 @@ fn pop_bc(core: &mut Core, _: Option<Operand>) {
     core.registers.set_bc(value);
 }
 
+fn pop_af(core: &mut Core, _: Option<Operand>) {
+    let value = core.stack_pop();
+    core.registers.set_af(value);
+}
+
 fn pop_de(core: &mut Core, _: Option<Operand>) {
     let value = core.stack_pop();
     core.registers.set_de(value);
@@ -1161,6 +1263,10 @@ fn ret_z(core: &mut Core, _: Option<Operand>) {
     }
 }
 
+fn compare_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_cp(operand.unwrap().byte);
+}
+
 fn compare_a(core: &mut Core, _: Option<Operand>) {
     core.alu_cp(core.registers.a);
 }
@@ -1192,6 +1298,10 @@ fn compare_l(core: &mut Core, _: Option<Operand>) {
 fn compare_mem_hl(core: &mut Core, _: Option<Operand>) {
     let value = core.memory.borrow().get(core.registers.get_hl());
     core.alu_cp(value);
+}
+
+fn or_d8(core: &mut Core, operand: Option<Operand>) {
+    core.alu_or(operand.unwrap().byte);
 }
 
 fn or_a(core: &mut Core, _: Option<Operand>) {
@@ -1695,6 +1805,10 @@ fn load_sp_d16(core: &mut Core, operand: Option<Operand>) {
 
 fn load_hl_d16(core: &mut Core, operand: Option<Operand>) {
     core.registers.set_hl(operand.unwrap().word);
+}
+
+fn load_sp_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.sp = core.registers.get_hl();
 }
 
 fn add_hl_hl(core: &mut Core, _: Option<Operand>) {
