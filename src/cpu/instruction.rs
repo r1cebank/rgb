@@ -550,8 +550,68 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x77,
         Instruction::new("ld (hl), a", 0x77, 0, 8, Box::new(load_mem_hl_a)),
     );
+    instruction_set.insert(
+        0x78,
+        Instruction::new("ld a, b", 0x78, 0, 4, Box::new(load_a_b)),
+    );
+    instruction_set.insert(
+        0x79,
+        Instruction::new("ld a, c", 0x79, 0, 4, Box::new(load_a_c)),
+    );
+    instruction_set.insert(
+        0x7a,
+        Instruction::new("ld a, d", 0x7a, 0, 4, Box::new(load_a_d)),
+    );
+    instruction_set.insert(
+        0x7b,
+        Instruction::new("ld a, e", 0x7b, 0, 4, Box::new(load_a_e)),
+    );
+    instruction_set.insert(
+        0x7c,
+        Instruction::new("ld a, h", 0x7c, 0, 4, Box::new(load_a_h)),
+    );
+    instruction_set.insert(
+        0x7d,
+        Instruction::new("ld a, l", 0x7d, 0, 4, Box::new(load_a_l)),
+    );
+    instruction_set.insert(
+        0x7e,
+        Instruction::new("ld a, (hl)", 0x6e, 0, 8, Box::new(load_a_mem_hl)),
+    );
+    instruction_set.insert(
+        0x7f,
+        Instruction::new("ld a, a", 0x7f, 0, 4, Box::new(load_a_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn load_a_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.a;
+}
+
+fn load_a_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.b;
+}
+
+fn load_a_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.c;
+}
+
+fn load_a_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.d;
+}
+
+fn load_a_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.e;
+}
+
+fn load_a_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.h;
+}
+
+fn load_a_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.registers.l;
 }
 
 fn load_l_a(core: &mut Core, _: Option<Operand>) {
@@ -692,6 +752,10 @@ fn load_c_h(core: &mut Core, _: Option<Operand>) {
 
 fn load_c_l(core: &mut Core, _: Option<Operand>) {
     core.registers.c = core.registers.l;
+}
+
+fn load_a_mem_hl(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.memory.borrow().get(core.registers.get_hl());
 }
 
 fn load_c_mem_hl(core: &mut Core, _: Option<Operand>) {
