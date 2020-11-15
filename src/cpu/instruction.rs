@@ -521,6 +521,35 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x6f,
         Instruction::new("ld l, a", 0x6f, 0, 4, Box::new(load_l_a)),
     );
+    instruction_set.insert(
+        0x70,
+        Instruction::new("ld (hl), b", 0x70, 0, 8, Box::new(load_mem_hl_b)),
+    );
+    instruction_set.insert(
+        0x71,
+        Instruction::new("ld (hl), c", 0x71, 0, 8, Box::new(load_mem_hl_c)),
+    );
+    instruction_set.insert(
+        0x72,
+        Instruction::new("ld (hl), d", 0x72, 0, 8, Box::new(load_mem_hl_d)),
+    );
+    instruction_set.insert(
+        0x73,
+        Instruction::new("ld (hl), e", 0x73, 0, 8, Box::new(load_mem_hl_e)),
+    );
+    instruction_set.insert(
+        0x74,
+        Instruction::new("ld (hl), h", 0x74, 0, 8, Box::new(load_mem_hl_h)),
+    );
+    instruction_set.insert(
+        0x75,
+        Instruction::new("ld (hl), l", 0x75, 0, 8, Box::new(load_mem_hl_l)),
+    );
+    instruction_set.insert(0x76, Instruction::new("halt", 0x76, 0, 4, Box::new(halt)));
+    instruction_set.insert(
+        0x77,
+        Instruction::new("ld (hl), a", 0x77, 0, 8, Box::new(load_mem_hl_a)),
+    );
 
     (instruction_set, cb_instruction_set)
 }
@@ -721,6 +750,10 @@ fn nop(_: &mut Core, _: Option<Operand>) {}
 
 fn stop(_: &mut Core, _: Option<Operand>) {}
 
+fn halt(core: &mut Core, _: Option<Operand>) {
+    core.halted = true;
+}
+
 fn load_bc_d16(core: &mut Core, operand: Option<Operand>) {
     core.registers.set_bc(operand.unwrap().word);
 }
@@ -749,6 +782,48 @@ fn load_mem_bc_a(core: &mut Core, _: Option<Operand>) {
     core.memory
         .borrow_mut()
         .set(core.registers.get_bc(), core.registers.a);
+}
+
+fn load_mem_hl_b(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.b);
+}
+
+fn load_mem_hl_c(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.c);
+}
+
+fn load_mem_hl_d(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.d);
+}
+
+fn load_mem_hl_e(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.e);
+}
+
+fn load_mem_hl_h(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.h);
+}
+
+fn load_mem_hl_l(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.l);
+}
+
+fn load_mem_hl_a(core: &mut Core, _: Option<Operand>) {
+    core.memory
+        .borrow_mut()
+        .set(core.registers.get_hl(), core.registers.a);
 }
 
 fn load_mem_de_a(core: &mut Core, _: Option<Operand>) {

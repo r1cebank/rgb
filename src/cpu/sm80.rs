@@ -7,7 +7,7 @@ use super::registers::{Flag, Registers};
 pub struct Core {
     pub memory: Rc<RefCell<dyn Memory>>,
     pub registers: Registers,
-    halted: bool,
+    pub halted: bool,
     ei: bool,
 }
 
