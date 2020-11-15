@@ -678,8 +678,73 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x97,
         Instruction::new("sub a", 0x97, 0, 4, Box::new(subtract_a)),
     );
+    instruction_set.insert(
+        0x98,
+        Instruction::new("sbc b", 0x98, 0, 4, Box::new(subtract_b_with_carry)),
+    );
+    instruction_set.insert(
+        0x99,
+        Instruction::new("sbc c", 0x99, 0, 4, Box::new(subtract_c_with_carry)),
+    );
+    instruction_set.insert(
+        0x9a,
+        Instruction::new("sbc d", 0x9a, 0, 4, Box::new(subtract_d_with_carry)),
+    );
+    instruction_set.insert(
+        0x9b,
+        Instruction::new("sbc e", 0x9b, 0, 4, Box::new(subtract_e_with_carry)),
+    );
+    instruction_set.insert(
+        0x9c,
+        Instruction::new("sbc h", 0x9c, 0, 4, Box::new(subtract_h_with_carry)),
+    );
+    instruction_set.insert(
+        0x9d,
+        Instruction::new("sbc l", 0x9d, 0, 4, Box::new(subtract_l_with_carry)),
+    );
+    instruction_set.insert(
+        0x9e,
+        Instruction::new("sbc (hl)", 0x9e, 0, 8, Box::new(subtract_mem_hl_with_carry)),
+    );
+    instruction_set.insert(
+        0x9f,
+        Instruction::new("sbc a", 0x9f, 0, 4, Box::new(subtract_a_with_carry)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn subtract_a_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.a);
+}
+
+fn subtract_b_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.b);
+}
+
+fn subtract_c_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.c);
+}
+
+fn subtract_d_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.d);
+}
+
+fn subtract_e_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.e);
+}
+
+fn subtract_h_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.h);
+}
+
+fn subtract_l_with_carry(core: &mut Core, _: Option<Operand>) {
+    core.alu_sbc(core.registers.l);
+}
+
+fn subtract_mem_hl_with_carry(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_sbc(value);
 }
 
 fn subtract_a(core: &mut Core, _: Option<Operand>) {
