@@ -32,6 +32,7 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,13 +131,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00029" summary="JP">
-      <created>1605140662247</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1605140662247</updated>
     </task>
     <task id="LOCAL-00030" summary="CALL, PUSH, POP">
       <created>1605141686293</created>
@@ -474,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605506790020</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="Remove old files">
+      <created>1605508511003</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1605508511003</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -490,7 +491,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="OR" />
     <MESSAGE value="XOR" />
     <MESSAGE value="CP" />
     <MESSAGE value="RET" />
@@ -515,7 +515,8 @@
     <MESSAGE value="Add missing instr" />
     <MESSAGE value="Instruction decoder refactor" />
     <MESSAGE value="Refactor instructions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor instructions" />
+    <MESSAGE value="Remove old files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove old files" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605073732005">
@@ -542,22 +543,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="418" key="GridCell.Tab.0.bottom" timestamp="1605506638263">
+    <state width="2517" height="418" key="GridCell.Tab.0.bottom" timestamp="1605513066310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="418" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506638263" />
-    <state width="2517" height="418" key="GridCell.Tab.0.center" timestamp="1605506638263">
+    <state width="2517" height="418" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605513066310" />
+    <state width="2517" height="418" key="GridCell.Tab.0.center" timestamp="1605513066310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="418" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506638263" />
-    <state width="2517" height="418" key="GridCell.Tab.0.left" timestamp="1605506638263">
+    <state width="2517" height="418" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605513066310" />
+    <state width="2517" height="418" key="GridCell.Tab.0.left" timestamp="1605513066310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="418" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506638263" />
-    <state width="2517" height="418" key="GridCell.Tab.0.right" timestamp="1605506638263">
+    <state width="2517" height="418" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605513066310" />
+    <state width="2517" height="418" key="GridCell.Tab.0.right" timestamp="1605513066310">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="418" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506638263" />
+    <state width="2517" height="418" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605513066310" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

@@ -1911,531 +1911,563 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
 }
 
 fn set_7_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 7);
+    core.registers.a = core.alu_set(core.registers.a, 7);
 }
 
 fn set_7_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 7);
+    core.registers.b = core.alu_set(core.registers.b, 7);
 }
 
 fn set_7_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 7);
+    core.registers.c = core.alu_set(core.registers.c, 7);
 }
 
 fn set_7_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 7);
+    core.registers.d = core.alu_set(core.registers.d, 7);
 }
 
 fn set_7_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 7);
+    core.registers.e = core.alu_set(core.registers.e, 7);
 }
 
 fn set_7_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 7);
+    core.registers.h = core.alu_set(core.registers.h, 7);
 }
 
 fn set_7_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 7);
+    core.registers.l = core.alu_set(core.registers.l, 7);
 }
 
 fn set_7_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 7);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 7);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_6_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 6);
+    core.registers.a = core.alu_set(core.registers.a, 6);
 }
 
 fn set_6_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 6);
+    core.registers.b = core.alu_set(core.registers.b, 6);
 }
 
 fn set_6_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 6);
+    core.registers.c = core.alu_set(core.registers.c, 6);
 }
 
 fn set_6_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 6);
+    core.registers.d = core.alu_set(core.registers.d, 6);
 }
 
 fn set_6_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 6);
+    core.registers.e = core.alu_set(core.registers.e, 6);
 }
 
 fn set_6_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 6);
+    core.registers.h = core.alu_set(core.registers.h, 6);
 }
 
 fn set_6_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 6);
+    core.registers.l = core.alu_set(core.registers.l, 6);
 }
 
 fn set_6_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 6);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 6);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_5_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 5);
+    core.registers.a = core.alu_set(core.registers.a, 5);
 }
 
 fn set_5_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 5);
+    core.registers.b = core.alu_set(core.registers.b, 5);
 }
 
 fn set_5_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 5);
+    core.registers.c = core.alu_set(core.registers.c, 5);
 }
 
 fn set_5_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 5);
+    core.registers.d = core.alu_set(core.registers.d, 5);
 }
 
 fn set_5_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 5);
+    core.registers.e = core.alu_set(core.registers.e, 5);
 }
 
 fn set_5_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 5);
+    core.registers.h = core.alu_set(core.registers.h, 5);
 }
 
 fn set_5_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 5);
+    core.registers.l = core.alu_set(core.registers.l, 5);
 }
 
 fn set_5_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 5);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 5);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_4_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 4);
+    core.registers.a = core.alu_set(core.registers.a, 4);
 }
 
 fn set_4_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 4);
+    core.registers.b = core.alu_set(core.registers.b, 4);
 }
 
 fn set_4_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 4);
+    core.registers.c = core.alu_set(core.registers.c, 4);
 }
 
 fn set_4_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 4);
+    core.registers.d = core.alu_set(core.registers.d, 4);
 }
 
 fn set_4_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 4);
+    core.registers.e = core.alu_set(core.registers.e, 4);
 }
 
 fn set_4_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 4);
+    core.registers.h = core.alu_set(core.registers.h, 4);
 }
 
 fn set_4_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 4);
+    core.registers.l = core.alu_set(core.registers.l, 4);
 }
 
 fn set_4_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 4);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 4);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_3_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 3);
+    core.registers.a = core.alu_set(core.registers.a, 3);
 }
 
 fn set_3_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 3);
+    core.registers.b = core.alu_set(core.registers.b, 3);
 }
 
 fn set_3_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 3);
+    core.registers.c = core.alu_set(core.registers.c, 3);
 }
 
 fn set_3_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 3);
+    core.registers.d = core.alu_set(core.registers.d, 3);
 }
 
 fn set_3_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 3);
+    core.registers.e = core.alu_set(core.registers.e, 3);
 }
 
 fn set_3_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 3);
+    core.registers.h = core.alu_set(core.registers.h, 3);
 }
 
 fn set_3_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 3);
+    core.registers.l = core.alu_set(core.registers.l, 3);
 }
 
 fn set_3_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 3);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 3);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_2_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 2);
+    core.registers.a = core.alu_set(core.registers.a, 2);
 }
 
 fn set_2_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 2);
+    core.registers.b = core.alu_set(core.registers.b, 2);
 }
 
 fn set_2_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 2);
+    core.registers.c = core.alu_set(core.registers.c, 2);
 }
 
 fn set_2_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 2);
+    core.registers.d = core.alu_set(core.registers.d, 2);
 }
 
 fn set_2_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 2);
+    core.registers.e = core.alu_set(core.registers.e, 2);
 }
 
 fn set_2_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 2);
+    core.registers.h = core.alu_set(core.registers.h, 2);
 }
 
 fn set_2_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 2);
+    core.registers.l = core.alu_set(core.registers.l, 2);
 }
 
 fn set_2_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 2);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 2);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_1_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 1);
+    core.registers.a = core.alu_set(core.registers.a, 1);
 }
 
 fn set_1_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 1);
+    core.registers.b = core.alu_set(core.registers.b, 1);
 }
 
 fn set_1_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 1);
+    core.registers.c = core.alu_set(core.registers.c, 1);
 }
 
 fn set_1_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 1);
+    core.registers.d = core.alu_set(core.registers.d, 1);
 }
 
 fn set_1_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 1);
+    core.registers.e = core.alu_set(core.registers.e, 1);
 }
 
 fn set_1_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 1);
+    core.registers.h = core.alu_set(core.registers.h, 1);
 }
 
 fn set_1_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 1);
+    core.registers.l = core.alu_set(core.registers.l, 1);
 }
 
 fn set_1_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 1);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 1);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn set_0_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.a, 0);
+    core.registers.a = core.alu_set(core.registers.a, 0);
 }
 
 fn set_0_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.b, 0);
+    core.registers.b = core.alu_set(core.registers.b, 0);
 }
 
 fn set_0_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.c, 0);
+    core.registers.c = core.alu_set(core.registers.c, 0);
 }
 
 fn set_0_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.d, 0);
+    core.registers.d = core.alu_set(core.registers.d, 0);
 }
 
 fn set_0_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.e, 0);
+    core.registers.e = core.alu_set(core.registers.e, 0);
 }
 
 fn set_0_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.h, 0);
+    core.registers.h = core.alu_set(core.registers.h, 0);
 }
 
 fn set_0_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_set(core.registers.l, 0);
+    core.registers.l = core.alu_set(core.registers.l, 0);
 }
 
 fn set_0_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_set(value, 0);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_set(value, 0);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_7_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 7);
+    core.registers.a = core.alu_res(core.registers.a, 7);
 }
 
 fn res_7_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 7);
+    core.registers.b = core.alu_res(core.registers.b, 7);
 }
 
 fn res_7_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 7);
+    core.registers.c = core.alu_res(core.registers.c, 7);
 }
 
 fn res_7_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 7);
+    core.registers.d = core.alu_res(core.registers.d, 7);
 }
 
 fn res_7_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 7);
+    core.registers.e = core.alu_res(core.registers.e, 7);
 }
 
 fn res_7_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 7);
+    core.registers.h = core.alu_res(core.registers.h, 7);
 }
 
 fn res_7_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 7);
+    core.registers.l = core.alu_res(core.registers.l, 7);
 }
 
 fn res_7_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 7);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 7);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_6_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 6);
+    core.registers.a = core.alu_res(core.registers.a, 6);
 }
 
 fn res_6_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 6);
+    core.registers.b = core.alu_res(core.registers.b, 6);
 }
 
 fn res_6_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 6);
+    core.registers.c = core.alu_res(core.registers.c, 6);
 }
 
 fn res_6_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 6);
+    core.registers.d = core.alu_res(core.registers.d, 6);
 }
 
 fn res_6_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 6);
+    core.registers.e = core.alu_res(core.registers.e, 6);
 }
 
 fn res_6_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 6);
+    core.registers.h = core.alu_res(core.registers.h, 6);
 }
 
 fn res_6_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 6);
+    core.registers.l = core.alu_res(core.registers.l, 6);
 }
 
 fn res_6_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 6);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 6);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_5_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 5);
+    core.registers.a = core.alu_res(core.registers.a, 5);
 }
 
 fn res_5_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 5);
+    core.registers.b = core.alu_res(core.registers.b, 5);
 }
 
 fn res_5_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 5);
+    core.registers.c = core.alu_res(core.registers.c, 5);
 }
 
 fn res_5_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 5);
+    core.registers.d = core.alu_res(core.registers.d, 5);
 }
 
 fn res_5_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 5);
+    core.registers.e = core.alu_res(core.registers.e, 5);
 }
 
 fn res_5_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 5);
+    core.registers.h = core.alu_res(core.registers.h, 5);
 }
 
 fn res_5_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 5);
+    core.registers.l = core.alu_res(core.registers.l, 5);
 }
 
 fn res_5_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 5);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 5);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_4_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 4);
+    core.registers.a = core.alu_res(core.registers.a, 4);
 }
 
 fn res_4_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 4);
+    core.registers.b = core.alu_res(core.registers.b, 4);
 }
 
 fn res_4_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 4);
+    core.registers.c = core.alu_res(core.registers.c, 4);
 }
 
 fn res_4_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 4);
+    core.registers.d = core.alu_res(core.registers.d, 4);
 }
 
 fn res_4_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 4);
+    core.registers.e = core.alu_res(core.registers.e, 4);
 }
 
 fn res_4_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 4);
+    core.registers.h = core.alu_res(core.registers.h, 4);
 }
 
 fn res_4_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 4);
+    core.registers.l = core.alu_res(core.registers.l, 4);
 }
 
 fn res_4_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 4);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 4);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_3_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 3);
+    core.registers.a = core.alu_res(core.registers.a, 3);
 }
 
 fn res_3_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 3);
+    core.registers.b = core.alu_res(core.registers.b, 3);
 }
 
 fn res_3_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 3);
+    core.registers.c = core.alu_res(core.registers.c, 3);
 }
 
 fn res_3_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 3);
+    core.registers.d = core.alu_res(core.registers.d, 3);
 }
 
 fn res_3_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 3);
+    core.registers.e = core.alu_res(core.registers.e, 3);
 }
 
 fn res_3_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 3);
+    core.registers.h = core.alu_res(core.registers.h, 3);
 }
 
 fn res_3_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 3);
+    core.registers.l = core.alu_res(core.registers.l, 3);
 }
 
 fn res_3_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 3);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 3);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_2_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 2);
+    core.registers.a = core.alu_res(core.registers.a, 2);
 }
 
 fn res_2_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 2);
+    core.registers.b = core.alu_res(core.registers.b, 2);
 }
 
 fn res_2_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 2);
+    core.registers.c = core.alu_res(core.registers.c, 2);
 }
 
 fn res_2_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 2);
+    core.registers.d = core.alu_res(core.registers.d, 2);
 }
 
 fn res_2_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 2);
+    core.registers.e = core.alu_res(core.registers.e, 2);
 }
 
 fn res_2_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 2);
+    core.registers.h = core.alu_res(core.registers.h, 2);
 }
 
 fn res_2_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 2);
+    core.registers.l = core.alu_res(core.registers.l, 2);
 }
 
 fn res_2_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 2);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 2);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_1_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 1);
+    core.registers.a = core.alu_res(core.registers.a, 1);
 }
 
 fn res_1_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 1);
+    core.registers.b = core.alu_res(core.registers.b, 1);
 }
 
 fn res_1_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 1);
+    core.registers.c = core.alu_res(core.registers.c, 1);
 }
 
 fn res_1_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 1);
+    core.registers.d = core.alu_res(core.registers.d, 1);
 }
 
 fn res_1_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 1);
+    core.registers.e = core.alu_res(core.registers.e, 1);
 }
 
 fn res_1_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 1);
+    core.registers.h = core.alu_res(core.registers.h, 1);
 }
 
 fn res_1_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 1);
+    core.registers.l = core.alu_res(core.registers.l, 1);
 }
 
 fn res_1_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 1);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 1);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn res_0_a(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.a, 0);
+    core.registers.a = core.alu_res(core.registers.a, 0);
 }
 
 fn res_0_b(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.b, 0);
+    core.registers.b = core.alu_res(core.registers.b, 0);
 }
 
 fn res_0_c(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.c, 0);
+    core.registers.c = core.alu_res(core.registers.c, 0);
 }
 
 fn res_0_d(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.d, 0);
+    core.registers.d = core.alu_res(core.registers.d, 0);
 }
 
 fn res_0_e(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.e, 0);
+    core.registers.e = core.alu_res(core.registers.e, 0);
 }
 
 fn res_0_h(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.h, 0);
+    core.registers.h = core.alu_res(core.registers.h, 0);
 }
 
 fn res_0_l(core: &mut Core, _: Option<Operand>) {
-    core.alu_res(core.registers.l, 0);
+    core.registers.l = core.alu_res(core.registers.l, 0);
 }
 
 fn res_0_mem_hl(core: &mut Core, _: Option<Operand>) {
-    let value = core.memory.borrow().get(core.registers.get_hl());
-    core.alu_res(value, 0);
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_res(value, 0);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn bit_7_a(core: &mut Core, _: Option<Operand>) {
