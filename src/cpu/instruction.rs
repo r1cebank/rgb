@@ -1029,7 +1029,100 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         Instruction::new("rst 38h", 0xff, 0, 32, Box::new(rst_38h)),
     );
 
+    cb_instruction_set.insert(0x00, Instruction::new("rlc b", 0x00, 0, 8, Box::new(rlc_b)));
+    cb_instruction_set.insert(0x01, Instruction::new("rlc c", 0x01, 0, 8, Box::new(rlc_c)));
+    cb_instruction_set.insert(0x02, Instruction::new("rlc d", 0x02, 0, 8, Box::new(rlc_d)));
+    cb_instruction_set.insert(0x03, Instruction::new("rlc e", 0x03, 0, 8, Box::new(rlc_e)));
+    cb_instruction_set.insert(0x04, Instruction::new("rlc h", 0x04, 0, 8, Box::new(rlc_h)));
+    cb_instruction_set.insert(0x05, Instruction::new("rlc l", 0x05, 0, 8, Box::new(rlc_l)));
+    cb_instruction_set.insert(
+        0x06,
+        Instruction::new("rlc (hl)", 0x06, 0, 16, Box::new(rlc_mem_hl)),
+    );
+    cb_instruction_set.insert(0x07, Instruction::new("rlc a", 0x07, 0, 8, Box::new(rlc_a)));
+    cb_instruction_set.insert(0x08, Instruction::new("rrc b", 0x08, 0, 8, Box::new(rrc_b)));
+    cb_instruction_set.insert(0x09, Instruction::new("rrc c", 0x09, 0, 8, Box::new(rrc_c)));
+    cb_instruction_set.insert(0x0a, Instruction::new("rrc d", 0x0a, 0, 8, Box::new(rrc_d)));
+    cb_instruction_set.insert(0x0b, Instruction::new("rrc e", 0x0b, 0, 8, Box::new(rrc_e)));
+    cb_instruction_set.insert(0x0c, Instruction::new("rrc h", 0x0c, 0, 8, Box::new(rrc_h)));
+    cb_instruction_set.insert(0x0d, Instruction::new("rrc l", 0x0d, 0, 8, Box::new(rrc_l)));
+    cb_instruction_set.insert(
+        0x0e,
+        Instruction::new("rrc (hl)", 0x0e, 0, 16, Box::new(rrc_mem_hl)),
+    );
+    cb_instruction_set.insert(0x0f, Instruction::new("rrc a", 0x0f, 0, 8, Box::new(rrc_a)));
+
     (instruction_set, cb_instruction_set)
+}
+
+fn rrc_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rrc(core.registers.a);
+}
+
+fn rrc_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_rrc(core.registers.b);
+}
+
+fn rrc_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_rrc(core.registers.c);
+}
+
+fn rrc_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_rrc(core.registers.d);
+}
+
+fn rrc_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_rrc(core.registers.e);
+}
+
+fn rrc_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_rrc(core.registers.h);
+}
+
+fn rrc_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_rrc(core.registers.l);
+}
+
+fn rrc_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_rrc(value);
+    core.memory.borrow_mut().set(address, result);
+}
+
+fn rlc_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rlc(core.registers.a);
+}
+
+fn rlc_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_rlc(core.registers.b);
+}
+
+fn rlc_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_rlc(core.registers.c);
+}
+
+fn rlc_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_rlc(core.registers.d);
+}
+
+fn rlc_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_rlc(core.registers.e);
+}
+
+fn rlc_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_rlc(core.registers.h);
+}
+
+fn rlc_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_rlc(core.registers.l);
+}
+
+fn rlc_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_rlc(value);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn load_hl_sp_plus_r8(core: &mut Core, operand: Option<Operand>) {

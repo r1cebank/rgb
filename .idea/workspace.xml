@@ -63,7 +63,7 @@
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../gameboy2/src/main.rs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../gameboy2/src/cb_instructions.rs" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
@@ -131,20 +131,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00016" summary="RRA">
-      <created>1605076705443</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1605076705443</updated>
-    </task>
-    <task id="LOCAL-00017" summary="DAA">
-      <created>1605081328560</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1605081328560</updated>
     </task>
     <task id="LOCAL-00018" summary="CCF CPL SCF">
       <created>1605124107461</created>
@@ -475,7 +461,21 @@
       <option name="project" value="LOCAL" />
       <updated>1605479784679</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="Refactor instructions">
+      <created>1605480777341</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1605480777341</updated>
+    </task>
+    <task id="LOCAL-00066" summary="Refactor instructions">
+      <created>1605480863807</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1605480863807</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -539,26 +539,26 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state x="1060" y="455" key="FileChooserDialogImpl" timestamp="1605331242053">
+    <state x="1060" y="455" key="FileChooserDialogImpl" timestamp="1605480817131">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605331242053" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605479104788">
+    <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605480817131" />
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605493847381">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605479104788" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605479104788">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605493847381">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605479104788" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605479104788">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605493847381">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605479104788" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605479104788">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605493847381">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605479104788" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
