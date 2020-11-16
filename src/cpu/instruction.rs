@@ -1095,8 +1095,121 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         Instruction::new("sra (hl)", 0x2e, 0, 16, Box::new(sra_mem_hl)),
     );
     cb_instruction_set.insert(0x2f, Instruction::new("sra a", 0x2f, 0, 8, Box::new(sra_a)));
+    cb_instruction_set.insert(
+        0x30,
+        Instruction::new("swap b", 0x30, 0, 8, Box::new(swap_b)),
+    );
+    cb_instruction_set.insert(
+        0x31,
+        Instruction::new("swap c", 0x31, 0, 8, Box::new(swap_c)),
+    );
+    cb_instruction_set.insert(
+        0x32,
+        Instruction::new("swap d", 0x32, 0, 8, Box::new(swap_d)),
+    );
+    cb_instruction_set.insert(
+        0x33,
+        Instruction::new("swap e", 0x33, 0, 8, Box::new(swap_e)),
+    );
+    cb_instruction_set.insert(
+        0x34,
+        Instruction::new("swap h", 0x34, 0, 8, Box::new(swap_h)),
+    );
+    cb_instruction_set.insert(
+        0x35,
+        Instruction::new("swap l", 0x35, 0, 8, Box::new(swap_l)),
+    );
+    cb_instruction_set.insert(
+        0x36,
+        Instruction::new("swap (hl)", 0x36, 0, 16, Box::new(swap_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0x37,
+        Instruction::new("swap a", 0x37, 0, 8, Box::new(swap_a)),
+    );
+    cb_instruction_set.insert(0x38, Instruction::new("srl b", 0x38, 0, 8, Box::new(srl_b)));
+    cb_instruction_set.insert(0x39, Instruction::new("srl c", 0x39, 0, 8, Box::new(srl_c)));
+    cb_instruction_set.insert(0x3a, Instruction::new("srl d", 0x3a, 0, 8, Box::new(srl_d)));
+    cb_instruction_set.insert(0x3b, Instruction::new("srl e", 0x3b, 0, 8, Box::new(srl_e)));
+    cb_instruction_set.insert(0x3c, Instruction::new("srl h", 0x3c, 0, 8, Box::new(srl_h)));
+    cb_instruction_set.insert(0x3d, Instruction::new("srl l", 0x3d, 0, 8, Box::new(srl_l)));
+    cb_instruction_set.insert(
+        0x3e,
+        Instruction::new("srl (hl)", 0x3e, 0, 16, Box::new(srl_mem_hl)),
+    );
+    cb_instruction_set.insert(0x3f, Instruction::new("srl a", 0x3f, 0, 8, Box::new(srl_a)));
 
     (instruction_set, cb_instruction_set)
+}
+
+fn srl_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_srl(core.registers.a);
+}
+
+fn srl_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_srl(core.registers.b);
+}
+
+fn srl_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_srl(core.registers.c);
+}
+
+fn srl_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_srl(core.registers.d);
+}
+
+fn srl_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_srl(core.registers.e);
+}
+
+fn srl_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_srl(core.registers.h);
+}
+
+fn srl_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_srl(core.registers.l);
+}
+
+fn srl_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_srl(value);
+    core.memory.borrow_mut().set(address, result);
+}
+
+fn swap_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_swap(core.registers.a);
+}
+
+fn swap_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_swap(core.registers.b);
+}
+
+fn swap_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_swap(core.registers.c);
+}
+
+fn swap_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_swap(core.registers.d);
+}
+
+fn swap_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_swap(core.registers.e);
+}
+
+fn swap_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_swap(core.registers.h);
+}
+
+fn swap_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_swap(core.registers.l);
+}
+
+fn swap_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_swap(value);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn sra_a(core: &mut Core, _: Option<Operand>) {
