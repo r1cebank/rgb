@@ -45,7 +45,7 @@ fn main() {
     let mut config = ConfigBuilder::new();
     config.add_filter_allow(format!("{}", "rgb"));
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Warn, config.build(), TerminalMode::Mixed).unwrap(),
+        TermLogger::new(LevelFilter::Trace, config.build(), TerminalMode::Mixed).unwrap(),
         WriteLogger::new(
             LevelFilter::Warn,
             Config::default(),
