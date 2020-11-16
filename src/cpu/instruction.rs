@@ -1051,8 +1051,100 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         Instruction::new("rrc (hl)", 0x0e, 0, 16, Box::new(rrc_mem_hl)),
     );
     cb_instruction_set.insert(0x0f, Instruction::new("rrc a", 0x0f, 0, 8, Box::new(rrc_a)));
+    cb_instruction_set.insert(0x10, Instruction::new("rl b", 0x10, 0, 8, Box::new(rl_b)));
+    cb_instruction_set.insert(0x11, Instruction::new("rl c", 0x11, 0, 8, Box::new(rl_c)));
+    cb_instruction_set.insert(0x12, Instruction::new("rl d", 0x12, 0, 8, Box::new(rl_d)));
+    cb_instruction_set.insert(0x13, Instruction::new("rl e", 0x13, 0, 8, Box::new(rl_e)));
+    cb_instruction_set.insert(0x14, Instruction::new("rl h", 0x14, 0, 8, Box::new(rl_h)));
+    cb_instruction_set.insert(0x15, Instruction::new("rl l", 0x15, 0, 8, Box::new(rl_l)));
+    cb_instruction_set.insert(
+        0x16,
+        Instruction::new("rl (hl)", 0x16, 0, 16, Box::new(rl_mem_hl)),
+    );
+    cb_instruction_set.insert(0x17, Instruction::new("rl a", 0x17, 0, 8, Box::new(rl_a)));
+    cb_instruction_set.insert(0x18, Instruction::new("rr b", 0x18, 0, 8, Box::new(rr_b)));
+    cb_instruction_set.insert(0x19, Instruction::new("rr c", 0x19, 0, 8, Box::new(rr_c)));
+    cb_instruction_set.insert(0x1a, Instruction::new("rr d", 0x1a, 0, 8, Box::new(rr_d)));
+    cb_instruction_set.insert(0x1b, Instruction::new("rr e", 0x1b, 0, 8, Box::new(rr_e)));
+    cb_instruction_set.insert(0x1c, Instruction::new("rr h", 0x1c, 0, 8, Box::new(rr_h)));
+    cb_instruction_set.insert(0x1d, Instruction::new("rr l", 0x1c, 0, 8, Box::new(rr_l)));
+    cb_instruction_set.insert(
+        0x1e,
+        Instruction::new("rr (hl)", 0x1c, 0, 16, Box::new(rr_mem_hl)),
+    );
+    cb_instruction_set.insert(0x1f, Instruction::new("rr a", 0x1f, 0, 8, Box::new(rr_a)));
 
     (instruction_set, cb_instruction_set)
+}
+
+fn rr_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rr(core.registers.a);
+}
+
+fn rr_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_rr(core.registers.b);
+}
+
+fn rr_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_rr(core.registers.c);
+}
+
+fn rr_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_rr(core.registers.d);
+}
+
+fn rr_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_rr(core.registers.e);
+}
+
+fn rr_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_rr(core.registers.h);
+}
+
+fn rr_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_rr(core.registers.l);
+}
+
+fn rr_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_rr(value);
+    core.memory.borrow_mut().set(address, result);
+}
+
+fn rl_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_rl(core.registers.a);
+}
+
+fn rl_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_rl(core.registers.b);
+}
+
+fn rl_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_rl(core.registers.c);
+}
+
+fn rl_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_rl(core.registers.d);
+}
+
+fn rl_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_rl(core.registers.e);
+}
+
+fn rl_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_rl(core.registers.h);
+}
+
+fn rl_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_rl(core.registers.l);
+}
+
+fn rl_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_rl(value);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn rrc_a(core: &mut Core, _: Option<Operand>) {

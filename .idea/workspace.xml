@@ -132,13 +132,6 @@
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
     </task>
-    <task id="LOCAL-00018" summary="CCF CPL SCF">
-      <created>1605124107461</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1605124107461</updated>
-    </task>
     <task id="LOCAL-00019" summary="ADC, ADD, add missing traces">
       <created>1605126099203</created>
       <option name="number" value="00019" />
@@ -475,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605480863807</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="Refactor instructions">
+      <created>1605494652675</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1605494652675</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -543,22 +543,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605480817131" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605493847381">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605495070004">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605493847381">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605495070004" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605495070004">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605493847381">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605495070004" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605495070004">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605493847381">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605495070004" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605495070004">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605493847381" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605495070004" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
