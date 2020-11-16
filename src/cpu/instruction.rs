@@ -1394,8 +1394,1048 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         0x7f,
         Instruction::new("bit 7, a", 0x7f, 0, 8, Box::new(bit_7_a)),
     );
+    cb_instruction_set.insert(
+        0x80,
+        Instruction::new("res 0, b", 0x80, 0, 8, Box::new(res_0_b)),
+    );
+    cb_instruction_set.insert(
+        0x81,
+        Instruction::new("res 0, c", 0x81, 0, 8, Box::new(res_0_c)),
+    );
+    cb_instruction_set.insert(
+        0x82,
+        Instruction::new("res 0, d", 0x82, 0, 8, Box::new(res_0_d)),
+    );
+    cb_instruction_set.insert(
+        0x83,
+        Instruction::new("res 0, e", 0x83, 0, 8, Box::new(res_0_e)),
+    );
+    cb_instruction_set.insert(
+        0x84,
+        Instruction::new("res 0, h", 0x84, 0, 8, Box::new(res_0_h)),
+    );
+    cb_instruction_set.insert(
+        0x85,
+        Instruction::new("res 0, l", 0x85, 0, 8, Box::new(res_0_l)),
+    );
+    cb_instruction_set.insert(
+        0x86,
+        Instruction::new("res 0, (hl)", 0x86, 0, 16, Box::new(res_0_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0x87,
+        Instruction::new("res 0, a", 0x87, 0, 8, Box::new(res_0_a)),
+    );
+    cb_instruction_set.insert(
+        0x88,
+        Instruction::new("res 1, b", 0x88, 0, 8, Box::new(res_1_b)),
+    );
+    cb_instruction_set.insert(
+        0x89,
+        Instruction::new("res 1, c", 0x89, 0, 8, Box::new(res_1_c)),
+    );
+    cb_instruction_set.insert(
+        0x8a,
+        Instruction::new("res 1, d", 0x8a, 0, 8, Box::new(res_1_d)),
+    );
+    cb_instruction_set.insert(
+        0x8b,
+        Instruction::new("res 1, e", 0x8b, 0, 8, Box::new(res_1_e)),
+    );
+    cb_instruction_set.insert(
+        0x8c,
+        Instruction::new("res 1, h", 0x8c, 0, 8, Box::new(res_1_h)),
+    );
+    cb_instruction_set.insert(
+        0x8d,
+        Instruction::new("res 1, l", 0x8d, 0, 8, Box::new(res_1_l)),
+    );
+    cb_instruction_set.insert(
+        0x8e,
+        Instruction::new("res 1, (hl)", 0x8e, 0, 16, Box::new(res_1_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0x8f,
+        Instruction::new("res 1, a", 0x8f, 0, 8, Box::new(res_1_a)),
+    );
+    cb_instruction_set.insert(
+        0x90,
+        Instruction::new("res 2, b", 0x90, 0, 8, Box::new(res_2_b)),
+    );
+    cb_instruction_set.insert(
+        0x91,
+        Instruction::new("res 2, c", 0x91, 0, 8, Box::new(res_2_c)),
+    );
+    cb_instruction_set.insert(
+        0x92,
+        Instruction::new("res 2, d", 0x92, 0, 8, Box::new(res_2_d)),
+    );
+    cb_instruction_set.insert(
+        0x93,
+        Instruction::new("res 2, e", 0x93, 0, 8, Box::new(res_2_e)),
+    );
+    cb_instruction_set.insert(
+        0x94,
+        Instruction::new("res 2, h", 0x94, 0, 8, Box::new(res_2_h)),
+    );
+    cb_instruction_set.insert(
+        0x95,
+        Instruction::new("res 2, l", 0x95, 0, 8, Box::new(res_2_l)),
+    );
+    cb_instruction_set.insert(
+        0x96,
+        Instruction::new("res 2, (hl)", 0x96, 0, 16, Box::new(res_2_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0x97,
+        Instruction::new("res 2, a", 0x97, 0, 8, Box::new(res_2_a)),
+    );
+    cb_instruction_set.insert(
+        0x98,
+        Instruction::new("res 3, b", 0x98, 0, 8, Box::new(res_3_b)),
+    );
+    cb_instruction_set.insert(
+        0x99,
+        Instruction::new("res 3, c", 0x99, 0, 8, Box::new(res_3_c)),
+    );
+    cb_instruction_set.insert(
+        0x9a,
+        Instruction::new("res 3, d", 0x9a, 0, 8, Box::new(res_3_d)),
+    );
+    cb_instruction_set.insert(
+        0x9b,
+        Instruction::new("res 3, e", 0x9b, 0, 8, Box::new(res_3_e)),
+    );
+    cb_instruction_set.insert(
+        0x9c,
+        Instruction::new("res 3, h", 0x9c, 0, 8, Box::new(res_3_h)),
+    );
+    cb_instruction_set.insert(
+        0x9d,
+        Instruction::new("res 3, l", 0x9d, 0, 8, Box::new(res_3_l)),
+    );
+    cb_instruction_set.insert(
+        0x9e,
+        Instruction::new("res 3, (hl)", 0x9e, 0, 16, Box::new(res_3_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0x9f,
+        Instruction::new("res 3, a", 0x9f, 0, 8, Box::new(res_3_a)),
+    );
+    cb_instruction_set.insert(
+        0xa0,
+        Instruction::new("res 4, b", 0xa0, 0, 8, Box::new(res_4_b)),
+    );
+    cb_instruction_set.insert(
+        0xa1,
+        Instruction::new("res 4, c", 0xa1, 0, 8, Box::new(res_4_c)),
+    );
+    cb_instruction_set.insert(
+        0xa2,
+        Instruction::new("res 4, d", 0xa2, 0, 8, Box::new(res_4_d)),
+    );
+    cb_instruction_set.insert(
+        0xa3,
+        Instruction::new("res 4, e", 0xa3, 0, 8, Box::new(res_4_e)),
+    );
+    cb_instruction_set.insert(
+        0xa4,
+        Instruction::new("res 4, h", 0xa4, 0, 8, Box::new(res_4_h)),
+    );
+    cb_instruction_set.insert(
+        0xa5,
+        Instruction::new("res 4, l", 0xa5, 0, 8, Box::new(res_4_l)),
+    );
+    cb_instruction_set.insert(
+        0xa6,
+        Instruction::new("res 4, (hl)", 0xa6, 0, 16, Box::new(res_4_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xa7,
+        Instruction::new("res 4, a", 0xa7, 0, 8, Box::new(res_4_a)),
+    );
+    cb_instruction_set.insert(
+        0xa8,
+        Instruction::new("res 5, b", 0xa8, 0, 8, Box::new(res_5_b)),
+    );
+    cb_instruction_set.insert(
+        0xa9,
+        Instruction::new("res 5, c", 0xa9, 0, 8, Box::new(res_5_c)),
+    );
+    cb_instruction_set.insert(
+        0xaa,
+        Instruction::new("res 5, d", 0xaa, 0, 8, Box::new(res_5_d)),
+    );
+    cb_instruction_set.insert(
+        0xab,
+        Instruction::new("res 5, e", 0xab, 0, 8, Box::new(res_5_e)),
+    );
+    cb_instruction_set.insert(
+        0xac,
+        Instruction::new("res 5, h", 0xac, 0, 8, Box::new(res_5_h)),
+    );
+    cb_instruction_set.insert(
+        0xad,
+        Instruction::new("res 5, l", 0xad, 0, 8, Box::new(res_5_l)),
+    );
+    cb_instruction_set.insert(
+        0xae,
+        Instruction::new("res 5, (hl)", 0xae, 0, 16, Box::new(res_5_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xaf,
+        Instruction::new("res 5, a", 0xaf, 0, 8, Box::new(res_5_a)),
+    );
+    cb_instruction_set.insert(
+        0xb0,
+        Instruction::new("res 6, b", 0xb0, 0, 8, Box::new(res_6_b)),
+    );
+    cb_instruction_set.insert(
+        0xb1,
+        Instruction::new("res 6, c", 0xb1, 0, 8, Box::new(res_6_c)),
+    );
+    cb_instruction_set.insert(
+        0xb2,
+        Instruction::new("res 6, d", 0xb2, 0, 8, Box::new(res_6_d)),
+    );
+    cb_instruction_set.insert(
+        0xb3,
+        Instruction::new("res 6, e", 0xb3, 0, 8, Box::new(res_6_e)),
+    );
+    cb_instruction_set.insert(
+        0xb4,
+        Instruction::new("res 6, h", 0xb4, 0, 8, Box::new(res_6_h)),
+    );
+    cb_instruction_set.insert(
+        0xb5,
+        Instruction::new("res 6, l", 0xb5, 0, 8, Box::new(res_6_l)),
+    );
+    cb_instruction_set.insert(
+        0xb6,
+        Instruction::new("res 6, (hl)", 0xb6, 0, 16, Box::new(res_6_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xb7,
+        Instruction::new("res 6, a", 0xb7, 0, 8, Box::new(res_6_a)),
+    );
+    cb_instruction_set.insert(
+        0xb8,
+        Instruction::new("res 7, b", 0xb8, 0, 8, Box::new(res_7_b)),
+    );
+    cb_instruction_set.insert(
+        0xb9,
+        Instruction::new("res 7, c", 0xb9, 0, 8, Box::new(res_7_c)),
+    );
+    cb_instruction_set.insert(
+        0xba,
+        Instruction::new("res 7, d", 0xba, 0, 8, Box::new(res_7_d)),
+    );
+    cb_instruction_set.insert(
+        0xbb,
+        Instruction::new("res 7, e", 0xbb, 0, 8, Box::new(res_7_e)),
+    );
+    cb_instruction_set.insert(
+        0xbc,
+        Instruction::new("res 7, h", 0xbc, 0, 8, Box::new(res_7_h)),
+    );
+    cb_instruction_set.insert(
+        0xbd,
+        Instruction::new("res 7, l", 0xbd, 0, 8, Box::new(res_7_l)),
+    );
+    cb_instruction_set.insert(
+        0xbe,
+        Instruction::new("res 7, (hl)", 0xbe, 0, 16, Box::new(res_7_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xbf,
+        Instruction::new("res 7, a", 0xbf, 0, 8, Box::new(res_7_a)),
+    );
+    cb_instruction_set.insert(
+        0xc0,
+        Instruction::new("set 0, b", 0xc0, 0, 8, Box::new(set_0_b)),
+    );
+    cb_instruction_set.insert(
+        0xc1,
+        Instruction::new("set 0, c", 0xc1, 0, 8, Box::new(set_0_c)),
+    );
+    cb_instruction_set.insert(
+        0xc2,
+        Instruction::new("set 0, d", 0xc2, 0, 8, Box::new(set_0_d)),
+    );
+    cb_instruction_set.insert(
+        0xc3,
+        Instruction::new("set 0, e", 0xc3, 0, 8, Box::new(set_0_e)),
+    );
+    cb_instruction_set.insert(
+        0xc4,
+        Instruction::new("set 0, h", 0xc4, 0, 8, Box::new(set_0_h)),
+    );
+    cb_instruction_set.insert(
+        0xc5,
+        Instruction::new("set 0, l", 0xc5, 0, 8, Box::new(set_0_l)),
+    );
+    cb_instruction_set.insert(
+        0xc6,
+        Instruction::new("set 0, (hl)", 0xc6, 0, 16, Box::new(set_0_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xc7,
+        Instruction::new("set 0, a", 0xc7, 0, 8, Box::new(set_0_a)),
+    );
+    cb_instruction_set.insert(
+        0xc8,
+        Instruction::new("set 1, b", 0xc8, 0, 8, Box::new(set_1_b)),
+    );
+    cb_instruction_set.insert(
+        0xc9,
+        Instruction::new("set 1, c", 0xc9, 0, 8, Box::new(set_1_c)),
+    );
+    cb_instruction_set.insert(
+        0xca,
+        Instruction::new("set 1, d", 0xca, 0, 8, Box::new(set_1_d)),
+    );
+    cb_instruction_set.insert(
+        0xcb,
+        Instruction::new("set 1, e", 0xcb, 0, 8, Box::new(set_1_e)),
+    );
+    cb_instruction_set.insert(
+        0xcc,
+        Instruction::new("set 1, h", 0xcc, 0, 8, Box::new(set_1_h)),
+    );
+    cb_instruction_set.insert(
+        0xcd,
+        Instruction::new("set 1, l", 0xcd, 0, 8, Box::new(set_1_l)),
+    );
+    cb_instruction_set.insert(
+        0xce,
+        Instruction::new("set 1, (hl)", 0xce, 0, 16, Box::new(set_1_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xcf,
+        Instruction::new("set 1, a", 0xcf, 0, 8, Box::new(set_1_a)),
+    );
+    cb_instruction_set.insert(
+        0xd0,
+        Instruction::new("set 2, b", 0xd0, 0, 8, Box::new(set_2_b)),
+    );
+    cb_instruction_set.insert(
+        0xd1,
+        Instruction::new("set 2, c", 0xd1, 0, 8, Box::new(set_2_c)),
+    );
+    cb_instruction_set.insert(
+        0xd2,
+        Instruction::new("set 2, d", 0xd2, 0, 8, Box::new(set_2_d)),
+    );
+    cb_instruction_set.insert(
+        0xd3,
+        Instruction::new("set 2, e", 0xd3, 0, 8, Box::new(set_2_e)),
+    );
+    cb_instruction_set.insert(
+        0xd4,
+        Instruction::new("set 2, h", 0xd4, 0, 8, Box::new(set_2_h)),
+    );
+    cb_instruction_set.insert(
+        0xd5,
+        Instruction::new("set 2, l", 0xd5, 0, 8, Box::new(set_2_l)),
+    );
+    cb_instruction_set.insert(
+        0xd6,
+        Instruction::new("set 2, (hl)", 0xd6, 0, 16, Box::new(set_2_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xd7,
+        Instruction::new("set 2, a", 0xd7, 0, 8, Box::new(set_2_a)),
+    );
+    cb_instruction_set.insert(
+        0xd8,
+        Instruction::new("set 3, b", 0xd8, 0, 8, Box::new(set_3_b)),
+    );
+    cb_instruction_set.insert(
+        0xd9,
+        Instruction::new("set 3, c", 0xd9, 0, 8, Box::new(set_3_c)),
+    );
+    cb_instruction_set.insert(
+        0xda,
+        Instruction::new("set 3, d", 0xda, 0, 8, Box::new(set_3_d)),
+    );
+    cb_instruction_set.insert(
+        0xdb,
+        Instruction::new("set 3, e", 0xdb, 0, 8, Box::new(set_3_e)),
+    );
+    cb_instruction_set.insert(
+        0xdc,
+        Instruction::new("set 3, h", 0xdc, 0, 8, Box::new(set_3_h)),
+    );
+    cb_instruction_set.insert(
+        0xdd,
+        Instruction::new("set 3, l", 0xdd, 0, 8, Box::new(set_3_l)),
+    );
+    cb_instruction_set.insert(
+        0xde,
+        Instruction::new("set 3, (hl)", 0xde, 0, 16, Box::new(set_3_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xdf,
+        Instruction::new("set 3, a", 0xdf, 0, 8, Box::new(set_3_a)),
+    );
+    cb_instruction_set.insert(
+        0xe0,
+        Instruction::new("set 4, b", 0xe0, 0, 8, Box::new(set_4_b)),
+    );
+    cb_instruction_set.insert(
+        0xe1,
+        Instruction::new("set 4, c", 0xe1, 0, 8, Box::new(set_4_c)),
+    );
+    cb_instruction_set.insert(
+        0xe2,
+        Instruction::new("set 4, d", 0xe2, 0, 8, Box::new(set_4_d)),
+    );
+    cb_instruction_set.insert(
+        0xe3,
+        Instruction::new("set 4, e", 0xe3, 0, 8, Box::new(set_4_e)),
+    );
+    cb_instruction_set.insert(
+        0xe4,
+        Instruction::new("set 4, h", 0xe4, 0, 8, Box::new(set_4_h)),
+    );
+    cb_instruction_set.insert(
+        0xe5,
+        Instruction::new("set 4, l", 0xe5, 0, 8, Box::new(set_4_l)),
+    );
+    cb_instruction_set.insert(
+        0xe6,
+        Instruction::new("set 4, (hl)", 0xe6, 0, 16, Box::new(set_4_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xe7,
+        Instruction::new("set 4, a", 0xe7, 0, 8, Box::new(set_4_a)),
+    );
+    cb_instruction_set.insert(
+        0xe8,
+        Instruction::new("set 5, b", 0xe8, 0, 8, Box::new(set_5_b)),
+    );
+    cb_instruction_set.insert(
+        0xe9,
+        Instruction::new("set 5, c", 0xe9, 0, 8, Box::new(set_5_c)),
+    );
+    cb_instruction_set.insert(
+        0xea,
+        Instruction::new("set 5, d", 0xea, 0, 8, Box::new(set_5_d)),
+    );
+    cb_instruction_set.insert(
+        0xeb,
+        Instruction::new("set 5, e", 0xeb, 0, 8, Box::new(set_5_e)),
+    );
+    cb_instruction_set.insert(
+        0xec,
+        Instruction::new("set 5, h", 0xec, 0, 8, Box::new(set_5_h)),
+    );
+    cb_instruction_set.insert(
+        0xed,
+        Instruction::new("set 5, l", 0xed, 0, 8, Box::new(set_5_l)),
+    );
+    cb_instruction_set.insert(
+        0xee,
+        Instruction::new("set 5, (hl)", 0xee, 0, 16, Box::new(set_5_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xef,
+        Instruction::new("set 5, a", 0xef, 0, 8, Box::new(set_5_a)),
+    );
+    cb_instruction_set.insert(
+        0xf0,
+        Instruction::new("set 6, b", 0xf0, 0, 8, Box::new(set_6_b)),
+    );
+    cb_instruction_set.insert(
+        0xf1,
+        Instruction::new("set 6, c", 0xf1, 0, 8, Box::new(set_6_c)),
+    );
+    cb_instruction_set.insert(
+        0xf2,
+        Instruction::new("set 6, d", 0xf2, 0, 8, Box::new(set_6_d)),
+    );
+    cb_instruction_set.insert(
+        0xf3,
+        Instruction::new("set 6, e", 0xf3, 0, 8, Box::new(set_6_e)),
+    );
+    cb_instruction_set.insert(
+        0xf4,
+        Instruction::new("set 6, h", 0xf4, 0, 8, Box::new(set_6_h)),
+    );
+    cb_instruction_set.insert(
+        0xf5,
+        Instruction::new("set 6, l", 0xf5, 0, 8, Box::new(set_6_l)),
+    );
+    cb_instruction_set.insert(
+        0xf6,
+        Instruction::new("set 6, (hl)", 0xf6, 0, 16, Box::new(set_6_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xf7,
+        Instruction::new("set 6, a", 0xf7, 0, 8, Box::new(set_6_a)),
+    );
+    cb_instruction_set.insert(
+        0xf8,
+        Instruction::new("set 7, b", 0xf8, 0, 8, Box::new(set_7_b)),
+    );
+    cb_instruction_set.insert(
+        0xf9,
+        Instruction::new("set 7, c", 0xf9, 0, 8, Box::new(set_7_c)),
+    );
+    cb_instruction_set.insert(
+        0xfa,
+        Instruction::new("set 7, d", 0xfa, 0, 8, Box::new(set_7_d)),
+    );
+    cb_instruction_set.insert(
+        0xfb,
+        Instruction::new("set 7, e", 0xfb, 0, 8, Box::new(set_7_e)),
+    );
+    cb_instruction_set.insert(
+        0xfc,
+        Instruction::new("set 7, h", 0xfc, 0, 8, Box::new(set_7_h)),
+    );
+    cb_instruction_set.insert(
+        0xfd,
+        Instruction::new("set 7, l", 0xfd, 0, 8, Box::new(set_7_l)),
+    );
+    cb_instruction_set.insert(
+        0xfe,
+        Instruction::new("set 7, (hl)", 0xfe, 0, 16, Box::new(set_7_mem_hl)),
+    );
+    cb_instruction_set.insert(
+        0xff,
+        Instruction::new("set 7, a", 0xff, 0, 8, Box::new(set_7_a)),
+    );
 
     (instruction_set, cb_instruction_set)
+}
+
+fn set_7_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 7);
+}
+
+fn set_7_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 7);
+}
+
+fn set_7_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 7);
+}
+
+fn set_7_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 7);
+}
+
+fn set_7_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 7);
+}
+
+fn set_7_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 7);
+}
+
+fn set_7_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 7);
+}
+
+fn set_7_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 7);
+}
+
+fn set_6_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 6);
+}
+
+fn set_6_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 6);
+}
+
+fn set_6_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 6);
+}
+
+fn set_6_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 6);
+}
+
+fn set_6_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 6);
+}
+
+fn set_6_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 6);
+}
+
+fn set_6_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 6);
+}
+
+fn set_6_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 6);
+}
+
+fn set_5_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 5);
+}
+
+fn set_5_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 5);
+}
+
+fn set_5_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 5);
+}
+
+fn set_5_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 5);
+}
+
+fn set_5_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 5);
+}
+
+fn set_5_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 5);
+}
+
+fn set_5_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 5);
+}
+
+fn set_5_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 5);
+}
+
+fn set_4_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 4);
+}
+
+fn set_4_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 4);
+}
+
+fn set_4_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 4);
+}
+
+fn set_4_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 4);
+}
+
+fn set_4_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 4);
+}
+
+fn set_4_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 4);
+}
+
+fn set_4_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 4);
+}
+
+fn set_4_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 4);
+}
+
+fn set_3_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 3);
+}
+
+fn set_3_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 3);
+}
+
+fn set_3_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 3);
+}
+
+fn set_3_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 3);
+}
+
+fn set_3_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 3);
+}
+
+fn set_3_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 3);
+}
+
+fn set_3_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 3);
+}
+
+fn set_3_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 3);
+}
+
+fn set_2_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 2);
+}
+
+fn set_2_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 2);
+}
+
+fn set_2_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 2);
+}
+
+fn set_2_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 2);
+}
+
+fn set_2_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 2);
+}
+
+fn set_2_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 2);
+}
+
+fn set_2_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 2);
+}
+
+fn set_2_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 2);
+}
+
+fn set_1_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 1);
+}
+
+fn set_1_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 1);
+}
+
+fn set_1_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 1);
+}
+
+fn set_1_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 1);
+}
+
+fn set_1_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 1);
+}
+
+fn set_1_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 1);
+}
+
+fn set_1_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 1);
+}
+
+fn set_1_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 1);
+}
+
+fn set_0_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.a, 0);
+}
+
+fn set_0_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.b, 0);
+}
+
+fn set_0_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.c, 0);
+}
+
+fn set_0_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.d, 0);
+}
+
+fn set_0_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.e, 0);
+}
+
+fn set_0_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.h, 0);
+}
+
+fn set_0_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_set(core.registers.l, 0);
+}
+
+fn set_0_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_set(value, 0);
+}
+
+fn res_7_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 7);
+}
+
+fn res_7_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 7);
+}
+
+fn res_7_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 7);
+}
+
+fn res_7_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 7);
+}
+
+fn res_7_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 7);
+}
+
+fn res_7_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 7);
+}
+
+fn res_7_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 7);
+}
+
+fn res_7_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 7);
+}
+
+fn res_6_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 6);
+}
+
+fn res_6_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 6);
+}
+
+fn res_6_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 6);
+}
+
+fn res_6_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 6);
+}
+
+fn res_6_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 6);
+}
+
+fn res_6_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 6);
+}
+
+fn res_6_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 6);
+}
+
+fn res_6_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 6);
+}
+
+fn res_5_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 5);
+}
+
+fn res_5_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 5);
+}
+
+fn res_5_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 5);
+}
+
+fn res_5_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 5);
+}
+
+fn res_5_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 5);
+}
+
+fn res_5_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 5);
+}
+
+fn res_5_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 5);
+}
+
+fn res_5_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 5);
+}
+
+fn res_4_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 4);
+}
+
+fn res_4_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 4);
+}
+
+fn res_4_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 4);
+}
+
+fn res_4_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 4);
+}
+
+fn res_4_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 4);
+}
+
+fn res_4_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 4);
+}
+
+fn res_4_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 4);
+}
+
+fn res_4_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 4);
+}
+
+fn res_3_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 3);
+}
+
+fn res_3_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 3);
+}
+
+fn res_3_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 3);
+}
+
+fn res_3_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 3);
+}
+
+fn res_3_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 3);
+}
+
+fn res_3_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 3);
+}
+
+fn res_3_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 3);
+}
+
+fn res_3_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 3);
+}
+
+fn res_2_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 2);
+}
+
+fn res_2_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 2);
+}
+
+fn res_2_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 2);
+}
+
+fn res_2_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 2);
+}
+
+fn res_2_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 2);
+}
+
+fn res_2_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 2);
+}
+
+fn res_2_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 2);
+}
+
+fn res_2_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 2);
+}
+
+fn res_1_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 1);
+}
+
+fn res_1_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 1);
+}
+
+fn res_1_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 1);
+}
+
+fn res_1_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 1);
+}
+
+fn res_1_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 1);
+}
+
+fn res_1_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 1);
+}
+
+fn res_1_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 1);
+}
+
+fn res_1_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 1);
+}
+
+fn res_0_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.a, 0);
+}
+
+fn res_0_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.b, 0);
+}
+
+fn res_0_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.c, 0);
+}
+
+fn res_0_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.d, 0);
+}
+
+fn res_0_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.e, 0);
+}
+
+fn res_0_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.h, 0);
+}
+
+fn res_0_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_res(core.registers.l, 0);
+}
+
+fn res_0_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_res(value, 0);
 }
 
 fn bit_7_a(core: &mut Core, _: Option<Operand>) {
