@@ -1138,8 +1138,97 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         Instruction::new("srl (hl)", 0x3e, 0, 16, Box::new(srl_mem_hl)),
     );
     cb_instruction_set.insert(0x3f, Instruction::new("srl a", 0x3f, 0, 8, Box::new(srl_a)));
+    cb_instruction_set.insert(0x40, Instruction::new("bit 0, b", 0x40, 0, 8, Box::new(bit_0_b)));
+    cb_instruction_set.insert(0x41, Instruction::new("bit 0, c", 0x41, 0, 8, Box::new(bit_0_c)));
+    cb_instruction_set.insert(0x42, Instruction::new("bit 0, d", 0x42, 0, 8, Box::new(bit_0_d)));
+    cb_instruction_set.insert(0x43, Instruction::new("bit 0, e", 0x43, 0, 8, Box::new(bit_0_e)));
+    cb_instruction_set.insert(0x44, Instruction::new("bit 0, h", 0x44, 0, 8, Box::new(bit_0_h)));
+    cb_instruction_set.insert(0x45, Instruction::new("bit 0, l", 0x45, 0, 8, Box::new(bit_0_l)));
+    cb_instruction_set.insert(
+        0x46,
+        Instruction::new("bit 0, (hl)", 0x46, 0, 16, Box::new(bit_0_mem_hl)),
+    );
+    cb_instruction_set.insert(0x47, Instruction::new("bit 0, a", 0x47, 0, 8, Box::new(bit_0_a)));
+    cb_instruction_set.insert(0x48, Instruction::new("bit 1, b", 0x48, 0, 8, Box::new(bit_1_b)));
+    cb_instruction_set.insert(0x49, Instruction::new("bit 1, c", 0x49, 0, 8, Box::new(bit_1_c)));
+    cb_instruction_set.insert(0x4a, Instruction::new("bit 1, d", 0x4a, 0, 8, Box::new(bit_1_d)));
+    cb_instruction_set.insert(0x4b, Instruction::new("bit 1, e", 0x4b, 0, 8, Box::new(bit_1_e)));
+    cb_instruction_set.insert(0x4c, Instruction::new("bit 1, h", 0x4c, 0, 8, Box::new(bit_1_h)));
+    cb_instruction_set.insert(0x4d, Instruction::new("bit 1, l", 0x4d, 0, 8, Box::new(bit_1_l)));
+    cb_instruction_set.insert(
+        0x4e,
+        Instruction::new("bit 1, (hl)", 0x4e, 0, 16, Box::new(bit_1_mem_hl)),
+    );
+    cb_instruction_set.insert(0x4f, Instruction::new("bit 1, a", 0x4f, 0, 8, Box::new(bit_1_a)));
 
     (instruction_set, cb_instruction_set)
+}
+
+fn bit_1_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.a, 1);
+}
+
+fn bit_1_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.b, 1);
+}
+
+fn bit_1_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.c, 1);
+}
+
+fn bit_1_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.d, 1);
+}
+
+fn bit_1_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.e, 1);
+}
+
+fn bit_1_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.h, 1);
+}
+
+fn bit_1_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.l, 1);
+}
+
+fn bit_1_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_bit(value, 1);
+}
+
+
+fn bit_0_a(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.a, 0);
+}
+
+fn bit_0_b(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.b, 0);
+}
+
+fn bit_0_c(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.c, 0);
+}
+
+fn bit_0_d(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.d, 0);
+}
+
+fn bit_0_e(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.e, 0);
+}
+
+fn bit_0_h(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.h, 0);
+}
+
+fn bit_0_l(core: &mut Core, _: Option<Operand>) {
+    core.alu_bit(core.registers.l, 0);
+}
+
+fn bit_0_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let value = core.memory.borrow().get(core.registers.get_hl());
+    core.alu_bit(value, 0);
 }
 
 fn srl_a(core: &mut Core, _: Option<Operand>) {
