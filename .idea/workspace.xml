@@ -132,20 +132,6 @@
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
     </task>
-    <task id="LOCAL-00022" summary="ADD">
-      <created>1605128911582</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1605128911582</updated>
-    </task>
-    <task id="LOCAL-00023" summary="AND">
-      <created>1605137053463</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1605137053463</updated>
-    </task>
     <task id="LOCAL-00024" summary="OR">
       <created>1605137829956</created>
       <option name="number" value="00024" />
@@ -475,7 +461,21 @@
       <option name="project" value="LOCAL" />
       <updated>1605498973611</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="Refactor instructions">
+      <created>1605500295817</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1605500295817</updated>
+    </task>
+    <task id="LOCAL-00072" summary="Refactor instructions">
+      <created>1605500354714</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1605500354714</updated>
+    </task>
+    <option name="localTasksCounter" value="73" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -543,22 +543,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605480817131" />
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605498947754">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom" timestamp="1605500296477">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605498947754" />
-    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605498947754">
+    <state width="2517" height="355" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605500296477" />
+    <state width="2517" height="355" key="GridCell.Tab.0.center" timestamp="1605500296477">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605498947754" />
-    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605498947754">
+    <state width="2517" height="355" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605500296477" />
+    <state width="2517" height="355" key="GridCell.Tab.0.left" timestamp="1605500296477">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605498947754" />
-    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605498947754">
+    <state width="2517" height="355" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605500296477" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right" timestamp="1605500296477">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605498947754" />
+    <state width="2517" height="355" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605500296477" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
