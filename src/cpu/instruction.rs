@@ -1073,8 +1073,100 @@ pub fn get_instruction_set() -> (HashMap<u8, Instruction>, HashMap<u8, Instructi
         Instruction::new("rr (hl)", 0x1c, 0, 16, Box::new(rr_mem_hl)),
     );
     cb_instruction_set.insert(0x1f, Instruction::new("rr a", 0x1f, 0, 8, Box::new(rr_a)));
+    cb_instruction_set.insert(0x20, Instruction::new("sla b", 0x20, 0, 8, Box::new(sla_b)));
+    cb_instruction_set.insert(0x21, Instruction::new("sla c", 0x21, 0, 8, Box::new(sla_c)));
+    cb_instruction_set.insert(0x22, Instruction::new("sla d", 0x22, 0, 8, Box::new(sla_d)));
+    cb_instruction_set.insert(0x23, Instruction::new("sla e", 0x23, 0, 8, Box::new(sla_e)));
+    cb_instruction_set.insert(0x24, Instruction::new("sla h", 0x24, 0, 8, Box::new(sla_h)));
+    cb_instruction_set.insert(0x25, Instruction::new("sla l", 0x25, 0, 8, Box::new(sla_l)));
+    cb_instruction_set.insert(
+        0x26,
+        Instruction::new("sla (hl)", 0x26, 0, 16, Box::new(sla_mem_hl)),
+    );
+    cb_instruction_set.insert(0x27, Instruction::new("sla a", 0x27, 0, 8, Box::new(sla_a)));
+    cb_instruction_set.insert(0x28, Instruction::new("sra b", 0x28, 0, 8, Box::new(sra_b)));
+    cb_instruction_set.insert(0x29, Instruction::new("sra c", 0x29, 0, 8, Box::new(sra_c)));
+    cb_instruction_set.insert(0x2a, Instruction::new("sra d", 0x2a, 0, 8, Box::new(sra_d)));
+    cb_instruction_set.insert(0x2b, Instruction::new("sra e", 0x2b, 0, 8, Box::new(sra_e)));
+    cb_instruction_set.insert(0x2c, Instruction::new("sra h", 0x2c, 0, 8, Box::new(sra_h)));
+    cb_instruction_set.insert(0x2d, Instruction::new("sra l", 0x2d, 0, 8, Box::new(sra_l)));
+    cb_instruction_set.insert(
+        0x2e,
+        Instruction::new("sra (hl)", 0x2e, 0, 16, Box::new(sra_mem_hl)),
+    );
+    cb_instruction_set.insert(0x2f, Instruction::new("sra a", 0x2f, 0, 8, Box::new(sra_a)));
 
     (instruction_set, cb_instruction_set)
+}
+
+fn sra_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_sra(core.registers.a);
+}
+
+fn sra_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_sra(core.registers.b);
+}
+
+fn sra_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_sra(core.registers.c);
+}
+
+fn sra_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_sra(core.registers.d);
+}
+
+fn sra_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_sra(core.registers.e);
+}
+
+fn sra_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_sra(core.registers.h);
+}
+
+fn sra_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_sra(core.registers.l);
+}
+
+fn sra_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_sra(value);
+    core.memory.borrow_mut().set(address, result);
+}
+
+fn sla_a(core: &mut Core, _: Option<Operand>) {
+    core.registers.a = core.alu_sla(core.registers.a);
+}
+
+fn sla_b(core: &mut Core, _: Option<Operand>) {
+    core.registers.b = core.alu_sla(core.registers.b);
+}
+
+fn sla_c(core: &mut Core, _: Option<Operand>) {
+    core.registers.c = core.alu_sla(core.registers.c);
+}
+
+fn sla_d(core: &mut Core, _: Option<Operand>) {
+    core.registers.d = core.alu_sla(core.registers.d);
+}
+
+fn sla_e(core: &mut Core, _: Option<Operand>) {
+    core.registers.e = core.alu_sla(core.registers.e);
+}
+
+fn sla_h(core: &mut Core, _: Option<Operand>) {
+    core.registers.h = core.alu_sla(core.registers.h);
+}
+
+fn sla_l(core: &mut Core, _: Option<Operand>) {
+    core.registers.l = core.alu_sla(core.registers.l);
+}
+
+fn sla_mem_hl(core: &mut Core, _: Option<Operand>) {
+    let address = core.registers.get_hl();
+    let value = core.memory.borrow().get(address);
+    let result = core.alu_sla(value);
+    core.memory.borrow_mut().set(address, result);
 }
 
 fn rr_a(core: &mut Core, _: Option<Operand>) {
