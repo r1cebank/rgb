@@ -3789,11 +3789,11 @@ fn load_sp_hl(core: &mut Core, _: Option<Operand>) {
 }
 
 fn add_hl_hl(core: &mut Core, _: Option<Operand>) {
-    core.registers.set_hl(core.registers.get_hl());
+    core.alu_add_hl(core.registers.get_hl());
 }
 
 fn add_hl_sp(core: &mut Core, _: Option<Operand>) {
-    core.registers.set_hl(core.registers.sp);
+    core.alu_add_hl(core.registers.sp);
 }
 
 fn load_de_d16(core: &mut Core, operand: Option<Operand>) {

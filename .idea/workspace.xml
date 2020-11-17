@@ -31,9 +31,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
+      <change afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/cpu_test.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/rgb.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/rgb.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,10 +75,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\siyua\Documents\GitHub\rgb" />
       <recent name="C:\Users\siyua\Documents\GitHub\rgb\src\debug" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run">
+  <component name="RunManager" selected="Cargo.Test run_cpu_tests">
     <configuration name="Format" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="fmt" />
@@ -102,6 +105,18 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test run_cpu_tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package rgb --test cpu_test run_cpu_tests -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="test" />
@@ -118,7 +133,13 @@
       <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Format" />
       <item itemvalue="Cargo.Test" />
+      <item itemvalue="Cargo.Test run_cpu_tests" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Test run_cpu_tests" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -132,13 +153,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00030" summary="CALL, PUSH, POP">
-      <created>1605141686293</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1605141686293</updated>
     </task>
     <task id="LOCAL-00031" summary="RST">
       <created>1605142300255</created>
@@ -476,7 +490,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605508511003</updated>
     </task>
-    <option name="localTasksCounter" value="79" />
+    <task id="LOCAL-00079" summary="Refactor instruction set">
+      <created>1605596266407</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1605596266407</updated>
+    </task>
+    <option name="localTasksCounter" value="80" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -492,7 +513,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="XOR" />
     <MESSAGE value="CP" />
     <MESSAGE value="RET" />
     <MESSAGE value="POP" />
@@ -517,7 +537,8 @@
     <MESSAGE value="Instruction decoder refactor" />
     <MESSAGE value="Refactor instructions" />
     <MESSAGE value="Remove old files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove old files" />
+    <MESSAGE value="Refactor instruction set" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor instruction set" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605073732005">
@@ -528,10 +549,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060578568" />
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1605035982240">
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1605642329536">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605035982240" />
+    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605642329536" />
     <state x="1010" y="447" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1605248399012">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -544,22 +565,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605595838917">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605644050066">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605595838917" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605595838917">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605644050066" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605644050066">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605595838917" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605595838917">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605644050066" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605644050066">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605595838917" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605595838917">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605644050066" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605644050066">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605595838917" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605644050066" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
