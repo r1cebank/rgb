@@ -11,7 +11,6 @@ use std::thread::{Builder, JoinHandle};
 
 pub struct Emulator {
     pub mmu: Rc<RefCell<MMU>>,
-    instruction_set: InstructionSet,
     pub cpu: ClockedCPU,
 }
 
@@ -30,40 +29,12 @@ impl Emulator {
             cpu.simulate_boot_rom();
         }
 
-        Self {
-            cpu,
-            mmu,
-            instruction_set: InstructionSet::new(),
-        }
+        Self { cpu, mmu }
     }
-    fn execute_next_instruction(&mut self) -> u8 {
-        let executable_instruction = self
-            .instruction_set
-            .get_next_executable_instruction(&mut self.cpu.cpu)
-            .expect("Error decoding next instruction");
 
-        let (instruction, operand) = executable_instruction;
-
-        match instruction.operand_length {
-            0 => {
-                trace!("{}", instruction.name);
-            }
-            1 => {
-                trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
-            }
-            2 => {
-                trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
-            }
-            _ => {}
-        }
-
-        (instruction.exec)(&mut self.cpu.cpu, operand);
-
-        instruction.cycles
-    }
     pub fn tick(&mut self) -> u32 {
-        let cycles = self.execute_next_instruction() as u32;
-        self.mmu.borrow_mut().tick(cycles);
+        let cycles = self.cpu.tick();
+        // self.mmu.borrow_mut().tick(cycles);
         cycles
     }
 }

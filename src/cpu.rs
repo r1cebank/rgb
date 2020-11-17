@@ -5,6 +5,7 @@ pub mod sm80;
 use crate::memory::Memory;
 use std::time::{Duration, Instant};
 
+use crate::cpu::instruction::InstructionSet;
 use sm80::Core;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -21,6 +22,7 @@ pub const STEP_CYCLES: u32 = (STEP_TIME as f64 / (1000_f64 / CLOCK_FREQUENCY as 
 /// We are slicing the cycles in 16 ms chunks
 pub struct ClockedCPU {
     pub cpu: Core,
+    instruction_set: InstructionSet,
     step_cycles: u32,
     // How many cycles in the step (around 67108)
     step_zero: Instant,
@@ -33,10 +35,37 @@ impl ClockedCPU {
         let cpu = Core::new(memory);
         Self {
             cpu,
+            instruction_set: InstructionSet::new(),
             step_cycles: 0,
             step_zero: Instant::now(),
             step_flip: false,
         }
+    }
+
+    fn execute_next_instruction(&mut self) -> u8 {
+        let executable_instruction = self
+            .instruction_set
+            .get_next_executable_instruction(&mut self.cpu)
+            .expect("Error decoding next instruction");
+
+        let (instruction, operand) = executable_instruction;
+
+        match instruction.operand_length {
+            0 => {
+                trace!("{}", instruction.name);
+            }
+            1 => {
+                trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
+            }
+            2 => {
+                trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
+            }
+            _ => {}
+        }
+
+        (instruction.exec)(&mut self.cpu, operand);
+
+        instruction.cycles
     }
 
     // Function next simulates real hardware execution speed, by limiting the frequency of the function cpu.next().
@@ -71,12 +100,11 @@ impl ClockedCPU {
         }
 
         // Run the CPU and get the machine cycles
-        // let cycles = self.cpu.tick();
+        let cycles = self.execute_next_instruction() as u32;
 
         // Increment the step cycles with the cpu tick cycles
-        // self.step_cycles += cycles;
-        // cycles
-        0
+        self.step_cycles += cycles;
+        cycles
     }
 
     pub fn simulate_boot_rom(&mut self) {
