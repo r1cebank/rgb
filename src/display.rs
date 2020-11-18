@@ -27,7 +27,7 @@ pub fn start_display_thread(
     Builder::new()
         .name("display".to_string())
         .spawn(move || {
-            debug!("thread spawned");
+            debug!("Display thread spawned");
             // Grab the actual screen size to draw our window in
             let (screen_width, screen_height) = get_actual_window_size(scale_factor);
 

@@ -48,23 +48,27 @@ pub fn start_emulator_thread(
     Builder::new()
         .name("emulator".to_string())
         .spawn(move || {
-            debug!("thread spawned");
+            debug!("Emulator Thread spawned");
             let mut emulator = Emulator::new(boot_rom, rom);
+            let mut total_cycles = 0;
             'emulator: loop {
-                std::thread::sleep(std::time::Duration::from_millis(10));
-                emulator.tick();
-                let mut gpu_framebuffer = random_framebuffer();
-                match framebuffer_sender.try_send(gpu_framebuffer) {
-                    Ok(_) => {}
-                    Err(TrySendError::Full(_)) => {}
-                    Err(TrySendError::Disconnected(_)) => break 'emulator,
-                }
-                match debug_result_sender
-                    .try_send(DebugMessage::RegisterUpdate(emulator.cpu.cpu.registers))
-                {
-                    Ok(_) => {}
-                    Err(TrySendError::Full(_)) => {}
-                    Err(TrySendError::Disconnected(_)) => break 'emulator,
+                // std::thread::sleep(std::time::Duration::from_millis(10));
+                total_cycles += emulator.tick();
+                if total_cycles >= 200000 {
+                    let mut gpu_framebuffer = random_framebuffer();
+                    match framebuffer_sender.try_send(gpu_framebuffer) {
+                        Ok(_) => {}
+                        Err(TrySendError::Full(_)) => {}
+                        Err(TrySendError::Disconnected(_)) => break 'emulator,
+                    }
+                    match debug_result_sender
+                        .try_send(DebugMessage::RegisterUpdate(emulator.cpu.cpu.registers))
+                    {
+                        Ok(_) => {}
+                        Err(TrySendError::Full(_)) => {}
+                        Err(TrySendError::Disconnected(_)) => break 'emulator,
+                    }
+                    total_cycles = 0;
                 }
             }
         })

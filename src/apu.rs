@@ -4,7 +4,7 @@ pub fn start_apu_thread() -> JoinHandle<()> {
     Builder::new()
         .name("apu".to_string())
         .spawn(move || {
-            debug!("thread spawned");
+            debug!("Audio thread spawned");
             let device = cpal::default_output_device().unwrap();
             let format = device.default_output_format().unwrap();
             let format = cpal::Format {

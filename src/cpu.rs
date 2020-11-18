@@ -83,7 +83,7 @@ impl ClockedCPU {
             // Subtract the time passed from the expected step time to get the time thread needs to sleep
             let sleep_time = u64::from(STEP_TIME.saturating_sub(time_passed.as_millis() as u32));
 
-            debug!("CPU: sleep {} millis", sleep_time);
+            trace!("CPU: sleep {} millis", sleep_time);
             thread::sleep(Duration::from_millis(sleep_time));
 
             // Update the last run zero time with the last time + step time

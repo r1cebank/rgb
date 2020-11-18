@@ -1,15 +1,14 @@
 use rgb;
-use rgb::emulator::Emulator;
-use rgb::util::get_rom;
-use rgb::memory::Memory;
-use std::cell::RefCell;
 use rgb::cpu::ClockedCPU;
+use rgb::emulator::Emulator;
+use rgb::memory::Memory;
+use rgb::util::get_rom;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 struct TestMemory {
     last_serial: u8,
     memory: [u8; 0xffff],
-
 }
 
 impl TestMemory {
@@ -61,9 +60,7 @@ impl Memory for TestMemory {
     fn get(&self, address: u16) -> u8 {
         println!("${:04x}", address);
         match address {
-            _ => {
-                self.memory[address as usize]
-            }
+            _ => self.memory[address as usize],
         }
     }
 
@@ -71,7 +68,7 @@ impl Memory for TestMemory {
         match address {
             0xff01 => self.last_serial = value,
             0xff02 => print!("{}", self.last_serial as char),
-            _ => self.memory[address as usize] = value
+            _ => self.memory[address as usize] = value,
         }
     }
 }

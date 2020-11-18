@@ -4,7 +4,7 @@ pub fn start_io_thread() -> JoinHandle<()> {
     Builder::new()
         .name("io".to_string())
         .spawn(move || {
-            debug!("thread spawned");
+            debug!("IO thread spawned");
         })
         .unwrap()
 }

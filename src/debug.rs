@@ -20,7 +20,7 @@ pub fn start_debug_thread() -> JoinHandle<()> {
     Builder::new()
         .name("debugger".to_string())
         .spawn(move || {
-            debug!("thread spawned");
+            debug!("Debug thread spawned");
             loop {
                 let readline = rl.readline("[rgb-debug]# ");
                 match readline {
