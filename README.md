@@ -37,12 +37,18 @@ I've used so much online resource to help me understand the gameboy hardware and
 
 ### Documentation
 https://realboyemulator.files.wordpress.com/2013/01/gbcpuman.pdf
+
 https://problemkaputt.de/pandocs.htm
+
 https://gbdev.gg8.se/wiki/articles/Gameboy_Bootstrap_ROM
+
 https://blog.ryanlevick.com/DMG-01/
 
 ### Repos
 https://github.com/mohanson/gameboy
+
 https://github.com/rylev/DMG-01
+
 https://github.com/mvdnes/rboy
+
 https://github.com/nwessing/gameboy
