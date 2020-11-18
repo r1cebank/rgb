@@ -1,8 +1,8 @@
 extern crate clap;
 #[macro_use]
 extern crate log;
+extern crate cursive_hexview;
 extern crate find_folder;
-extern crate gfx_device_gl;
 extern crate image as im;
 extern crate piston_window;
 
@@ -96,20 +96,24 @@ fn main() {
     let boot_rom = matches.value_of("boot").map(|path| get_boot_rom(path));
     let rom = get_rom(matches.value_of("rom").unwrap());
 
-    let emulator_thread =
-        start_emulator_thread(boot_rom, rom, framebuffer_sender, debug_message_sender);
+    let emulator_thread = start_emulator_thread(
+        boot_rom,
+        rom,
+        framebuffer_sender.clone(),
+        debug_message_sender.clone(),
+    );
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         String::from("test rom"),
-        framebuffer_receiver,
-        debug_message_receiver,
-        log_message_receiver,
+        framebuffer_receiver.clone(),
+        debug_message_receiver.clone(),
+        log_message_receiver.clone(),
     );
     let apu_thread = start_apu_thread();
 
     #[cfg(feature = "debug")]
-    let debug_thread = start_debug_thread();
+    let debug_thread = start_debug_thread(debug_message_receiver.clone());
 
     emulator_thread.join().unwrap();
     io_thread.join().unwrap();

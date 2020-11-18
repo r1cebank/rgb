@@ -21,7 +21,7 @@ pub const STEP_CYCLES: u32 = (STEP_TIME as f64 / (1000_f64 / CLOCK_FREQUENCY as 
 /// Because the speed Gameboy is running at, there is no accurate way to time each clock cycle
 /// We are slicing the cycles in 16 ms chunks
 pub struct ClockedCPU {
-    pub cpu: Core,
+    pub core: Core,
     instruction_set: InstructionSet,
     step_cycles: u32,
     // How many cycles in the step (around 67108)
@@ -32,9 +32,9 @@ pub struct ClockedCPU {
 
 impl ClockedCPU {
     pub fn new(memory: Rc<RefCell<dyn Memory>>) -> Self {
-        let cpu = Core::new(memory);
+        let core = Core::new(memory);
         Self {
-            cpu,
+            core,
             instruction_set: InstructionSet::new(),
             step_cycles: 0,
             step_zero: Instant::now(),
@@ -45,7 +45,7 @@ impl ClockedCPU {
     fn execute_next_instruction(&mut self) -> u8 {
         let executable_instruction = self
             .instruction_set
-            .get_next_executable_instruction(&mut self.cpu)
+            .get_next_executable_instruction(&mut self.core)
             .expect("Error decoding next instruction");
 
         let (instruction, operand) = executable_instruction;
@@ -63,7 +63,7 @@ impl ClockedCPU {
             _ => {}
         }
 
-        (instruction.exec)(&mut self.cpu, operand);
+        (instruction.exec)(&mut self.core, operand);
 
         instruction.cycles
     }
@@ -108,7 +108,7 @@ impl ClockedCPU {
     }
 
     pub fn simulate_boot_rom(&mut self) {
-        self.cpu.simulate_boot_rom();
+        self.core.simulate_boot_rom();
     }
 
     pub fn flip(&mut self) -> bool {

@@ -5,5 +5,6 @@ use crate::cpu::registers::Registers;
 pub enum DebugMessage {
     LogUpdate(String),
     DebugCommand(DebugCommand),
+    MemoryUpdate(Vec<u8>),
     RegisterUpdate(Registers),
 }
