@@ -34,7 +34,7 @@ impl Emulator {
 
     pub fn tick(&mut self) -> u32 {
         let cycles = self.cpu.tick();
-        // self.mmu.borrow_mut().tick(cycles);
+        self.mmu.borrow_mut().tick(cycles);
         cycles
     }
 }
@@ -69,7 +69,12 @@ pub fn start_emulator_thread(
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
                     }
                     match debug_result_sender.try_send(DebugMessage::MemoryUpdate(
-                        emulator.mmu.borrow().boot_rom.unwrap().to_vec(),
+                        emulator
+                            .mmu
+                            .borrow()
+                            .boot_rom
+                            .unwrap_or([0 as u8; 256])
+                            .to_vec(),
                     )) {
                         Ok(_) => {}
                         Err(TrySendError::Full(_)) => {}

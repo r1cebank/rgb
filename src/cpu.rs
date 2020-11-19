@@ -17,6 +17,15 @@ pub const CLOCK_FREQUENCY: u32 = 4_194_304;
 pub const STEP_TIME: u32 = 16;
 pub const STEP_CYCLES: u32 = (STEP_TIME as f64 / (1000_f64 / CLOCK_FREQUENCY as f64)) as u32;
 
+const INTERRUPT_ENABLE_REG: u16 = 0xFFFF;
+const INTERRUPT_FLAG_REG: u16 = 0xFF0F;
+
+const V_BLANK: u8 = 0x01;
+const LCD_STAT: u8 = 0x02;
+const TIMER: u8 = 0x04;
+const SERIAL: u8 = 0x08;
+const D_PAD: u8 = 0x10;
+
 // Real time cpu provided to simulate real hardware speed.
 /// Because the speed Gameboy is running at, there is no accurate way to time each clock cycle
 /// We are slicing the cycles in 16 ms chunks
@@ -42,30 +51,77 @@ impl ClockedCPU {
         }
     }
 
-    fn execute_next_instruction(&mut self) -> u8 {
-        let executable_instruction = self
-            .instruction_set
-            .get_next_executable_instruction(&mut self.core)
-            .expect("Error decoding next instruction");
-
-        let (instruction, operand) = executable_instruction;
-
-        match instruction.operand_length {
-            0 => {
-                trace!("{}", instruction.name);
+    fn check_interrupts(&mut self) {
+        let enabled = self.core.memory.borrow().get(INTERRUPT_ENABLE_REG);
+        let flag = self.core.memory.borrow().get(INTERRUPT_FLAG_REG);
+        let interrupts = enabled & flag;
+        if self.core.ei {
+            if interrupts & V_BLANK == V_BLANK {
+                self.handle_interrupt(flag, V_BLANK);
+            } else if interrupts & LCD_STAT == LCD_STAT {
+                self.handle_interrupt(flag, LCD_STAT);
+            } else if interrupts & TIMER == TIMER {
+                self.handle_interrupt(flag, TIMER);
+            } else if interrupts & SERIAL == SERIAL {
+                self.handle_interrupt(flag, SERIAL);
+            } else if interrupts & D_PAD == D_PAD {
+                self.handle_interrupt(flag, D_PAD);
             }
-            1 => {
-                trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
-            }
-            2 => {
-                trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
-            }
-            _ => {}
         }
 
-        (instruction.exec)(&mut self.core, operand);
+        if interrupts != 0 {
+            self.core.halted = false;
+        }
+    }
 
-        instruction.cycles
+    fn handle_interrupt(&mut self, flags: u8, interrupt: u8) {
+        println!("handling {:x} {:x}", flags, interrupt);
+        self.core.ei = false;
+        self.core
+            .memory
+            .borrow_mut()
+            .set(INTERRUPT_FLAG_REG, flags & !interrupt);
+        let pc = self.core.registers.pc;
+        self.core.stack_push(pc);
+        self.core.registers.pc = match interrupt {
+            V_BLANK => 0x40,
+            LCD_STAT => 0x48,
+            TIMER => 0x50,
+            SERIAL => 0x58,
+            D_PAD => 0x60,
+            _ => panic!("Invalid interrupt {}", interrupt),
+        }
+    }
+
+    fn execute_next_instruction(&mut self) -> u8 {
+        // If halted, no-op and return 4 ticks
+        if self.core.halted {
+            4
+        } else {
+            let executable_instruction = self
+                .instruction_set
+                .get_next_executable_instruction(&mut self.core)
+                .expect("Error decoding next instruction");
+
+            let (instruction, operand) = executable_instruction;
+
+            match instruction.operand_length {
+                0 => {
+                    trace!("{}", instruction.name);
+                }
+                1 => {
+                    trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
+                }
+                2 => {
+                    trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
+                }
+                _ => {}
+            }
+
+            (instruction.exec)(&mut self.core, operand);
+
+            instruction.cycles
+        }
     }
 
     // Function next simulates real hardware execution speed, by limiting the frequency of the function cpu.next().
@@ -101,6 +157,9 @@ impl ClockedCPU {
 
         // Run the CPU and get the machine cycles
         let cycles = self.execute_next_instruction() as u32;
+
+        // Handle interrupt
+        self.check_interrupts();
 
         // Increment the step cycles with the cpu tick cycles
         self.step_cycles += cycles;

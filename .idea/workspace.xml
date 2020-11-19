@@ -32,7 +32,13 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc1.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc1.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/timer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/timer.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +97,7 @@
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- -b DMG_ROM.bin -r marioyoshi.gb" />
+      <option name="command" value="run -- -r cpu_instrs.gb" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -127,8 +133,8 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Format" />
+      <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Test" />
       <item itemvalue="Cargo.Test run_cpu_tests" />
     </list>
@@ -150,20 +156,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00034" summary="LDH">
-      <created>1605148143997</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1605148143997</updated>
-    </task>
-    <task id="LOCAL-00035" summary="DI, EI, and others">
-      <created>1605149200987</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1605149200987</updated>
     </task>
     <task id="LOCAL-00036" summary="Non prefixed instructions DONE">
       <created>1605150194424</created>
@@ -494,7 +486,21 @@
       <option name="project" value="LOCAL" />
       <updated>1605664264842</updated>
     </task>
-    <option name="localTasksCounter" value="83" />
+    <task id="LOCAL-00083" summary="Update readme">
+      <created>1605669078568</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1605669078569</updated>
+    </task>
+    <task id="LOCAL-00084" summary="Update readme">
+      <created>1605669115438</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1605669115438</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +516,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="POP" />
     <MESSAGE value="JP" />
     <MESSAGE value="CALL, PUSH, POP" />
     <MESSAGE value="RST" />
@@ -535,13 +540,18 @@
     <MESSAGE value="Refactor instruction set" />
     <MESSAGE value="CPU pass all tests" />
     <MESSAGE value="Adding cursive debug view" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding cursive debug view" />
+    <MESSAGE value="Update readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update readme" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605658406912">
+    <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605658406912" />
+    <state x="872" y="341" key="#Plugins/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605727891877" />
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605736256245">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605736256245" />
     <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1605060578568">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -562,22 +572,26 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605667751794">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605739372168">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605667751794" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605667751794">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605739372168">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605667751794" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605667751794">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605739372168">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605667751794" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605667751794">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605739372168">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605667751794" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
+    <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605725059971">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1077" y="402" key="RollbackChangesDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605725059971" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

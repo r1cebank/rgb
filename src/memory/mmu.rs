@@ -10,6 +10,7 @@ pub struct MMU {
     pub ppu: PPU,
     boot_rom_enabled: bool,
     timer: Timer,
+    last_serial: u8,
     work_ram: [u8; 0x8000],
     high_ram: [u8; 0x7f],
     work_ram_bank: usize,
@@ -35,6 +36,7 @@ impl MMU {
             boot_rom,
             timer: Timer::new(),
             ppu: PPU::new(),
+            last_serial: 0x00,
             boot_rom_enabled: boot_rom != None,
             cartridge: load_cartridge(rom),
             high_ram: [0x00; 0x7f],
@@ -44,7 +46,12 @@ impl MMU {
             interrupt_enabled: 0x00,
         }
     }
-    pub fn tick(&mut self, cycles: u32) {}
+    pub fn tick(&mut self, cycles: u32) {
+        self.timer.tick(cycles);
+
+        self.interrupt_flags |= self.timer.interrupt;
+        self.timer.interrupt = 0;
+    }
 
     /// When no boot rom is supplied, we set the following states in memory just like the boot rom
     pub fn simulate_boot_rom(&mut self) {
@@ -121,7 +128,7 @@ impl Memory for MMU {
             }
             0xff04..=0xff07 => {
                 // Clock
-                0
+                self.timer.get(address)
             }
             0xff0f => self.interrupt_flags,
             0xff10..=0xff3f => {
@@ -164,8 +171,14 @@ impl Memory for MMU {
             }
             0xff01..=0xff02 => {
                 // Serial
+                if address == 0xff01 {
+                    self.last_serial = value;
+                }
+                if address == 0xff02 {
+                    print!("{}", self.last_serial as char);
+                }
             }
-            0xff04..=0xff07 => self.timer.write(address, value),
+            0xff04..=0xff07 => self.timer.set(address, value),
             0xff0f => self.interrupt_flags = value,
             0xff10..=0xff3f => {
                 // Sound

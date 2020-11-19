@@ -1,6 +1,7 @@
 extern crate clap;
 #[macro_use]
 extern crate log;
+#[cfg(feature = "debug")]
 extern crate cursive_hexview;
 extern crate find_folder;
 extern crate image as im;
@@ -45,7 +46,7 @@ fn main() {
     let mut config = ConfigBuilder::new();
     config.add_filter_allow(format!("{}", "rgb"));
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Warn, config.build(), TerminalMode::Mixed).unwrap(),
+        TermLogger::new(LevelFilter::Debug, config.build(), TerminalMode::Mixed).unwrap(),
         WriteLogger::new(
             LevelFilter::Warn,
             Config::default(),

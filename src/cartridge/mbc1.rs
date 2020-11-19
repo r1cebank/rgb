@@ -38,9 +38,9 @@ impl Memory for Mbc1 {
             0x0000..=0x3fff => self.rom[address as usize],
             0x4000..=0x7fff => {
                 let selected_bank = if self.bank_mode == BankMode::Ram {
-                    0x1f
+                    self.bank & 0x1f
                 } else {
-                    0x7f
+                    self.bank & 0x7f
                 } as usize;
                 let offset = selected_bank * 0x4000;
                 self.rom[address as usize - 0x4000 + offset]
