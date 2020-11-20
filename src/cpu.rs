@@ -1,4 +1,5 @@
 pub mod instruction;
+pub mod interrupt;
 pub mod registers;
 pub mod sm80;
 
@@ -6,6 +7,7 @@ use crate::memory::Memory;
 use std::time::{Duration, Instant};
 
 use crate::cpu::instruction::InstructionSet;
+use crate::cpu::registers::Flag;
 use sm80::Core;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -26,14 +28,64 @@ const TIMER: u8 = 0x04;
 const SERIAL: u8 = 0x08;
 const D_PAD: u8 = 0x10;
 
+// Nintendo documents describe the CPU & instructions speed in machine cycles while this document describes them in
+// clock cycles. Here is the translation:
+//   1 machine cycle = 4 clock cycles
+//                   GB CPU Speed    NOP Instruction
+// Machine Cycles    1.05MHz         1 cycle
+// Clock Cycles      4.19MHz         4 cycles
+//
+//  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+const OP_CYCLES: [u32; 256] = [
+    1, 3, 2, 2, 1, 1, 2, 1, 5, 2, 2, 2, 1, 1, 2, 1, // 0
+    0, 3, 2, 2, 1, 1, 2, 1, 3, 2, 2, 2, 1, 1, 2, 1, // 1
+    2, 3, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 1, 1, 2, 1, // 2
+    2, 3, 2, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1, 1, 2, 1, // 3
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 4
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 5
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 6
+    2, 2, 2, 2, 2, 2, 0, 2, 1, 1, 1, 1, 1, 1, 2, 1, // 7
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 8
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // 9
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // a
+    1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, // b
+    2, 3, 3, 4, 3, 4, 2, 4, 2, 4, 3, 0, 3, 6, 2, 4, // c
+    2, 3, 3, 0, 3, 4, 2, 4, 2, 4, 3, 0, 3, 0, 2, 4, // d
+    3, 3, 2, 0, 0, 4, 2, 4, 4, 1, 4, 0, 0, 0, 2, 4, // e
+    3, 3, 2, 1, 0, 4, 2, 4, 3, 2, 4, 1, 0, 0, 2, 4, // f
+];
+
+//  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+const CB_CYCLES: [u32; 256] = [
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 0
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 1
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 2
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 3
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 4
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 5
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 6
+    2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, // 7
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 8
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // 9
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // a
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // b
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // c
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // d
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // e
+    2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2, // f
+];
+
 // Real time cpu provided to simulate real hardware speed.
 /// Because the speed Gameboy is running at, there is no accurate way to time each clock cycle
 /// We are slicing the cycles in 16 ms chunks
 pub struct ClockedCPU {
+    // The sm83 core
     pub core: Core,
+    // The instruction set mappers
     instruction_set: InstructionSet,
-    step_cycles: u32,
     // How many cycles in the step (around 67108)
+    step_cycles: u32,
+    // last time when the last step is finished
     step_zero: Instant,
     // Begin step
     step_flip: bool, // When this is set to true, we want to handle events
@@ -50,77 +102,91 @@ impl ClockedCPU {
             step_flip: false,
         }
     }
+    fn execute_next_instruction(&mut self) -> u32 {
+        let executable_instruction = self
+            .instruction_set
+            .get_next_executable_instruction(&mut self.core)
+            .expect("Error decoding next instruction");
 
-    fn check_interrupts(&mut self) {
-        let enabled = self.core.memory.borrow().get(INTERRUPT_ENABLE_REG);
-        let flag = self.core.memory.borrow().get(INTERRUPT_FLAG_REG);
-        let interrupts = enabled & flag;
-        if self.core.ei {
-            if interrupts & V_BLANK == V_BLANK {
-                self.handle_interrupt(flag, V_BLANK);
-            } else if interrupts & LCD_STAT == LCD_STAT {
-                self.handle_interrupt(flag, LCD_STAT);
-            } else if interrupts & TIMER == TIMER {
-                self.handle_interrupt(flag, TIMER);
-            } else if interrupts & SERIAL == SERIAL {
-                self.handle_interrupt(flag, SERIAL);
-            } else if interrupts & D_PAD == D_PAD {
-                self.handle_interrupt(flag, D_PAD);
+        let (instruction, operand, prefixed, opcode) = executable_instruction;
+
+        // Some instructions have operands, for those we need to push the pc register and get the operand from memory
+        match instruction.operand_length {
+            0 => {
+                trace!("{}", instruction.name);
             }
+            1 => {
+                trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
+            }
+            2 => {
+                trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
+            }
+            _ => {}
         }
 
-        if interrupts != 0 {
-            self.core.halted = false;
-        }
-    }
+        // Execute the instruction
+        (instruction.exec)(&mut self.core, operand);
 
-    fn handle_interrupt(&mut self, flags: u8, interrupt: u8) {
-        println!("handling {:x} {:x}", flags, interrupt);
-        self.core.ei = false;
-        self.core
-            .memory
-            .borrow_mut()
-            .set(INTERRUPT_FLAG_REG, flags & !interrupt);
-        let pc = self.core.registers.pc;
-        self.core.stack_push(pc);
-        self.core.registers.pc = match interrupt {
-            V_BLANK => 0x40,
-            LCD_STAT => 0x48,
-            TIMER => 0x50,
-            SERIAL => 0x58,
-            D_PAD => 0x60,
-            _ => panic!("Invalid interrupt {}", interrupt),
-        }
-    }
+        // When we branch, there are extra machine cycles needed for (reading, setting) pc, we are
+        // adding those there
+        let branch_cycle = match opcode {
+            0x20 | 0x30 => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x01
+                }
+            }
+            0x28 | 0x38 => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x01
+                } else {
+                    0x00
+                }
+            }
+            0xc0 | 0xd0 => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x03
+                }
+            }
+            0xc8 | 0xcc | 0xd8 | 0xdc => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x03
+                } else {
+                    0x00
+                }
+            }
+            0xc2 | 0xd2 => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x01
+                }
+            }
+            0xca | 0xda => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x01
+                } else {
+                    0x00
+                }
+            }
+            0xc4 | 0xd4 => {
+                if self.core.registers.get_flag(Flag::Z) {
+                    0x00
+                } else {
+                    0x03
+                }
+            }
+            _ => 0x00,
+        };
 
-    fn execute_next_instruction(&mut self) -> u8 {
-        // If halted, no-op and return 4 ticks
-        if self.core.halted {
-            4
+        // Based on the type of the instruction, cycle is mapped with the cycle map
+        if prefixed {
+            CB_CYCLES[opcode as usize]
         } else {
-            let executable_instruction = self
-                .instruction_set
-                .get_next_executable_instruction(&mut self.core)
-                .expect("Error decoding next instruction");
-
-            let (instruction, operand) = executable_instruction;
-
-            match instruction.operand_length {
-                0 => {
-                    trace!("{}", instruction.name);
-                }
-                1 => {
-                    trace!("{}, ${:02x}", instruction.name, operand.unwrap().byte);
-                }
-                2 => {
-                    trace!("{}, ${:04x}", instruction.name, operand.unwrap().word);
-                }
-                _ => {}
-            }
-
-            (instruction.exec)(&mut self.core, operand);
-
-            instruction.cycles
+            OP_CYCLES[opcode as usize] + branch_cycle
         }
     }
 
@@ -155,11 +221,17 @@ impl ClockedCPU {
             }
         }
 
-        // Run the CPU and get the machine cycles
-        let cycles = self.execute_next_instruction() as u32;
-
-        // Handle interrupt
-        self.check_interrupts();
+        // Run the CPU and get the machine cycles, handle interrupts if there is any
+        let cycles = {
+            let interrupt_cycles = self.core.handle_interrupt();
+            if interrupt_cycles != 0 {
+                interrupt_cycles
+            } else if self.core.halted {
+                OP_CYCLES[0]
+            } else {
+                self.execute_next_instruction()
+            }
+        } * 4; // We time this by 4 since up till now, the cycles we are referring to is machine cycles. 1 machine cycle = 4 t-cycle
 
         // Increment the step cycles with the cpu tick cycles
         self.step_cycles += cycles;

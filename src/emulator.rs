@@ -33,7 +33,9 @@ impl Emulator {
     }
 
     pub fn tick(&mut self) -> u32 {
+        // Execute one cpu cycle
         let cycles = self.cpu.tick();
+        // Update the mmu with the cycles
         self.mmu.borrow_mut().tick(cycles);
         cycles
     }

@@ -329,4 +329,38 @@ impl Core {
     pub fn alu_set(&mut self, a: u8, b: u8) -> u8 {
         a | (1 << b)
     }
+
+    pub fn handle_interrupt(&mut self) -> u32 {
+        if !self.halted && !self.ei {
+            return 0;
+        }
+
+        let intf = self.memory.borrow().get(0xff0f);
+        let inte = self.memory.borrow().get(0xffff);
+        let ii = intf & inte;
+        if ii == 0x00 {
+            return 0;
+        }
+        self.halted = false;
+
+        if !self.ei {
+            return 0;
+        }
+        self.ei = false;
+
+        // Consumer an interrupter, the rest is written back to the register
+        let n = ii.trailing_zeros();
+        let intf = intf & !(1 << n);
+        self.memory.borrow_mut().set(0xff0f, intf);
+
+        self.stack_push(self.registers.pc);
+        // Set the PC to correspond interrupt process program:
+        // V-Blank: 0x40
+        // LCD: 0x48
+        // TIMER: 0x50
+        // JOYPAD: 0x60
+        // Serial: 0x58
+        self.registers.pc = 0x0040 | ((n as u16) << 3);
+        4
+    }
 }

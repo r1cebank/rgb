@@ -31,12 +31,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
+      <change afterPath="$PROJECT_DIR$/src/cpu/interrupt.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc1.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc1.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cpu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/instruction.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/instruction.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/sm80.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/sm80.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/memory/timer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/timer.rs" afterDir="false" />
     </list>
@@ -156,13 +156,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00036" summary="Non prefixed instructions DONE">
-      <created>1605150194424</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1605150194424</updated>
     </task>
     <task id="LOCAL-00037" summary="RLC RRC">
       <created>1605152557868</created>
@@ -500,7 +493,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605669115438</updated>
     </task>
-    <option name="localTasksCounter" value="85" />
+    <task id="LOCAL-00085" summary="Passing cpu_instrs with serial output">
+      <created>1605753188735</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1605753188735</updated>
+    </task>
+    <option name="localTasksCounter" value="86" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -516,7 +516,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="JP" />
     <MESSAGE value="CALL, PUSH, POP" />
     <MESSAGE value="RST" />
     <MESSAGE value="Finish ADC" />
@@ -541,7 +540,8 @@
     <MESSAGE value="CPU pass all tests" />
     <MESSAGE value="Adding cursive debug view" />
     <MESSAGE value="Update readme" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update readme" />
+    <MESSAGE value="Passing cpu_instrs with serial output" />
+    <option name="LAST_COMMIT_MESSAGE" value="Passing cpu_instrs with serial output" />
   </component>
   <component name="WindowStateProjectService">
     <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
@@ -572,26 +572,26 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605739372168">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1605824013138">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605739372168">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605824013138" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1605824013138">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605739372168">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605824013138" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1605824013138">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605739372168">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605824013138" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1605824013138">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605739372168" />
-    <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605725059971">
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605824013138" />
+    <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1077" y="402" key="RollbackChangesDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605725059971" />
+    <state x="1077" y="402" key="RollbackChangesDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605761785569" />
     <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

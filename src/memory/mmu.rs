@@ -1,8 +1,13 @@
 use super::timer::Timer;
 use super::Memory;
 use crate::cartridge::{load_cartridge, Cartridge};
+use crate::cpu::interrupt::InterruptFlags;
 use crate::ppu::PPU;
 use crate::util::BOOT_ROM_SIZE;
+use std::cell::RefCell;
+use std::io;
+use std::io::Write;
+use std::rc::Rc;
 
 pub struct MMU {
     pub boot_rom: Option<[u8; 256]>,
@@ -14,7 +19,7 @@ pub struct MMU {
     work_ram: [u8; 0x8000],
     high_ram: [u8; 0x7f],
     work_ram_bank: usize,
-    interrupt_flags: u8,
+    interrupt_flags: Rc<RefCell<InterruptFlags>>,
     interrupt_enabled: u8,
 }
 
@@ -32,25 +37,26 @@ impl MMU {
             boot_rom.copy_from_slice(&boot_rom_buffer);
             boot_rom
         });
+        // The interrupt flag is shared across each component in the gameboy, any component is able
+        // to raise an interrupt
+        let interrupt_flags = Rc::new(RefCell::new(InterruptFlags::new()));
         Self {
             boot_rom,
-            timer: Timer::new(),
+            timer: Timer::new(interrupt_flags.clone()),
             ppu: PPU::new(),
             last_serial: 0x00,
+            interrupt_flags: interrupt_flags.clone(),
             boot_rom_enabled: boot_rom != None,
             cartridge: load_cartridge(rom),
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],
             work_ram_bank: 0x01,
-            interrupt_flags: 0x00,
             interrupt_enabled: 0x00,
         }
     }
+    /// Update the MMU cycles, will tick the clock
     pub fn tick(&mut self, cycles: u32) {
         self.timer.tick(cycles);
-
-        self.interrupt_flags |= self.timer.interrupt;
-        self.timer.interrupt = 0;
     }
 
     /// When no boot rom is supplied, we set the following states in memory just like the boot rom
@@ -130,7 +136,7 @@ impl Memory for MMU {
                 // Clock
                 self.timer.get(address)
             }
-            0xff0f => self.interrupt_flags,
+            0xff0f => self.interrupt_flags.borrow_mut().data,
             0xff10..=0xff3f => {
                 // APU
                 0
@@ -176,10 +182,11 @@ impl Memory for MMU {
                 }
                 if address == 0xff02 {
                     print!("{}", self.last_serial as char);
+                    io::stdout().flush();
                 }
             }
             0xff04..=0xff07 => self.timer.set(address, value),
-            0xff0f => self.interrupt_flags = value,
+            0xff0f => self.interrupt_flags.borrow_mut().data = value,
             0xff10..=0xff3f => {
                 // Sound
             }
