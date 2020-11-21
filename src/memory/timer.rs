@@ -115,7 +115,10 @@ impl Timer {
 
     pub fn tick(&mut self, cycles: u32) {
         // Increment div at rate of 16384Hz. Because the clock cycles is 4194304, so div increment every 256 cycles.
-        self.register.div = self.register.div.wrapping_add(self.div_clock.next(cycles) as u8);
+        self.register.div = self
+            .register
+            .div
+            .wrapping_add(self.div_clock.next(cycles) as u8);
 
         // Increment tima at rate of Clock / freq
         // Timer Enable

@@ -12,7 +12,7 @@ use std::rc::Rc;
 pub struct MMU {
     pub boot_rom: Option<[u8; 256]>,
     pub cartridge: Box<dyn Cartridge>,
-    pub ppu: PPU,
+    pub ppu: RefCell<PPU>,
     boot_rom_enabled: bool,
     timer: Timer,
     last_serial: u8,
@@ -43,7 +43,7 @@ impl MMU {
         Self {
             boot_rom,
             timer: Timer::new(interrupt_flags.clone()),
-            ppu: PPU::new(),
+            ppu: RefCell::new(PPU::new(interrupt_flags.clone())),
             last_serial: 0x00,
             interrupt_flags: interrupt_flags.clone(),
             boot_rom_enabled: boot_rom != None,
@@ -106,10 +106,7 @@ impl Memory for MMU {
                     self.cartridge.get(address)
                 }
             }
-            0x8000..=0x9fff => {
-                // Get PPU
-                0
-            }
+            0x8000..=0x9fff => self.ppu.borrow().get(address),
             0xa000..=0xbfff => self.cartridge.get(address),
             0xc000..=0xcfff => self.work_ram[address as usize - 0xc000],
             0xd000..=0xdfff => {
@@ -154,9 +151,7 @@ impl Memory for MMU {
     fn set(&mut self, address: u16, value: u8) {
         match address {
             0x0000..=0x7fff => self.cartridge.set(address, value),
-            0x8000..=0x9fff => {
-                // PPU
-            }
+            0x8000..=0x9fff => self.ppu.borrow_mut().set(address, value),
             0xa000..=0xbfff => self.cartridge.set(address, value),
             0xc000..=0xcfff => self.work_ram[address as usize - 0xc000] = value,
             0xd000..=0xdfff => {

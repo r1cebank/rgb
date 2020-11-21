@@ -64,20 +64,6 @@ pub fn start_display_thread(
             // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
 
-            // Create a texture context for our texture
-            let mut game_texture_context = TextureContext {
-                factory: window.factory.clone(),
-                encoder: window.factory.create_command_buffer().into(),
-            };
-
-            // Create a texture from the image that stores our framebuffer
-            let mut game_texture: G2dTexture = Texture::from_image(
-                &mut game_texture_context,
-                &game_image,
-                &TextureSettings::new(),
-            )
-            .unwrap();
-
             // Our display loop
             'display: while let Some(e) = window.next() {
                 if let Some(_) = e.render_args() {
