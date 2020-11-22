@@ -70,6 +70,13 @@ pub fn start_emulator_thread(
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
                     }
+                    match debug_result_sender.try_send(DebugMessage::TileUpdate(Vec::from(
+                        emulator.mmu.borrow().ppu.borrow().tile_set,
+                    ))) {
+                        Ok(_) => {}
+                        Err(TrySendError::Full(_)) => {}
+                        Err(TrySendError::Disconnected(_)) => break 'emulator,
+                    }
                     match debug_result_sender.try_send(DebugMessage::MemoryUpdate(
                         emulator
                             .mmu

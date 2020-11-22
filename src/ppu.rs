@@ -32,7 +32,7 @@ impl std::convert::From<Mode> for u8 {
     }
 }
 
-type Tile = [[u8; 8]; 8];
+pub type Tile = [[u8; 8]; 8];
 
 // Digital image with mode RGB. Size = 144 * 160 * 3.
 // 3---------
@@ -78,7 +78,7 @@ impl PPU {
 
         if value != 0x00 {
             // Nothing but zeros being written, in infinite loop.
-            debug!("Writing data to VRAM!: {:#X}", value);
+            trace!("VRAM:TILE {:#x}", value);
         }
 
         // Work out which tile and row was updated

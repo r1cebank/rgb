@@ -1,9 +1,11 @@
 use crate::cpu::registers::Registers;
+use crate::ppu::{Tile, TILE_MAP_SIZE};
 
 const MAX_LOG: usize = 6;
 
 pub struct DebugState {
     pub registers: Registers,
+    pub tiles: Vec<Tile>,
     pub log_messages: Vec<String>,
 }
 
@@ -11,6 +13,7 @@ pub struct DebugState {
 impl DebugState {
     pub fn new() -> DebugState {
         Self {
+            tiles: vec![[[0x00; 8]; 8]; TILE_MAP_SIZE],
             registers: Registers::new(),
             log_messages: Vec::new(),
         }

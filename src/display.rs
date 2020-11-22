@@ -47,6 +47,9 @@ pub fn start_display_thread(
             // The canvas to draw our emulator framebuffer
             let mut game_image = im::ImageBuffer::new(FB_W as u32, FB_H as u32);
 
+            // The canvas to draw our tiles framebuffer
+            let mut tile_image = im::ImageBuffer::new(256 as u32, 256 as u32);
+
             // Create a texture context for our texture
             let mut game_texture_context = TextureContext {
                 factory: window.factory.clone(),
@@ -57,6 +60,14 @@ pub fn start_display_thread(
             let mut game_texture: G2dTexture = Texture::from_image(
                 &mut game_texture_context,
                 &game_image,
+                &TextureSettings::new(),
+            )
+            .unwrap();
+
+            // Create a texture from the tiles that stores our framebuffer
+            let mut tile_texture: G2dTexture = Texture::from_image(
+                &mut game_texture_context,
+                &tile_image,
                 &TextureSettings::new(),
             )
             .unwrap();
@@ -73,6 +84,9 @@ pub fn start_display_thread(
                     // Update the game texture with the game image
                     game_texture
                         .update(&mut game_texture_context, &game_image)
+                        .unwrap();
+                    tile_texture
+                        .update(&mut game_texture_context, &tile_image)
                         .unwrap();
 
                     // Draw the debug info, if this function returns false, break the loop
@@ -95,6 +109,13 @@ pub fn start_display_thread(
                             c.transform.scale(scale_factor as f64, scale_factor as f64),
                             g,
                         );
+                        image(
+                            &tile_texture,
+                            c.transform
+                                .scale(1.5 as f64, 1.5 as f64)
+                                .trans(220 as f64, 10 as f64),
+                            g,
+                        );
                     });
                 }
                 // Update framebuffer when the receiver receive new framebuffer
@@ -107,6 +128,18 @@ pub fn start_display_thread(
                         ));
                         game_canvas::update_game_canvas(framebuffer, &mut game_image);
                     }
+                    Err(TryRecvError::Empty) => (),
+                    Err(TryRecvError::Disconnected) => break 'display,
+                }
+
+                // Update framebuffer for tiles
+                match debug_result_receiver.try_recv() {
+                    Ok(message) => match message {
+                        DebugMessage::TileUpdate(tiles) => {
+                            debug_canvas::update_tile_canvas(tiles, &mut tile_image);
+                        }
+                        _ => {}
+                    },
                     Err(TryRecvError::Empty) => (),
                     Err(TryRecvError::Disconnected) => break 'display,
                 }

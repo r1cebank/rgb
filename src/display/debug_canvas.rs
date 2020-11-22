@@ -1,7 +1,7 @@
 use crate::cpu::registers::Flag;
 use crate::debug::debug_state::DebugState;
 use crate::debug::message::DebugMessage;
-use crate::ppu::FB_H;
+use crate::ppu::{Tile, FB_H};
 use flume::{Receiver, TryRecvError};
 use piston_window::*;
 
@@ -30,6 +30,9 @@ pub fn draw_debug_info(
         Ok(message) => match message {
             DebugMessage::RegisterUpdate(registers) => {
                 debug_state.registers = registers;
+            }
+            DebugMessage::TileUpdate(tiles) => {
+                debug_state.tiles = tiles;
             }
             _ => {}
         },
@@ -103,4 +106,68 @@ pub fn draw_debug_info(
     });
 
     draw_result
+}
+
+pub fn update_tile_canvas(
+    tile_set: Vec<Tile>,
+    image_buffer: &mut im::ImageBuffer<im::Rgba<u8>, Vec<u8>>,
+) {
+    let framebuffer = tile_to_framebuffer(tile_set);
+    // Update each pixel from our raw framebuffer to the canvas image
+    for y in 0..framebuffer.len() {
+        for x in 0..framebuffer[y].len() {
+            image_buffer.put_pixel(
+                x as u32,
+                y as u32,
+                im::Rgba([
+                    framebuffer[y][x][0],
+                    framebuffer[y][x][1],
+                    framebuffer[y][x][2],
+                    framebuffer[y][x][3],
+                ]),
+            );
+        }
+    }
+}
+
+pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 256]> {
+    const TILE_COUNT: usize = 24;
+    const TILE_WIDTH: usize = 8;
+    const IMAGE_WIDTH: usize = TILE_WIDTH * TILE_COUNT;
+    const PIXEL_COLOUR_STRIDE: usize = 4;
+    const PALETTE: [[u8; 4]; 4] = [
+        [0, 0, 0, 255],
+        [192, 192, 192, 255],
+        [96, 96, 96, 255],
+        [255, 255, 255, 255],
+    ];
+
+    let mut framebuffer = vec![[[0x00 as u8; 4]; 256]; 256];
+
+    for tile_y in 0..TILE_COUNT {
+        for tile_x in 0..TILE_COUNT {
+            let target_tile = tile_x + (tile_y * TILE_COUNT);
+
+            if target_tile >= 384 {
+                return framebuffer;
+            }
+
+            for y in 0..TILE_WIDTH {
+                for x in 0..TILE_WIDTH {
+                    let pixel_palette =
+                        PALETTE[tile_set[target_tile as usize][y as usize][x as usize] as usize];
+
+                    let point_x = x + (tile_x * TILE_WIDTH);
+                    let point_y = y + (tile_y * TILE_WIDTH);
+
+                    framebuffer[point_y][point_x][0] = pixel_palette[0];
+                    framebuffer[point_y][point_x][1] = pixel_palette[1];
+                    framebuffer[point_y][point_x][2] = pixel_palette[2];
+                    framebuffer[point_y][point_x][3] = pixel_palette[3];
+                }
+            }
+        }
+    }
+
+    framebuffer
 }
