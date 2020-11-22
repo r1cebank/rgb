@@ -59,7 +59,7 @@ impl Registers {
 
     pub fn get_register_overview(&self) -> String {
         format!(
-            "A: {:04x}, B: {:04x}, C: {:04x}, D: {:04x}, E: {:04x}, H: {:04x}, L: {:04x}",
+            "A: {:02x}, B: {:02x}, C: {:02x}, D: {:02x}, E: {:02x}, H: {:02x}, L: {:02x}",
             self.a, self.b, self.c, self.d, self.e, self.h, self.l
         )
     }

@@ -127,6 +127,10 @@ impl ClockedCPU {
         // Execute the instruction
         (instruction.exec)(&mut self.core, operand);
 
+        trace!("{}", self.core.registers.get_flag_register_overview());
+        trace!("{}", self.core.registers.get_register_overview());
+        trace!("{}", self.core.registers.get_word_register_overview());
+
         // When we branch, there are extra machine cycles needed for (reading, setting) pc, we are
         // adding those there
         let branch_cycle = match opcode {

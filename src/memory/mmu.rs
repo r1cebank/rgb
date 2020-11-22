@@ -195,7 +195,7 @@ impl Memory for MMU {
 
                 // PPU
             }
-            0xff80...0xffee => self.high_ram[address as usize - 0xff80] = value,
+            0xff80...0xfffe => self.high_ram[address as usize - 0xff80] = value,
             0xffff => self.interrupt_enabled = value,
             _ => {}
         }
