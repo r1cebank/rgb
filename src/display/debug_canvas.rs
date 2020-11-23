@@ -13,6 +13,8 @@ pub fn draw_debug_info(
     window: &mut PistonWindow,
     debug_message_receiver: Receiver<DebugMessage>,
     log_message_receiver: Receiver<DebugMessage>,
+    tile_image: &mut im::ImageBuffer<im::Rgba<u8>, Vec<u8>>,
+    tile_texture: &mut G2dTexture,
     debug_state: &mut DebugState,
 ) -> bool {
     // The asset folder
@@ -53,9 +55,47 @@ pub fn draw_debug_info(
             draw_result = false;
         }
     }
+    // Update framebuffer for tiles
+    match debug_message_receiver.try_recv() {
+        Ok(message) => match message {
+            DebugMessage::TileUpdate(tiles) => {
+                debug_state.tiles = tiles;
+            }
+            _ => {}
+        },
+        Err(TryRecvError::Empty) => (),
+        Err(TryRecvError::Disconnected) => {
+            draw_result = false;
+        }
+    }
+
+    let framebuffer = tile_to_framebuffer(debug_state.tiles.clone());
+
+    // Update each pixel from our raw framebuffer to the canvas image
+    for y in 0..framebuffer.len() {
+        for x in 0..framebuffer[y].len() {
+            tile_image.put_pixel(
+                x as u32,
+                y as u32,
+                im::Rgba([
+                    framebuffer[y][x][0],
+                    framebuffer[y][x][1],
+                    framebuffer[y][x][2],
+                    framebuffer[y][x][3],
+                ]),
+            );
+        }
+    }
 
     // Draw the debug info
     window.draw_2d(e, |c, g, device| {
+        image(
+            tile_texture,
+            c.transform
+                .scale(1.5 as f64, 1.5 as f64)
+                .trans(220 as f64, 10 as f64),
+            g,
+        );
         text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
             .draw(
                 format!("{}", debug_state.registers.get_register_overview()).as_str(),
@@ -137,8 +177,8 @@ pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 256]> {
     const PIXEL_COLOUR_STRIDE: usize = 4;
     const PALETTE: [[u8; 4]; 4] = [
         [0, 0, 0, 255],
-        [192, 192, 192, 255],
-        [96, 96, 96, 255],
+        [255, 255, 255, 255],
+        [255, 255, 255, 255],
         [255, 255, 255, 255],
     ];
 

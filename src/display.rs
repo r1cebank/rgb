@@ -39,10 +39,10 @@ pub fn start_display_thread(
                 format!("rgb [{}] - {} FPS", rom_name, -1).as_str(),
                 (screen_width, screen_height),
             )
-            .resizable(false)
-            .exit_on_esc(true)
-            .build()
-            .unwrap_or_else(|e| panic!("Failed to build window: {}", e));
+                .resizable(false)
+                .exit_on_esc(true)
+                .build()
+                .unwrap_or_else(|e| panic!("Failed to build window: {}", e));
 
             // The canvas to draw our emulator framebuffer
             let mut game_image = im::ImageBuffer::new(FB_W as u32, FB_H as u32);
@@ -62,7 +62,7 @@ pub fn start_display_thread(
                 &game_image,
                 &TextureSettings::new(),
             )
-            .unwrap();
+                .unwrap();
 
             // Create a texture from the tiles that stores our framebuffer
             let mut tile_texture: G2dTexture = Texture::from_image(
@@ -70,7 +70,7 @@ pub fn start_display_thread(
                 &tile_image,
                 &TextureSettings::new(),
             )
-            .unwrap();
+                .unwrap();
 
             // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
@@ -95,6 +95,8 @@ pub fn start_display_thread(
                         &mut window,
                         debug_result_receiver.clone(),
                         log_message_receiver.clone(),
+                        &mut tile_image,
+                        &mut tile_texture,
                         &mut debug_state,
                     ) {
                         break 'display;
@@ -128,18 +130,6 @@ pub fn start_display_thread(
                         ));
                         game_canvas::update_game_canvas(framebuffer, &mut game_image);
                     }
-                    Err(TryRecvError::Empty) => (),
-                    Err(TryRecvError::Disconnected) => break 'display,
-                }
-
-                // Update framebuffer for tiles
-                match debug_result_receiver.try_recv() {
-                    Ok(message) => match message {
-                        DebugMessage::TileUpdate(tiles) => {
-                            debug_canvas::update_tile_canvas(tiles, &mut tile_image);
-                        }
-                        _ => {}
-                    },
                     Err(TryRecvError::Empty) => (),
                     Err(TryRecvError::Disconnected) => break 'display,
                 }

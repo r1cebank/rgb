@@ -32,12 +32,8 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/debug/debug_state.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug/debug_state.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/debug/message.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug/message.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/display/debug_canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/debug_canvas.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,13 +151,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00039" summary="SLA, SRA">
-      <created>1605153652046</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1605153652046</updated>
     </task>
     <task id="LOCAL-00040" summary="SWAP">
       <created>1605154793742</created>
@@ -499,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606008676945</updated>
     </task>
-    <option name="localTasksCounter" value="88" />
+    <task id="LOCAL-00088" summary="display tiles for bootrom">
+      <created>1606024674240</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1606024674240</updated>
+    </task>
+    <option name="localTasksCounter" value="89" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -515,7 +511,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Finish ADC" />
     <MESSAGE value="Finish SBC" />
     <MESSAGE value="LDH" />
     <MESSAGE value="DI, EI, and others" />
@@ -540,7 +535,8 @@
     <MESSAGE value="Passing cpu_instrs with serial output" />
     <MESSAGE value="Adding mmu timer and passing instruction timing tests with help" />
     <MESSAGE value="Fix MMU bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix MMU bug" />
+    <MESSAGE value="display tiles for bootrom" />
+    <option name="LAST_COMMIT_MESSAGE" value="display tiles for bootrom" />
   </component>
   <component name="WindowStateProjectService">
     <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
@@ -571,22 +567,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606024534211">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606104427784">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606024534211" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606024534211">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606104427784" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606104427784">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606024534211" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606024534211">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606104427784" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606104427784">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606024534211" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606024534211">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606104427784" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606104427784">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606024534211" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606104427784" />
     <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
