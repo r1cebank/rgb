@@ -80,7 +80,7 @@ pub struct PPU {
     pub oam: [u8; OAM_SIZE],
     pub mode: Mode,
     sprites: [Sprite; 40],
-    palette: [[u8; 4]; 4],
+    palette: [[u8; 3]; 4],
 
     // This register assigns gray shades for sprite palette 0. It works exactly as BGP (FF47), except that the lower
     // two bits aren't used because sprite data 00 is transparent.
@@ -123,12 +123,7 @@ impl PPU {
             tile_set: [[[0x00; 8]; 8]; TILE_MAP_SIZE],
             framebuffer: [[[0x00; 3]; FB_W]; FB_H],
             sprites: [Sprite::new(); 40],
-            palette: [
-                [254, 248, 208, 255],
-                [136, 192, 112, 255],
-                [39, 80, 70, 255],
-                [8, 24, 32, 255],
-            ],
+            palette: [[254, 248, 208], [136, 192, 112], [39, 80, 70], [8, 24, 32]],
             mode_clock: 0,
             line: 0,
             scroll_x: 0,
@@ -259,7 +254,7 @@ impl PPU {
         } else {
             0
         };
-        loop {
+        while i < 160 {
             let mapoff = ((i as usize + self.scroll_x as usize) % 256) >> 3;
             let tilei = self.video_ram[mapbase + mapoff];
 
@@ -291,13 +286,78 @@ impl PPU {
             }
 
             x = 0;
-            if i >= 160 as u8 {
-                break;
+        }
+    }
+
+    fn render_sprites(&mut self) {
+        for sprite in self.sprites.iter() {
+            let line = self.line as i32;
+
+            if self.lcdc_obj_sprite_size {
+                panic!("Double-sized sprites not yet supported");
+            }
+
+            // If the sprite falls within the scanline
+            if sprite.y_pos <= line && (sprite.y_pos + 8) > line {
+                let mut canvas_offset = ((line * 160) + sprite.x_pos) as usize;
+                let tile_row;
+
+                if sprite.y_flip {
+                    tile_row =
+                        self.tile_set[sprite.tile as usize][7 - (line - sprite.y_pos) as usize];
+                } else {
+                    tile_row = self.tile_set[sprite.tile as usize][(line - sprite.y_pos) as usize];
+                }
+
+                let mut colour;
+
+                for x in 0..8 {
+                    if sprite.x_pos + x >= 0 && sprite.x_pos + x < 160 {
+                        let palette_index = if sprite.x_flip {
+                            7 - x as usize
+                        } else {
+                            x as usize
+                        };
+                        colour = self.palette[tile_row[palette_index] as usize];
+
+                        let pixel_y = canvas_offset / FB_W;
+                        let pixel_x = canvas_offset % FB_W;
+
+                        // The last palette is the "zero" palette, when OAM has priority over BG, draw the pixel
+                        if self.framebuffer[pixel_y][pixel_x] == self.palette[3] {
+                            if !sprite.priority_behind_bg {
+                                continue;
+                            }
+                        }
+
+                        self.framebuffer[pixel_y][pixel_x][0] = colour[0];
+                        self.framebuffer[pixel_y][pixel_x][1] = colour[1];
+                        self.framebuffer[pixel_y][pixel_x][2] = colour[2];
+
+                        canvas_offset += 1;
+                    }
+                }
             }
         }
     }
 
-    fn render_sprites(&mut self) {}
+    pub fn update_sprite_object(&mut self, sprite_addr: usize, value: u8) {
+        let sprite_index = sprite_addr >> 2;
+        let byte = sprite_addr & 3;
+
+        match byte {
+            0x00 => self.sprites[sprite_index].y_pos = value as i32 - 16,
+            0x01 => self.sprites[sprite_index].x_pos = value as i32 - 8,
+            0x02 => self.sprites[sprite_index].tile = value,
+            0x03 => {
+                self.sprites[sprite_index].priority_behind_bg = (value & 0b1000_0000) != 0;
+                self.sprites[sprite_index].y_flip = (value & 0b0100_0000) != 0;
+                self.sprites[sprite_index].x_flip = (value & 0b0010_0000) != 0;
+                self.sprites[sprite_index].use_palette_1 = (value & 0b0001_0000) != 0;
+            }
+            _ => panic!("Invalid byte in update_sprite_object"),
+        }
+    }
 
     fn render_scanline(&mut self) {
         trace!("Rendering scanline, {:?}", self.mode);
@@ -329,6 +389,7 @@ impl Memory for PPU {
     fn get(&self, address: u16) -> u8 {
         match address {
             0x8000..=0x9fff => self.video_ram[address as usize - 0x8000],
+            0xfe00...0xfe9f => self.oam[address as usize - 0xfe00],
             0xff40 => {
                 (if self.lcdc_display_enabled {
                     0b1000_0000
@@ -403,6 +464,12 @@ impl Memory for PPU {
                     self.update_tile(address, value);
                 }
             }
+            0xfe00..=0xfe9f => {
+                let sprite_addr = address as usize - 0xfe00;
+                self.oam[sprite_addr] = value;
+
+                self.update_sprite_object(sprite_addr, value);
+            }
             0xff40 => {
                 let previous_lcdc_display_enabled = self.lcdc_display_enabled;
 
@@ -434,10 +501,10 @@ impl Memory for PPU {
             0xff47 => {
                 for i in 0..4 {
                     match (value >> (i * 2)) & 3 {
-                        0 => self.palette[i] = [254, 248, 208, 255],
-                        1 => self.palette[i] = [136, 192, 112, 255],
-                        2 => self.palette[i] = [39, 80, 70, 255],
-                        3 => self.palette[i] = [8, 24, 32, 255],
+                        0 => self.palette[i] = [254, 248, 208],
+                        1 => self.palette[i] = [136, 192, 112],
+                        2 => self.palette[i] = [39, 80, 70],
+                        3 => self.palette[i] = [8, 24, 32],
                         _ => {
                             panic!("Unexpected background palette value: {:#X}", i);
                         }

@@ -60,6 +60,19 @@ impl MMU {
         self.ppu.borrow_mut().tick(cycles);
     }
 
+    /// DMA oam table to ppu, in order to have sprites on the screen, cartridge will often use DMA
+    /// to copy oam table to ppu memory, we use the oam start address to set oam table from the source
+    fn oam_dma(&mut self, source_address: u8) {
+        trace!("OAM DMA address: ${:04x}", source_address);
+        let source_base_address = (source_address as u16) << 8;
+        const OAM_START_ADDRESS: u16 = 0xfe00;
+
+        for index in 0x00..0xa0 {
+            let source_byte = self.get(source_base_address + index);
+            self.set(OAM_START_ADDRESS + index, source_byte);
+        }
+    }
+
     /// When no boot rom is supplied, we set the following states in memory just like the boot rom
     pub fn simulate_boot_rom(&mut self) {
         self.set(0xff05, 0x00);
@@ -117,10 +130,7 @@ impl Memory for MMU {
             0xf000..=0xfdff => {
                 self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank]
             }
-            0xfe00..=0xfe9f => {
-                // Get PPU
-                0
-            }
+            0xfe00..=0xfe9f => self.ppu.borrow().get(address),
             0xfea0..=0xfeff => 0x00, // Invalid address
             0xff00 => {
                 // IO
@@ -159,9 +169,7 @@ impl Memory for MMU {
             0xf000..=0xfdff => {
                 self.work_ram[address as usize - 0xf000 + 0x1000 * self.work_ram_bank] = value
             }
-            0xfe00..=0xfe9f => {
-                // PPU
-            }
+            0xfe00..=0xfe9f => self.ppu.borrow_mut().set(address, value),
             0xfea0..=0xfeff => {
                 // Not used
             }
@@ -183,9 +191,7 @@ impl Memory for MMU {
             0xff10..=0xff3f => {
                 // Sound
             }
-            0xff46 => {
-                // OAM dma
-            }
+            0xff46 => self.oam_dma(value),
             0xff40..=0xff45 | 0xff47..=0xff4b | 0xff4f => self.ppu.borrow_mut().set(address, value),
             0xff50 => {
                 self.boot_rom_enabled = false;
