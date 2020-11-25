@@ -33,10 +33,11 @@ use util::{get_boot_rom, get_rom};
 
 fn main() {
     /////////////////flume sender receivers////////////////////////
-    let (framebuffer_sender, framebuffer_receiver) = flume::unbounded();
+    let (framebuffer_sender, framebuffer_receiver) = flume::bounded(1);
     // Debug channels
     // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
-    let (debug_message_sender, debug_message_receiver) = flume::unbounded();
+    let (debug_message_sender, debug_message_receiver) = flume::bounded(1);
+    let (tile_update_sender, tile_update_receiver) = flume::bounded(1);
     let (log_message_sender, log_message_receiver) = flume::unbounded();
 
     // Logger configurations
@@ -102,6 +103,7 @@ fn main() {
         rom,
         framebuffer_sender.clone(),
         debug_message_sender.clone(),
+        tile_update_sender.clone(),
     );
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
@@ -110,6 +112,7 @@ fn main() {
         framebuffer_receiver.clone(),
         debug_message_receiver.clone(),
         log_message_receiver.clone(),
+        tile_update_receiver.clone(),
     );
     let apu_thread = start_apu_thread();
 

@@ -32,6 +32,14 @@ To run without bootrom
 cargo run -- -r [your game rom]
 ```
 
+## Test result
+
+### Instruction test
+![cpu instruction test](cpu_instrs.png)
+
+### Instruction timing
+![cpu instruction test](instr_timing.png)
+
 ## Special Thanks
 I've used so much online resource to help me understand the gameboy hardware and help me to write this vastly complicated emulator.
 
@@ -52,3 +60,7 @@ https://github.com/rylev/DMG-01
 https://github.com/mvdnes/rboy
 
 https://github.com/nwessing/gameboy
+
+https://github.com/alexcrichton/jba
+
+https://github.com/chrisbutcher/gameboy

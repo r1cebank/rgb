@@ -13,6 +13,7 @@ pub fn draw_debug_info(
     window: &mut PistonWindow,
     debug_message_receiver: Receiver<DebugMessage>,
     log_message_receiver: Receiver<DebugMessage>,
+    tile_update_receiver: Receiver<DebugMessage>,
     tile_image: &mut im::ImageBuffer<im::Rgba<u8>, Vec<u8>>,
     tile_texture: &mut G2dTexture,
     debug_state: &mut DebugState,
@@ -56,7 +57,7 @@ pub fn draw_debug_info(
         }
     }
     // Update framebuffer for tiles
-    match debug_message_receiver.try_recv() {
+    match tile_update_receiver.try_recv() {
         Ok(message) => match message {
             DebugMessage::TileUpdate(tiles) => {
                 debug_state.tiles = tiles;
@@ -89,11 +90,20 @@ pub fn draw_debug_info(
 
     // Draw the debug info
     window.draw_2d(e, |c, g, device| {
+        // text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
+        //     .draw(
+        //         "Tileset",
+        //         &mut font,
+        //         &c.draw_state,
+        //         c.transform.trans(330 as f64, 20 as f64),
+        //         g,
+        //     )
+        //     .unwrap();
         image(
             tile_texture,
             c.transform
-                .scale(1.5 as f64, 1.5 as f64)
-                .trans(220 as f64, 10 as f64),
+                .scale(2 as f64, 2 as f64)
+                .trans(170 as f64, 0 as f64),
             g,
         );
         text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
@@ -171,15 +181,15 @@ pub fn update_tile_canvas(
 }
 
 pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 256]> {
-    const TILE_COUNT: usize = 24;
+    const TILE_COUNT: usize = 18;
     const TILE_WIDTH: usize = 8;
     const IMAGE_WIDTH: usize = TILE_WIDTH * TILE_COUNT;
     const PIXEL_COLOUR_STRIDE: usize = 4;
     const PALETTE: [[u8; 4]; 4] = [
-        [0, 0, 0, 255],
-        [255, 255, 255, 255],
-        [255, 255, 255, 255],
-        [255, 255, 255, 255],
+        [254, 248, 208, 255],
+        [136, 192, 112, 255],
+        [39, 80, 70, 255],
+        [8, 24, 32, 255],
     ];
 
     let mut framebuffer = vec![[[0x00 as u8; 4]; 256]; 256];

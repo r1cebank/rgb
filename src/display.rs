@@ -23,6 +23,7 @@ pub fn start_display_thread(
     framebuffer_receiver: Receiver<PPUFramebuffer>,
     debug_result_receiver: Receiver<DebugMessage>,
     log_message_receiver: Receiver<DebugMessage>,
+    tile_update_receiver: Receiver<DebugMessage>,
 ) -> JoinHandle<()> {
     Builder::new()
         .name("display".to_string())
@@ -39,10 +40,10 @@ pub fn start_display_thread(
                 format!("rgb [{}] - {} FPS", rom_name, -1).as_str(),
                 (screen_width, screen_height),
             )
-                .resizable(false)
-                .exit_on_esc(true)
-                .build()
-                .unwrap_or_else(|e| panic!("Failed to build window: {}", e));
+            .resizable(false)
+            .exit_on_esc(true)
+            .build()
+            .unwrap_or_else(|e| panic!("Failed to build window: {}", e));
 
             // The canvas to draw our emulator framebuffer
             let mut game_image = im::ImageBuffer::new(FB_W as u32, FB_H as u32);
@@ -62,7 +63,7 @@ pub fn start_display_thread(
                 &game_image,
                 &TextureSettings::new(),
             )
-                .unwrap();
+            .unwrap();
 
             // Create a texture from the tiles that stores our framebuffer
             let mut tile_texture: G2dTexture = Texture::from_image(
@@ -70,7 +71,7 @@ pub fn start_display_thread(
                 &tile_image,
                 &TextureSettings::new(),
             )
-                .unwrap();
+            .unwrap();
 
             // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
@@ -79,7 +80,7 @@ pub fn start_display_thread(
             'display: while let Some(e) = window.next() {
                 if let Some(_) = e.render_args() {
                     window.draw_2d(&e, |_, g, _| {
-                        clear([0.0, 0.0, 0.0, 1.0], g);
+                        clear([0.03, 0.09, 0.12, 1.0], g);
                     });
                     // Update the game texture with the game image
                     game_texture
@@ -95,6 +96,7 @@ pub fn start_display_thread(
                         &mut window,
                         debug_result_receiver.clone(),
                         log_message_receiver.clone(),
+                        tile_update_receiver.clone(),
                         &mut tile_image,
                         &mut tile_texture,
                         &mut debug_state,
@@ -111,13 +113,6 @@ pub fn start_display_thread(
                             c.transform.scale(scale_factor as f64, scale_factor as f64),
                             g,
                         );
-                        image(
-                            &tile_texture,
-                            c.transform
-                                .scale(1.5 as f64, 1.5 as f64)
-                                .trans(220 as f64, 10 as f64),
-                            g,
-                        );
                     });
                 }
                 // Update framebuffer when the receiver receive new framebuffer
@@ -130,10 +125,12 @@ pub fn start_display_thread(
                         ));
                         game_canvas::update_game_canvas(framebuffer, &mut game_image);
                     }
-                    Err(TryRecvError::Empty) => (),
+                    Err(TryRecvError::Empty) => {}
                     Err(TryRecvError::Disconnected) => break 'display,
                 }
             }
+            debug!("Display loop exited.");
+            std::process::exit(0x00);
         })
         .unwrap()
 }

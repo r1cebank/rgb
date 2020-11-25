@@ -86,6 +86,8 @@ pub fn start_debug_thread(debug_result_receiver: Receiver<DebugMessage>) -> Join
 
             // Starts the event loop.
             siv.run();
+            debug!("Debug thread exited");
+            std::process::exit(0x00);
         })
         .unwrap()
 }

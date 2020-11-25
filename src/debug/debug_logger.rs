@@ -1,5 +1,5 @@
 use crate::debug::message::DebugMessage;
-use flume::Sender;
+use flume::{Sender, TrySendError};
 use log::{LevelFilter, Log, Metadata, Record};
 use simplelog::{Config, SharedLogger};
 use std::borrow::Cow;
@@ -71,8 +71,14 @@ impl Log for DebugLogger {
             if self.should_skip(&self.config, record) {
                 // NOP
             } else {
-                self.log_sender
-                    .send(DebugMessage::LogUpdate(format!("{}", record.args())));
+                match self
+                    .log_sender
+                    .try_send(DebugMessage::LogUpdate(format!("{}", record.args())))
+                {
+                    Ok(_) => {}
+                    Err(TrySendError::Full(_)) => {}
+                    Err(TrySendError::Disconnected(_)) => {}
+                }
             }
         }
     }

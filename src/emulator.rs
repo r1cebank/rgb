@@ -46,6 +46,7 @@ pub fn start_emulator_thread(
     rom: Vec<u8>,
     framebuffer_sender: Sender<PPUFramebuffer>,
     debug_result_sender: Sender<DebugMessage>,
+    tile_update_sender: Sender<DebugMessage>,
 ) -> JoinHandle<()> {
     Builder::new()
         .name("emulator".to_string())
@@ -56,9 +57,10 @@ pub fn start_emulator_thread(
             'emulator: loop {
                 // std::thread::sleep(std::time::Duration::from_millis(10));
                 total_cycles += emulator.tick();
-                if total_cycles >= 200000 {
-                    let mut gpu_framebuffer = random_framebuffer();
-                    match framebuffer_sender.try_send(gpu_framebuffer) {
+                if total_cycles > 2000 {
+                    match framebuffer_sender
+                        .try_send(emulator.mmu.borrow().ppu.borrow().framebuffer)
+                    {
                         Ok(_) => {}
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
@@ -70,7 +72,7 @@ pub fn start_emulator_thread(
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
                     }
-                    match debug_result_sender.try_send(DebugMessage::TileUpdate(Vec::from(
+                    match tile_update_sender.try_send(DebugMessage::TileUpdate(Vec::from(
                         emulator.mmu.borrow().ppu.borrow().tile_set,
                     ))) {
                         Ok(_) => {}
@@ -92,6 +94,8 @@ pub fn start_emulator_thread(
                     total_cycles = 0;
                 }
             }
+            debug!("Emulator loop exited");
+            std::process::exit(0x00);
         })
         .unwrap()
 }

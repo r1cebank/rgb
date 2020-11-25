@@ -57,6 +57,7 @@ impl MMU {
     /// Update the MMU cycles, will tick the clock
     pub fn tick(&mut self, cycles: u32) {
         self.timer.tick(cycles);
+        self.ppu.borrow_mut().tick(cycles);
     }
 
     /// When no boot rom is supplied, we set the following states in memory just like the boot rom
@@ -123,7 +124,7 @@ impl Memory for MMU {
             0xfea0..=0xfeff => 0x00, // Invalid address
             0xff00 => {
                 // IO
-                0
+                0xff
             }
             0xff01..=0xff02 => {
                 // Serial
@@ -138,10 +139,7 @@ impl Memory for MMU {
                 // APU
                 0
             }
-            0xf40...0xff4b => {
-                // PPU
-                0
-            }
+            0xf40...0xff4b => self.ppu.borrow().get(address),
             0xff80..=0xfffe => self.high_ram[address as usize - 0xff80],
             0xffff => self.interrupt_enabled,
             _ => 0x0000,
@@ -172,13 +170,13 @@ impl Memory for MMU {
             }
             0xff01..=0xff02 => {
                 // Serial
-                if address == 0xff01 {
-                    self.last_serial = value;
-                }
-                if address == 0xff02 {
-                    print!("{}", self.last_serial as char);
-                    io::stdout().flush();
-                }
+                // if address == 0xff01 {
+                //     self.last_serial = value;
+                // }
+                // if address == 0xff02 {
+                //     print!("{}", self.last_serial as char);
+                //     io::stdout().flush();
+                // }
             }
             0xff04..=0xff07 => self.timer.set(address, value),
             0xff0f => self.interrupt_flags.borrow_mut().data = value,
@@ -188,12 +186,15 @@ impl Memory for MMU {
             0xff46 => {
                 // OAM dma
             }
-            0xff40..=0xff45 | 0xff47..=0xff7f => {
-                if address == 0xff50 {
-                    self.boot_rom_enabled = false;
-                }
-
-                // PPU
+            0xff40..=0xff45 | 0xff47..=0xff4b | 0xff4f => self.ppu.borrow_mut().set(address, value),
+            0xff50 => {
+                self.boot_rom_enabled = false;
+            }
+            0xff70 => {
+                self.work_ram_bank = match value & 0x7 {
+                    0 => 1,
+                    n => n as usize,
+                };
             }
             0xff80...0xfffe => self.high_ram[address as usize - 0xff80] = value,
             0xffff => self.interrupt_enabled = value,
