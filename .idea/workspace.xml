@@ -31,8 +31,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
+      <change afterPath="$PROJECT_DIR$/res/FiraCode-Regular.ttf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cpu/registers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cpu/registers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display/debug_canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/debug_canvas.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -153,13 +158,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00042" summary="RES">
-      <created>1605156781247</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1605156781247</updated>
     </task>
     <task id="LOCAL-00043" summary="Finished all cpu opcode">
       <created>1605156926022</created>
@@ -497,7 +495,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606281573903</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="Adding ppu sprite rendering">
+      <created>1606284029355</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1606284029355</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -514,7 +519,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="DI, EI, and others" />
     <MESSAGE value="Non prefixed instructions DONE" />
     <MESSAGE value="RLC RRC" />
     <MESSAGE value="RL RR" />
@@ -539,17 +543,18 @@
     <MESSAGE value="display tiles for bootrom" />
     <MESSAGE value="Housekeeping in debug canvas" />
     <MESSAGE value="Adding ppu background rendering" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding ppu background rendering" />
+    <MESSAGE value="Adding ppu sprite rendering" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding ppu sprite rendering" />
   </component>
   <component name="WindowStateProjectService">
     <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="872" y="341" key="#Plugins/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605727891877" />
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606283935835">
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606330441265">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606283935835" />
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606330441265" />
     <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1605060578568">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -570,22 +575,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606283937044">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606368703189">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606283937044" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606283937044">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606368703189" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606368703189">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606283937044" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606283937044">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606368703189" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606368703189">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606283937044" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606283937044">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606368703189" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606368703189">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606283937044" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606368703189" />
     <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

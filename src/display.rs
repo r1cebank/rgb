@@ -61,7 +61,7 @@ pub fn start_display_thread(
             let mut game_texture: G2dTexture = Texture::from_image(
                 &mut game_texture_context,
                 &game_image,
-                &TextureSettings::new(),
+                &TextureSettings::new().mag(texture::Filter::Nearest),
             )
             .unwrap();
 
@@ -69,7 +69,7 @@ pub fn start_display_thread(
             let mut tile_texture: G2dTexture = Texture::from_image(
                 &mut game_texture_context,
                 &tile_image,
-                &TextureSettings::new(),
+                &TextureSettings::new().mag(texture::Filter::Nearest),
             )
             .unwrap();
 

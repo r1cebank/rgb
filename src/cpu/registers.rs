@@ -79,10 +79,10 @@ impl Registers {
     pub fn get_flag_register_overview(&self) -> String {
         format!(
             "Z: {}, N: {}, H: {}, C: {}",
-            self.get_flag(Flag::Z),
-            self.get_flag(Flag::N),
-            self.get_flag(Flag::H),
-            self.get_flag(Flag::C)
+            self.get_flag(Flag::Z) as u8,
+            self.get_flag(Flag::N) as u8,
+            self.get_flag(Flag::H) as u8,
+            self.get_flag(Flag::C) as u8
         )
     }
 

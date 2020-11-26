@@ -5,7 +5,7 @@ use crate::ppu::{Tile, FB_H};
 use flume::{Receiver, TryRecvError};
 use piston_window::*;
 
-const DEBUG_FONT_SIZE: usize = 15;
+const DEBUG_FONT_SIZE: usize = 13;
 const PADDING: usize = DEBUG_FONT_SIZE / 2;
 
 pub fn draw_debug_info(
@@ -24,7 +24,7 @@ pub fn draw_debug_info(
         .unwrap();
     // The font for drawing our text
     let mut font = window
-        .load_font(assets.join("mplus-1p-regular.ttf"))
+        .load_font(assets.join("FiraCode-Regular.ttf"))
         .unwrap();
 
     let mut draw_result = true;
@@ -145,7 +145,7 @@ pub fn draw_debug_info(
                     c.transform.trans(
                         10.0,
                         ((FB_H * 2)
-                            + (DEBUG_FONT_SIZE + PADDING) * 7
+                            + (DEBUG_FONT_SIZE + PADDING) * 9
                             + i * (DEBUG_FONT_SIZE + PADDING)) as f64,
                     ),
                     g,

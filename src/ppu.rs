@@ -324,7 +324,7 @@ impl PPU {
                         let pixel_x = canvas_offset % FB_W;
 
                         // The last palette is the "zero" palette, when OAM has priority over BG, draw the pixel
-                        if self.framebuffer[pixel_y][pixel_x] == self.palette[3] {
+                        if self.framebuffer[pixel_y][pixel_x] == [8, 24, 32] {
                             if !sprite.priority_behind_bg {
                                 continue;
                             }

@@ -3,7 +3,7 @@ use crate::cpu::instruction::InstructionSet;
 use crate::cpu::ClockedCPU;
 use crate::debug::message::DebugMessage;
 use crate::memory::mmu::MMU;
-use crate::ppu::{random_framebuffer, PPUFramebuffer};
+use crate::ppu::{random_framebuffer, Mode, PPUFramebuffer};
 use flume::{Sender, TrySendError};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -39,6 +39,10 @@ impl Emulator {
         self.mmu.borrow_mut().tick(cycles);
         cycles
     }
+
+    pub fn should_refresh_screen(&self) -> bool {
+        self.mmu.borrow().ppu.borrow().mode == Mode::VBlank
+    }
 }
 
 pub fn start_emulator_thread(
@@ -53,11 +57,10 @@ pub fn start_emulator_thread(
         .spawn(move || {
             debug!("Emulator Thread spawned");
             let mut emulator = Emulator::new(boot_rom, rom);
-            let mut total_cycles = 0;
             'emulator: loop {
                 // std::thread::sleep(std::time::Duration::from_millis(10));
-                total_cycles += emulator.tick();
-                if total_cycles > 2000 {
+                emulator.tick();
+                if emulator.should_refresh_screen() {
                     match framebuffer_sender
                         .try_send(emulator.mmu.borrow().ppu.borrow().framebuffer)
                     {
@@ -91,7 +94,6 @@ pub fn start_emulator_thread(
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
                     }
-                    total_cycles = 0;
                 }
             }
             debug!("Emulator loop exited");

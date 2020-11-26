@@ -20,6 +20,7 @@ mod save;
 mod util;
 
 use apu::start_apu_thread;
+use cartridge::load_cartridge;
 use clap::{App, Arg};
 use debug::debug_logger::DebugLogger;
 #[cfg(feature = "debug")]
@@ -100,7 +101,7 @@ fn main() {
 
     let emulator_thread = start_emulator_thread(
         boot_rom,
-        rom,
+        rom.clone(),
         framebuffer_sender.clone(),
         debug_message_sender.clone(),
         tile_update_sender.clone(),
@@ -108,7 +109,7 @@ fn main() {
     let io_thread = start_io_thread();
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
-        String::from("test rom"),
+        load_cartridge(rom.clone()).title(),
         framebuffer_receiver.clone(),
         debug_message_receiver.clone(),
         log_message_receiver.clone(),
