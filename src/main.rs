@@ -13,7 +13,7 @@ mod cpu;
 mod debug;
 mod display;
 mod emulator;
-mod io;
+mod input;
 mod memory;
 mod ppu;
 mod save;
@@ -27,7 +27,7 @@ use debug::debug_logger::DebugLogger;
 use debug::start_debug_thread;
 use display::start_display_thread;
 use emulator::start_emulator_thread;
-use io::start_io_thread;
+use input::start_io_thread;
 use simplelog::*;
 use std::fs::File;
 use util::{get_boot_rom, get_rom};
@@ -40,6 +40,7 @@ fn main() {
     let (debug_message_sender, debug_message_receiver) = flume::bounded(1);
     let (tile_update_sender, tile_update_receiver) = flume::bounded(1);
     let (log_message_sender, log_message_receiver) = flume::unbounded();
+    let (input_message_sender, input_message_receiver) = flume::unbounded();
 
     // Logger configurations
     let mut debug_logger =
@@ -64,7 +65,7 @@ fn main() {
     .unwrap();
 
     let matches = App::new("rgb")
-        .author("Siyuan Gao <rbnk@elica.io>")
+        .author("Siyuan Gao <rbnk@elica.input>")
         .arg(
             Arg::with_name("boot")
                 .short("b")
@@ -102,14 +103,16 @@ fn main() {
     let emulator_thread = start_emulator_thread(
         boot_rom,
         rom.clone(),
+        input_message_receiver.clone(),
         framebuffer_sender.clone(),
         debug_message_sender.clone(),
         tile_update_sender.clone(),
     );
-    let io_thread = start_io_thread();
+    let io_thread = start_io_thread(input_message_sender.clone());
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         load_cartridge(rom.clone()).title(),
+        input_message_sender.clone(),
         framebuffer_receiver.clone(),
         debug_message_receiver.clone(),
         log_message_receiver.clone(),

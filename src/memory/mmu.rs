@@ -2,6 +2,7 @@ use super::timer::Timer;
 use super::Memory;
 use crate::cartridge::{load_cartridge, Cartridge};
 use crate::cpu::interrupt::InterruptFlags;
+use crate::input::joypad::JoyPad;
 use crate::ppu::PPU;
 use crate::util::BOOT_ROM_SIZE;
 use std::cell::RefCell;
@@ -13,6 +14,7 @@ pub struct MMU {
     pub boot_rom: Option<[u8; 256]>,
     pub cartridge: Box<dyn Cartridge>,
     pub ppu: RefCell<PPU>,
+    pub joypad: JoyPad,
     boot_rom_enabled: bool,
     timer: Timer,
     last_serial: u8,
@@ -42,6 +44,7 @@ impl MMU {
         let interrupt_flags = Rc::new(RefCell::new(InterruptFlags::new()));
         Self {
             boot_rom,
+            joypad: JoyPad::new(interrupt_flags.clone()),
             timer: Timer::new(interrupt_flags.clone()),
             ppu: RefCell::new(PPU::new(interrupt_flags.clone())),
             last_serial: 0x00,
@@ -132,10 +135,7 @@ impl Memory for MMU {
             }
             0xfe00..=0xfe9f => self.ppu.borrow().get(address),
             0xfea0..=0xfeff => 0x00, // Invalid address
-            0xff00 => {
-                // IO
-                0xff
-            }
+            0xff00 => self.joypad.get(address),
             0xff01..=0xff02 => {
                 // Serial
                 0
@@ -173,9 +173,7 @@ impl Memory for MMU {
             0xfea0..=0xfeff => {
                 // Not used
             }
-            0xff00 => {
-                // Input
-            }
+            0xff00 => self.joypad.set(address, value),
             0xff01..=0xff02 => {
                 // Serial
                 // if address == 0xff01 {
@@ -183,7 +181,7 @@ impl Memory for MMU {
                 // }
                 // if address == 0xff02 {
                 //     print!("{}", self.last_serial as char);
-                //     io::stdout().flush();
+                //     input::stdout().flush();
                 // }
             }
             0xff04..=0xff07 => self.timer.set(address, value),

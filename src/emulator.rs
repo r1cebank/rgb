@@ -1,10 +1,11 @@
+use super::input::input_message::InputMessage;
 use crate::cartridge::load_cartridge;
 use crate::cpu::instruction::InstructionSet;
 use crate::cpu::ClockedCPU;
 use crate::debug::message::DebugMessage;
 use crate::memory::mmu::MMU;
 use crate::ppu::{random_framebuffer, Mode, PPUFramebuffer};
-use flume::{Sender, TrySendError};
+use flume::{Receiver, Sender, TryRecvError, TrySendError};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::thread::{Builder, JoinHandle};
@@ -48,6 +49,7 @@ impl Emulator {
 pub fn start_emulator_thread(
     boot_rom: Option<Vec<u8>>,
     rom: Vec<u8>,
+    input_message_receiver: Receiver<InputMessage>,
     framebuffer_sender: Sender<PPUFramebuffer>,
     debug_result_sender: Sender<DebugMessage>,
     tile_update_sender: Sender<DebugMessage>,
@@ -60,6 +62,16 @@ pub fn start_emulator_thread(
             'emulator: loop {
                 // std::thread::sleep(std::time::Duration::from_millis(10));
                 emulator.tick();
+                match input_message_receiver.try_recv() {
+                    Ok(inputMessage) => match inputMessage {
+                        InputMessage::KeyDown(key) => {
+                            emulator.mmu.borrow_mut().joypad.key_down(key)
+                        }
+                        InputMessage::KeyUp(key) => emulator.mmu.borrow_mut().joypad.key_up(key),
+                    },
+                    Err(TryRecvError::Empty) => {}
+                    Err(TryRecvError::Disconnected) => break 'emulator,
+                }
                 if emulator.should_refresh_screen() {
                     match framebuffer_sender
                         .try_send(emulator.mmu.borrow().ppu.borrow().framebuffer)

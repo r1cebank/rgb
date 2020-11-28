@@ -1,8 +1,11 @@
+use crate::cpu::interrupt::Flag::Joypad;
 use crate::debug;
 use crate::debug::message::DebugMessage;
+use crate::input::input_message::InputMessage;
+use crate::input::joypad::JoyPadKey;
 use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
 use debug::debug_state::DebugState;
-use flume::{Receiver, TryRecvError};
+use flume::{Receiver, Sender, TryRecvError, TrySendError};
 use piston_window::*;
 use std::thread::{Builder, JoinHandle};
 
@@ -20,6 +23,7 @@ pub fn get_actual_window_size(scale: u32) -> (u32, u32) {
 pub fn start_display_thread(
     scale_factor: u32,
     rom_name: String,
+    input_message_sender: Sender<InputMessage>,
     framebuffer_receiver: Receiver<PPUFramebuffer>,
     debug_result_receiver: Receiver<DebugMessage>,
     log_message_receiver: Receiver<DebugMessage>,
@@ -76,8 +80,53 @@ pub fn start_display_thread(
             // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
 
+            let mut events = Events::new(EventSettings::new());
+
             // Our display loop
-            'display: while let Some(e) = window.next() {
+            'display: while let Some(e) = events.next(&mut window) {
+                if let Some(Button::Keyboard(key)) = e.press_args() {
+                    trace!("Pressed keyboard key '{:?}'", key);
+                    let mut key_pressed = match key {
+                        Key::Up => JoyPadKey::Up,
+                        Key::Down => JoyPadKey::Down,
+                        Key::Left => JoyPadKey::Left,
+                        Key::Right => JoyPadKey::Right,
+                        Key::Z => JoyPadKey::A,
+                        Key::X => JoyPadKey::B,
+                        Key::Space => JoyPadKey::Select,
+                        Key::Return => JoyPadKey::Start,
+                        _ => JoyPadKey::Invalid,
+                    };
+                    match input_message_sender.try_send(InputMessage::KeyDown(key_pressed)) {
+                        Ok(_) => {}
+                        Err(TrySendError::Full(_)) => {}
+                        Err(TrySendError::Disconnected(_)) => break 'display,
+                    }
+                };
+                if let Some(button) = e.release_args() {
+                    match button {
+                        Button::Keyboard(key) => {
+                            trace!("Released keyboard key '{:?}'", key);
+                            let mut key_pressed = match key {
+                                Key::Up => JoyPadKey::Up,
+                                Key::Down => JoyPadKey::Down,
+                                Key::Left => JoyPadKey::Left,
+                                Key::Right => JoyPadKey::Right,
+                                Key::Z => JoyPadKey::A,
+                                Key::X => JoyPadKey::B,
+                                Key::Space => JoyPadKey::Select,
+                                Key::Return => JoyPadKey::Start,
+                                _ => JoyPadKey::Invalid,
+                            };
+                            match input_message_sender.try_send(InputMessage::KeyUp(key_pressed)) {
+                                Ok(_) => {}
+                                Err(TrySendError::Full(_)) => {}
+                                Err(TrySendError::Disconnected(_)) => break 'display,
+                            }
+                        }
+                        _ => {}
+                    }
+                };
                 if let Some(_) = e.render_args() {
                     window.draw_2d(&e, |_, g, _| {
                         clear([0.03, 0.09, 0.12, 1.0], g);
