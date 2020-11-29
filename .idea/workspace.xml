@@ -32,7 +32,10 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc3.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc3.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display/debug_canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/debug_canvas.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,13 +155,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00044" summary="Formatting">
-      <created>1605157474655</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1605157474655</updated>
     </task>
     <task id="LOCAL-00045" summary="Fixed small issue">
       <created>1605157525145</created>
@@ -496,7 +492,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606369717302</updated>
     </task>
-    <option name="localTasksCounter" value="93" />
+    <task id="LOCAL-00093" summary="BG priority + transparent pixel barely working">
+      <created>1606683320259</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1606683320259</updated>
+    </task>
+    <option name="localTasksCounter" value="94" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -513,7 +516,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="RLC RRC" />
     <MESSAGE value="RL RR" />
     <MESSAGE value="SLA, SRA" />
     <MESSAGE value="SWAP" />
@@ -538,7 +540,8 @@
     <MESSAGE value="Adding ppu background rendering" />
     <MESSAGE value="Adding ppu sprite rendering" />
     <MESSAGE value="Adding sprite priority and change font" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding sprite priority and change font" />
+    <MESSAGE value="BG priority + transparent pixel barely working" />
+    <option name="LAST_COMMIT_MESSAGE" value="BG priority + transparent pixel barely working" />
   </component>
   <component name="WindowStateProjectService">
     <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
@@ -569,22 +572,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606683203220">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606690505889">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606683203220">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606690505889" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606690505889">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606683203220">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606690505889" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606690505889">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606683203220">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606690505889" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606690505889">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606690505889" />
     <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -597,10 +600,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="987" y="433" width="585" height="534" key="find.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606243413352" />
-    <state x="936" y="330" key="run.anything.popup" timestamp="1605048547490">
+    <state x="936" y="330" key="run.anything.popup" timestamp="1606687097984">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605048547490" />
+    <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606687097984" />
     <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1605035113578">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

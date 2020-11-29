@@ -16,7 +16,7 @@ mod game_canvas;
 
 /// The actual window size factored in scaling and debug windows
 pub fn get_actual_window_size(scale: u32) -> (u32, u32) {
-    return (FB_W as u32 * scale * 2, FB_H as u32 * scale * 2);
+    return (FB_W as u32 * scale * 3, FB_H as u32 * scale * 2);
 }
 
 /// Start the display thread, will be in charge of displaying graphics to screen

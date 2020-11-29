@@ -90,20 +90,20 @@ pub fn draw_debug_info(
 
     // Draw the debug info
     window.draw_2d(e, |c, g, device| {
-        // text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
-        //     .draw(
-        //         "Tileset",
-        //         &mut font,
-        //         &c.draw_state,
-        //         c.transform.trans(330 as f64, 20 as f64),
-        //         g,
-        //     )
-        //     .unwrap();
+        text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
+            .draw(
+                "Tileset",
+                &mut font,
+                &c.draw_state,
+                c.transform.trans(640 as f64, 40 as f64),
+                g,
+            )
+            .unwrap();
         image(
             tile_texture,
             c.transform
                 .scale(2 as f64, 2 as f64)
-                .trans(170 as f64, 0 as f64),
+                .trans(320 as f64, 40 as f64),
             g,
         );
         text::Text::new_color([1.0; 4], DEBUG_FONT_SIZE as u32)
@@ -180,10 +180,12 @@ pub fn update_tile_canvas(
     }
 }
 
-pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 256]> {
-    const TILE_COUNT: usize = 18;
+pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 128]> {
+    const NUM_TILES_ROW: usize = 24;
+    const NUM_TILES_COL: usize = 16;
     const TILE_WIDTH: usize = 8;
-    const IMAGE_WIDTH: usize = TILE_WIDTH * TILE_COUNT;
+    const IMAGE_WIDTH: usize = TILE_WIDTH * NUM_TILES_COL;
+    const IMAGE_HEIGHT: usize = TILE_WIDTH * NUM_TILES_ROW;
     const PIXEL_COLOUR_STRIDE: usize = 4;
     const PALETTE: [[u8; 4]; 4] = [
         [254, 248, 208, 255],
@@ -192,11 +194,11 @@ pub fn tile_to_framebuffer(tile_set: Vec<Tile>) -> Vec<[[u8; 4]; 256]> {
         [8, 24, 32, 255],
     ];
 
-    let mut framebuffer = vec![[[0x00 as u8; 4]; 256]; 256];
+    let mut framebuffer = vec![[[0x00 as u8; 4]; IMAGE_WIDTH]; IMAGE_HEIGHT];
 
-    for tile_y in 0..TILE_COUNT {
-        for tile_x in 0..TILE_COUNT {
-            let target_tile = tile_x + (tile_y * TILE_COUNT);
+    for tile_y in 0..NUM_TILES_ROW {
+        for tile_x in 0..NUM_TILES_COL {
+            let target_tile = tile_x + (tile_y * NUM_TILES_COL);
 
             if target_tile >= 384 {
                 return framebuffer;

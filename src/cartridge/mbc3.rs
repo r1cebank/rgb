@@ -42,7 +42,7 @@ impl Memory for Mbc3 {
                 if self.ram_enabled {
                     if self.ram_bank <= 0x03 {
                         // Ram bank 00-03 is actual ram banks
-                        self.ram[self.ram_bank * 0x2000 + address as usize - 0xa0000]
+                        self.ram[self.ram_bank * 0x2000 + address as usize - 0xa000]
                     } else {
                         // Ram bank 08-0C means we are reading from RTC
                         self.rtc.get(self.ram_bank as u16)
@@ -84,6 +84,17 @@ impl Memory for Mbc3 {
                 // this by calling tick on t he rtc
                 if value & 0x01 != 0 {
                     self.rtc.tick();
+                }
+            }
+            0xa000..=0xbfff => {
+                if self.ram_enabled {
+                    if self.ram_bank <= 0x03 {
+                        // Ram bank 00-03 is actual ram banks
+                        self.ram[self.ram_bank * 0x2000 + address as usize - 0xa000] = value;
+                    } else {
+                        // Ram bank 08-0C means we are setting from RTC
+                        self.rtc.set(self.ram_bank as u16, value);
+                    }
                 }
             }
             _ => {}

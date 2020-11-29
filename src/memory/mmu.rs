@@ -150,6 +150,7 @@ impl Memory for MMU {
                 0
             }
             0xf40...0xff4b => self.ppu.borrow().get(address),
+            0xff68..=0xff6b => self.ppu.borrow().get(address),
             0xff80..=0xfffe => self.high_ram[address as usize - 0xff80],
             0xffff => self.interrupt_enabled,
             _ => 0x0000,
@@ -194,6 +195,7 @@ impl Memory for MMU {
             0xff50 => {
                 self.boot_rom_enabled = false;
             }
+            0xff68..=0xff6b => self.ppu.borrow_mut().set(address, value),
             0xff70 => {
                 self.work_ram_bank = match value & 0x7 {
                     0 => 1,
