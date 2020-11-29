@@ -80,10 +80,8 @@ pub fn start_display_thread(
             // Our super inaccurate FPS counter
             let mut fps_counter = fps::FPSCounter::new();
 
-            let mut events = Events::new(EventSettings::new());
-
             // Our display loop
-            'display: while let Some(e) = events.next(&mut window) {
+            'display: while let Some(e) = window.next() {
                 if let Some(Button::Keyboard(key)) = e.press_args() {
                     trace!("Pressed keyboard key '{:?}'", key);
                     let mut key_pressed = match key {

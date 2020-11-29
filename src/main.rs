@@ -65,7 +65,7 @@ fn main() {
     .unwrap();
 
     let matches = App::new("rgb")
-        .author("Siyuan Gao <rbnk@elica.input>")
+        .author("Siyuan Gao <rbnk@elica.io>")
         .arg(
             Arg::with_name("boot")
                 .short("b")

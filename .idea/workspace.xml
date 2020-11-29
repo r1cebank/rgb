@@ -32,10 +32,8 @@
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc3.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc3.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/display/debug_canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display/debug_canvas.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
