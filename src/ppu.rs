@@ -82,6 +82,8 @@ pub struct PPU {
     sprites: [Sprite; 40],
     palette: [[u8; 3]; 4],
 
+    bgp: u8, // Background sprite
+
     // This register assigns gray shades for sprite palette 0. It works exactly as BGP (FF47), except that the lower
     // two bits aren't used because sprite data 00 is transparent.
     op0: u8,
@@ -128,6 +130,8 @@ impl PPU {
             line: 0,
             scroll_x: 0,
             scroll_y: 0,
+
+            bgp: 0x00,
 
             op0: 0x00,
             op1: 0x01,
@@ -309,7 +313,7 @@ impl PPU {
                     tile_row = self.tile_set[sprite.tile as usize][(line - sprite.y_pos) as usize];
                 }
 
-                let mut colour;
+                let mut color;
 
                 for x in 0..8 {
                     if sprite.x_pos + x >= 0 && sprite.x_pos + x < 160 {
@@ -318,23 +322,28 @@ impl PPU {
                         } else {
                             x as usize
                         };
-                        colour = self.palette[tile_row[palette_index] as usize];
+
+                        let color_index = tile_row[palette_index];
+                        color = self.palette[color_index as usize];
 
                         let pixel_y = canvas_offset / FB_W;
                         let pixel_x = canvas_offset % FB_W;
 
-                        // The last palette is the "zero" palette, when OAM has priority over BG, draw the pixel
-                        if self.framebuffer[pixel_y][pixel_x] == [8, 24, 32] {
-                            if !sprite.priority_behind_bg {
+                        canvas_offset += 1;
+
+                        if color_index == 0 {
+                            continue;
+                        }
+
+                        if self.framebuffer[pixel_y][pixel_x] != self.palette[0] {
+                            if sprite.priority_behind_bg {
                                 continue;
                             }
                         }
 
-                        self.framebuffer[pixel_y][pixel_x][0] = colour[0];
-                        self.framebuffer[pixel_y][pixel_x][1] = colour[1];
-                        self.framebuffer[pixel_y][pixel_x][2] = colour[2];
-
-                        canvas_offset += 1;
+                        self.framebuffer[pixel_y][pixel_x][0] = color[0];
+                        self.framebuffer[pixel_y][pixel_x][1] = color[1];
+                        self.framebuffer[pixel_y][pixel_x][2] = color[2];
                     }
                 }
             }
@@ -450,6 +459,11 @@ impl Memory for PPU {
             0xff43 => self.scroll_x,
             0xff44 => self.line,
             0xff45 => self.ly_coincidence,
+            0xff47 => self.bgp,
+            0xff48 => self.op0,
+            0xff49 => self.op1,
+            0xff4a => self.wy,
+            0xff4b => self.wx,
             _ => panic!("Read not implemented for address: ${:04x}", address),
         }
     }
@@ -499,6 +513,7 @@ impl Memory for PPU {
             0xff44 => {} // ly is changed by scanline
             0xff45 => self.ly_coincidence = value,
             0xff47 => {
+                self.bgp = value;
                 for i in 0..4 {
                     match (value >> (i * 2)) & 3 {
                         0 => self.palette[i] = [254, 248, 208],

@@ -31,16 +31,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
-      <change afterPath="$PROJECT_DIR$/src/input.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/input/input_message.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/input/joypad.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/io.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +93,7 @@
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- -b DMG_ROM.bin -r tetris.gb" />
+      <option name="command" value="run -- -r pokemon.gb" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -553,10 +545,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="872" y="341" key="#Plugins/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605727891877" />
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606330441265">
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606683215185">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606330441265" />
+    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683215185" />
     <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1605060578568">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -577,22 +569,22 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606549670514">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1606683203220">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606549670514" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606549670514">
+    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
+    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1606683203220">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606549670514" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606549670514">
+    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
+    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1606683203220">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606549670514" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606549670514">
+    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1606683203220">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606549670514" />
+    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606683203220" />
     <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
