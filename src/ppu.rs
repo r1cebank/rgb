@@ -96,7 +96,7 @@ pub struct PPU {
     wx: u8,
 
     mode_clock: u32,
-    line: u8,
+    ly: u8,
     scroll_x: u8,
     scroll_y: u8,
     lcdc_display_enabled: bool,
@@ -127,7 +127,7 @@ impl PPU {
             sprites: [Sprite::new(); 40],
             palette: [[254, 248, 208], [136, 192, 112], [39, 80, 70], [8, 24, 32]],
             mode_clock: 0,
-            line: 0,
+            ly: 0,
             scroll_x: 0,
             scroll_y: 0,
 
@@ -210,17 +210,17 @@ impl PPU {
 
             if self.mode_clock >= 456 {
                 self.mode_clock -= 456;
-                self.line = (self.line + 1) % 154;
-                if self.ly_coincidence_interrupt_enabled && self.line == self.ly_coincidence {
+                self.ly = (self.ly + 1) % 154;
+                if self.ly_coincidence_interrupt_enabled && self.ly == self.ly_coincidence {
                     self.interrupt_flags.borrow_mut().hi(Flag::LCDStat);
                 }
 
-                if self.line >= 144 && self.mode != Mode::VBlank {
+                if self.ly >= 144 && self.mode != Mode::VBlank {
                     self.change_mode(Mode::VBlank);
                 }
             }
 
-            if self.line < 144 {
+            if self.ly < 144 {
                 if self.mode_clock <= 80 {
                     if self.mode != Mode::OAMRead {
                         self.change_mode(Mode::OAMRead);
@@ -241,7 +241,7 @@ impl PPU {
     fn render_background(&mut self) {
         // tiles: 8x8 pixels
         // two maps: 32x32 each
-        let using_window = self.lcdc_window_enabled && self.wy <= self.line;
+        let using_window = self.lcdc_window_enabled && self.wy <= self.ly;
 
         let background_memory: usize = if using_window {
             if self.lcdc_window_tilemap {
@@ -257,11 +257,15 @@ impl PPU {
             }
         };
 
-        let line = self.line as usize + self.scroll_y as usize;
+        let line = self.ly as usize + self.scroll_y as usize;
         let mapbase = background_memory + ((line % 256) >> 3) * 32;
-        let y = (self.line.wrapping_add(self.scroll_y)) % 8;
+        let y = if using_window {
+            (self.ly.wrapping_sub(self.wy)) % 8
+        } else {
+            (self.ly.wrapping_add(self.scroll_y)) % 8
+        };
         let mut x = self.scroll_x % 8;
-        let mut canvas_offset = (self.line as usize) * 160;
+        let mut canvas_offset = (self.ly as usize) * 160;
         let mut i = 0;
         let tilebase = if !self.lcdc_bg_and_window_tile_base {
             256
@@ -269,7 +273,11 @@ impl PPU {
             0
         };
         while i < 160 {
-            let mapoff = ((i as usize + self.scroll_x as usize) % 256) >> 3;
+            let mapoff = if using_window && i >= self.wx {
+                ((i as usize - self.wx.wrapping_sub(7) as usize) % 256) >> 3
+            } else {
+                ((i as usize + self.scroll_x as usize) % 256) >> 3
+            };
             let tilei = self.video_ram[mapbase + mapoff];
 
             let tilebase = if self.lcdc_bg_and_window_tile_base {
@@ -305,7 +313,7 @@ impl PPU {
 
     fn render_sprites(&mut self) {
         for sprite in self.sprites.iter() {
-            let line = self.line as i32;
+            let line = self.ly as i32;
 
             if self.lcdc_obj_sprite_size {
                 panic!("Double-sized sprites not yet supported");
@@ -457,7 +465,7 @@ impl Memory for PPU {
                     0x08
                 } else {
                     0
-                }) | (if self.line == self.ly_coincidence {
+                }) | (if self.ly == self.ly_coincidence {
                     0x04
                 } else {
                     0
@@ -467,7 +475,7 @@ impl Memory for PPU {
             }
             0xff42 => self.scroll_y,
             0xff43 => self.scroll_x,
-            0xff44 => self.line,
+            0xff44 => self.ly,
             0xff45 => self.ly_coincidence,
             0xff47 => self.bgp,
             0xff48 => self.op0,
@@ -508,7 +516,7 @@ impl Memory for PPU {
 
                 if previous_lcdc_display_enabled && !self.lcdc_display_enabled {
                     self.mode_clock = 0;
-                    self.line = 0;
+                    self.ly = 0;
                     self.change_mode(Mode::HBlank);
                 }
             }
@@ -542,7 +550,7 @@ impl Memory for PPU {
             0xff49 => {
                 self.op1 = value;
             }
-            0xff4A => {
+            0xff4a => {
                 self.wy = value;
             }
             0xff4b => self.wx = value,
