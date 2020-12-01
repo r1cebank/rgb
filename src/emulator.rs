@@ -63,7 +63,7 @@ pub fn start_emulator_thread(
                 // std::thread::sleep(std::time::Duration::from_millis(10));
                 emulator.tick();
                 match input_message_receiver.try_recv() {
-                    Ok(inputMessage) => match inputMessage {
+                    Ok(input_message) => match input_message {
                         InputMessage::KeyDown(key) => {
                             emulator.mmu.borrow_mut().joypad.key_down(key)
                         }

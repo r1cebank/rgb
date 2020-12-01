@@ -102,7 +102,7 @@ pub struct PPU {
     lcdc_display_enabled: bool,
     lcdc_window_tilemap: bool,
     lcdc_window_enabled: bool,
-    lcdc_bg_and_windown_tile_base: bool,
+    lcdc_bg_and_window_tile_base: bool,
     lcdc_bg_tilemap_base: bool,
     lcdc_obj_sprite_size: bool,
     lcdc_obj_sprite_display_enabled: bool,
@@ -141,7 +141,7 @@ impl PPU {
             lcdc_display_enabled: false,
             lcdc_window_tilemap: true,
             lcdc_window_enabled: false,
-            lcdc_bg_and_windown_tile_base: true,
+            lcdc_bg_and_window_tile_base: true,
             lcdc_bg_tilemap_base: true,
             lcdc_obj_sprite_size: false,
             lcdc_obj_sprite_display_enabled: false,
@@ -241,19 +241,29 @@ impl PPU {
     fn render_background(&mut self) {
         // tiles: 8x8 pixels
         // two maps: 32x32 each
+        let using_window = self.lcdc_window_enabled && self.wy <= self.line;
 
-        let mapbase: usize = if self.lcdc_bg_tilemap_base {
-            0x1c00
+        let background_memory: usize = if using_window {
+            if self.lcdc_window_tilemap {
+                0x1c00
+            } else {
+                0x1800
+            }
         } else {
-            0x1800
+            if self.lcdc_bg_tilemap_base {
+                0x1c00
+            } else {
+                0x1800
+            }
         };
+
         let line = self.line as usize + self.scroll_y as usize;
-        let mapbase = mapbase + ((line % 256) >> 3) * 32;
+        let mapbase = background_memory + ((line % 256) >> 3) * 32;
         let y = (self.line.wrapping_add(self.scroll_y)) % 8;
         let mut x = self.scroll_x % 8;
         let mut canvas_offset = (self.line as usize) * 160;
         let mut i = 0;
-        let tilebase = if !self.lcdc_bg_and_windown_tile_base {
+        let tilebase = if !self.lcdc_bg_and_window_tile_base {
             256
         } else {
             0
@@ -262,7 +272,7 @@ impl PPU {
             let mapoff = ((i as usize + self.scroll_x as usize) % 256) >> 3;
             let tilei = self.video_ram[mapbase + mapoff];
 
-            let tilebase = if self.lcdc_bg_and_windown_tile_base {
+            let tilebase = if self.lcdc_bg_and_window_tile_base {
                 tilebase + tilei as usize
             } else {
                 (tilebase as isize + (tilei as i8 as isize)) as usize
@@ -412,7 +422,7 @@ impl Memory for PPU {
                     0b0010_0000
                 } else {
                     0
-                }) | (if self.lcdc_bg_and_windown_tile_base {
+                }) | (if self.lcdc_bg_and_window_tile_base {
                     0b0001_0000
                 } else {
                     0
@@ -490,7 +500,7 @@ impl Memory for PPU {
                 self.lcdc_display_enabled = value & 0b1000_0000 != 0;
                 self.lcdc_window_tilemap = value & 0b0100_0000 != 0;
                 self.lcdc_window_enabled = value & 0b0010_0000 != 0;
-                self.lcdc_bg_and_windown_tile_base = value & 0b0001_0000 != 0;
+                self.lcdc_bg_and_window_tile_base = value & 0b0001_0000 != 0;
                 self.lcdc_bg_tilemap_base = value & 0b0000_1000 != 0;
                 self.lcdc_obj_sprite_size = value & 0b0000_0100 != 0;
                 self.lcdc_obj_sprite_display_enabled = value & 0b0000_0010 != 0;
