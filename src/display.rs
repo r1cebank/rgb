@@ -7,6 +7,7 @@ use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
 use debug::debug_state::DebugState;
 use flume::{Receiver, Sender, TryRecvError, TrySendError};
 use piston_window::*;
+use std::thread;
 use std::thread::{Builder, JoinHandle};
 
 mod debug_canvas;
@@ -172,7 +173,9 @@ pub fn start_display_thread(
                         ));
                         game_canvas::update_game_canvas(framebuffer, &mut game_image);
                     }
-                    Err(TryRecvError::Empty) => {}
+                    Err(TryRecvError::Empty) => {
+                        thread::yield_now();
+                    }
                     Err(TryRecvError::Disconnected) => break 'display,
                 }
             }

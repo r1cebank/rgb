@@ -3,6 +3,7 @@ pub mod joypad;
 
 use crate::input::input_message::InputMessage;
 use flume::Sender;
+use std::thread;
 use std::thread::{Builder, JoinHandle};
 
 pub fn start_io_thread(_input_message_sender: Sender<InputMessage>) -> JoinHandle<()> {
@@ -12,6 +13,7 @@ pub fn start_io_thread(_input_message_sender: Sender<InputMessage>) -> JoinHandl
             debug!("IO thread spawned");
             // This place is reserved, if we need a separate producer for input commands
             // ex. external server
+            thread::yield_now();
         })
         .unwrap()
 }

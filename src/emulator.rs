@@ -8,6 +8,7 @@ use crate::ppu::{random_framebuffer, Mode, PPUFramebuffer};
 use flume::{Receiver, Sender, TryRecvError, TrySendError};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::thread;
 use std::thread::{Builder, JoinHandle};
 
 pub struct Emulator {
@@ -106,6 +107,8 @@ pub fn start_emulator_thread(
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'emulator,
                     }
+                } else {
+                    thread::yield_now();
                 }
             }
             debug!("Emulator loop exited");

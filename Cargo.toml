@@ -26,7 +26,7 @@ find_folder = { version = "0.3.0", optional = true }
 image = { version = "0.23.11", optional = true }
 cpal = { version = "0.8.0", optional = true }
 blockish = { version = "0.0.8", optional = true }
-piston_window = { version = "0.112.0", optional = true }
+piston_window = { version = "0.116.0", optional = true }
 cursive = { version = "0.14", optional = true, default-features = false, features = ["crossterm-backend"] }
 cursive_hexview = { version = "0.3", optional = true }
 

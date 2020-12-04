@@ -1,3 +1,4 @@
+use std::thread;
 use std::thread::{Builder, JoinHandle};
 
 pub fn start_apu_thread() -> JoinHandle<()> {
@@ -13,6 +14,7 @@ pub fn start_apu_thread() -> JoinHandle<()> {
                 data_type: cpal::SampleFormat::F32,
             };
             debug!("Open the audio player: {}", device.name());
+            thread::yield_now();
         })
         .unwrap()
 }
