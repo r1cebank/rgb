@@ -93,7 +93,7 @@
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- -r marioyoshi.gb" />
+      <option name="command" value="run -- -r pokemon.gb" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -134,13 +134,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00049" summary="Refactor instructions">
-      <created>1605395997569</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1605395997569</updated>
     </task>
     <task id="LOCAL-00050" summary="Refactor instructions">
       <created>1605401529797</created>
@@ -478,7 +471,14 @@
       <option name="project" value="LOCAL" />
       <updated>1607055775863</updated>
     </task>
-    <option name="localTasksCounter" value="98" />
+    <task id="LOCAL-00098" summary="Fixing graphic bugs with window + pokemon">
+      <created>1607410587516</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1607410587517</updated>
+    </task>
+    <option name="localTasksCounter" value="99" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -495,7 +495,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="RES" />
     <MESSAGE value="Finished all cpu opcode" />
     <MESSAGE value="Formatting" />
     <MESSAGE value="Fixed small issue" />
@@ -520,7 +519,8 @@
     <MESSAGE value="Window rendering support" />
     <MESSAGE value="Fixed some window rendering issues" />
     <MESSAGE value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
+    <MESSAGE value="Fixing graphic bugs with window + pokemon" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixing graphic bugs with window + pokemon" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

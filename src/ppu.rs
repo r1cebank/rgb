@@ -349,58 +349,72 @@ impl PPU {
     fn render_sprites(&mut self) {
         let use_8x16 = self.lcdc_obj_sprite_size;
         for sprite in self.sprites.iter() {
-            let line = self.ly as i32;
+            let y_pos = sprite.y_pos as u8;
+            let x_pos = sprite.x_pos as u8;
+            let tile_location = sprite.tile as u16;
+            let y_flip = sprite.y_flip;
+            let x_flip = sprite.x_flip;
+            let scanline = self.ly;
 
-            let y_size = if use_8x16 { 15 } else { 7 };
+            let y_size = if use_8x16 { 16 } else { 8 };
 
-            // If the sprite falls within the scanline
-            if sprite.y_pos <= line && (sprite.y_pos + 8) > line {
-                let mut canvas_offset = ((line * 160) + sprite.x_pos) as usize;
-                let tile_row;
+            if scanline >= y_pos && scanline < (y_pos.wrapping_add(y_size)) {
+                let line: i32 = scanline as i32 - y_pos as i32;
 
-                if sprite.y_flip {
-                    tile_row = self.tile_set[sprite.tile as usize]
-                        [y_size - (line - sprite.y_pos) as usize];
+                let line = if y_flip {
+                    (line - y_size as i32) * -1
                 } else {
-                    tile_row = self.tile_set[sprite.tile as usize][(line - sprite.y_pos) as usize];
-                }
+                    line
+                };
 
-                let mut color;
+                let line = line * 2;
 
-                for x in 0..8 {
-                    if sprite.x_pos + x >= 0 && sprite.x_pos + x < 160 {
-                        let palette_index = if sprite.x_flip {
-                            7 - x as usize
-                        } else {
-                            x as usize
-                        };
+                let data_address = 0x8000 + (tile_location * 16) + line as u16;
 
-                        let palette_num = if sprite.use_palette_1 {
-                            self.op1
-                        } else {
-                            self.op0
-                        };
+                let data1 = self.get(data_address);
+                let data2 = self.get(data_address + 1);
 
-                        let color_index = tile_row[palette_index];
-                        color = self.get_color(color_index, palette_num);
+                for tile_pixel in (0..8).rev() {
+                    let color_bit = tile_pixel as i32;
+                    let color_bit = if x_flip {
+                        (color_bit - 7) * -1
+                    } else {
+                        color_bit
+                    };
 
-                        let pixel_y = canvas_offset / FB_W;
-                        let pixel_x = canvas_offset % FB_W;
+                    let color_num = ((data2 >> color_bit) & 0b1) << 1;
+                    let color_num = color_num | ((data1 >> color_bit) & 0b1);
 
-                        canvas_offset += 1;
+                    let palette_num = if sprite.use_palette_1 {
+                        self.op1
+                    } else {
+                        self.op0
+                    };
 
-                        if color_index == 0 {
+                    if color_num == 0 {
+                        continue;
+                    }
+                    let color = self.get_color(color_num, palette_num);
+
+                    let x_pix = (0 as u8).wrapping_sub(tile_pixel as u8);
+                    let x_pix = x_pix.wrapping_add(7);
+
+                    let pixel = x_pos.wrapping_add(x_pix);
+
+                    if scanline > 143 || pixel > 159 {
+                        continue;
+                    }
+
+                    if self.framebuffer[scanline as usize][pixel as usize]
+                        != [WHITE.r, WHITE.g, WHITE.b]
+                    {
+                        if sprite.priority_behind_bg {
                             continue;
                         }
-
-                        if self.framebuffer[pixel_y][pixel_x] != [WHITE.r, WHITE.g, WHITE.b] {
-                            if sprite.priority_behind_bg {
-                                continue;
-                            }
-                        }
-
-                        self.framebuffer[pixel_y][pixel_x] = [color.r, color.g, color.b];
                     }
+
+                    self.framebuffer[scanline as usize][pixel as usize] =
+                        [color.r, color.g, color.b];
                 }
             }
         }
