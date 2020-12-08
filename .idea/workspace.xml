@@ -31,15 +31,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
-      <change afterPath="$PROJECT_DIR$/pokemon.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/apu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/apu.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/input.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/input.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +70,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="settings.saveactions" />
+    <property name="settings.editor.selected.configurable" value="language.rust" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -100,7 +93,7 @@
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run -- -r pokemon.gb" />
+      <option name="command" value="run -- -r marioyoshi.gb" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -108,18 +101,6 @@
       <envs />
       <method v="2">
         <option name="RunConfigurationTask" enabled="true" run_configuration_name="Format" run_configuration_type="CargoCommandRunConfiguration" />
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test run_cpu_tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package rgb --test cpu_test run_cpu_tests -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
@@ -139,13 +120,7 @@
       <item itemvalue="Cargo.Format" />
       <item itemvalue="Cargo.Run" />
       <item itemvalue="Cargo.Test" />
-      <item itemvalue="Cargo.Test run_cpu_tests" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Cargo.Test run_cpu_tests" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -159,13 +134,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00048" summary="Instruction decoder refactor">
-      <created>1605334897837</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1605334897837</updated>
     </task>
     <task id="LOCAL-00049" summary="Refactor instructions">
       <created>1605395997569</created>
@@ -503,7 +471,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606805231345</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="Upgrading lib, getting pokemon to run properly + optimize thread code">
+      <created>1607055775863</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1607055775863</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -520,7 +495,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="BIT" />
     <MESSAGE value="RES" />
     <MESSAGE value="Finished all cpu opcode" />
     <MESSAGE value="Formatting" />
@@ -545,72 +519,11 @@
     <MESSAGE value="Fixing memory issue with events.next()" />
     <MESSAGE value="Window rendering support" />
     <MESSAGE value="Fixed some window rendering issues" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed some window rendering issues" />
+    <MESSAGE value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
   </component>
-  <component name="WindowStateProjectService">
-    <state x="872" y="341" key="#Plugins" timestamp="1605727891877">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="872" y="341" key="#Plugins/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605727891877" />
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1607022709523">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="734" y="355" width="1092" height="738" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1607022709523" />
-    <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1605060578568">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="92" y="92" width="2376" height="1216" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605060578568" />
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser" timestamp="1605851336493">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="1085" y="416" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605851336493" />
-    <state x="1010" y="447" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1605248399012">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="1010" y="447" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605248399012" />
-    <state x="907" y="268" key="CommitChangelistDialog2" timestamp="1604816964608">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="907" y="268" key="CommitChangelistDialog2/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604816964608" />
-    <state x="1060" y="455" key="FileChooserDialogImpl" timestamp="1605506853643">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605506853643" />
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom" timestamp="1607022524774">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1607022524774" />
-    <state width="2517" height="417" key="GridCell.Tab.0.center" timestamp="1607022524774">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.center/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1607022524774" />
-    <state width="2517" height="417" key="GridCell.Tab.0.left" timestamp="1607022524774">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.left/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1607022524774" />
-    <state width="2517" height="417" key="GridCell.Tab.0.right" timestamp="1607022524774">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state width="2517" height="417" key="GridCell.Tab.0.right/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1607022524774" />
-    <state x="1077" y="402" key="RollbackChangesDialog" timestamp="1605761785569">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="1077" y="402" key="RollbackChangesDialog/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605761785569" />
-    <state x="473" y="300" key="SettingsEditor" timestamp="1604822853474">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="473" y="300" key="SettingsEditor/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1604822853474" />
-    <state x="987" y="433" width="585" height="534" key="find.popup" timestamp="1606243413352">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="987" y="433" width="585" height="534" key="find.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606243413352" />
-    <state x="936" y="330" key="run.anything.popup" timestamp="1606687097984">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1606687097984" />
-    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1605035113578">
-      <screen x="0" y="0" width="2560" height="1400" />
-    </state>
-    <state x="943" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-1080.-290.1080.1880@0.0.2560.1400" timestamp="1605035113578" />
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

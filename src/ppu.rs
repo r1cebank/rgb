@@ -10,6 +10,39 @@ pub const VRAM_SIZE: usize = 0x2000;
 pub const OAM_SIZE: usize = 0xa0;
 pub const TILE_MAP_SIZE: usize = 384;
 
+#[derive(Debug, PartialEq, Eq)]
+struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
+}
+
+const WHITE: Color = Color {
+    r: 254,
+    g: 248,
+    b: 208,
+    a: 255,
+};
+const LIGHT_GRAY: Color = Color {
+    r: 136,
+    g: 192,
+    b: 112,
+    a: 255,
+};
+const DARK_GRAY: Color = Color {
+    r: 39,
+    g: 80,
+    b: 70,
+    a: 255,
+};
+const BLACK: Color = Color {
+    r: 8,
+    g: 24,
+    b: 32,
+    a: 255,
+};
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Mode {
     // Mode 0
@@ -80,7 +113,6 @@ pub struct PPU {
     pub oam: [u8; OAM_SIZE],
     pub mode: Mode,
     sprites: [Sprite; 40],
-    palette: [[u8; 3]; 4],
 
     bgp: u8, // Background sprite
 
@@ -125,7 +157,6 @@ impl PPU {
             tile_set: [[[0x00; 8]; 8]; TILE_MAP_SIZE],
             framebuffer: [[[0x00; 3]; FB_W]; FB_H],
             sprites: [Sprite::new(); 40],
-            palette: [[254, 248, 208], [136, 192, 112], [39, 80, 70], [8, 24, 32]],
             mode_clock: 0,
             ly: 0,
             scroll_x: 0,
@@ -239,85 +270,88 @@ impl PPU {
     }
 
     fn render_background(&mut self) {
-        // tiles: 8x8 pixels
-        // two maps: 32x32 each
-        let using_window = self.lcdc_window_enabled && self.wy <= self.ly;
+        let scanline = self.ly;
 
-        let background_memory: usize = if using_window {
+        let scroll_y = self.scroll_y;
+        let scroll_x = self.scroll_x;
+        let window_x = self.wx.wrapping_sub(7);
+        let window_y = self.wy;
+
+        let use_window = self.lcdc_window_enabled && window_y <= scanline;
+
+        let (tile_data, unsigned): (u16, bool) = if self.lcdc_bg_and_window_tile_base {
+            (0x8000, true)
+        } else {
+            (0x8800, false)
+        };
+
+        let background_mem = if use_window {
             if self.lcdc_window_tilemap {
-                0x1c00
+                0x9c00
             } else {
-                0x1800
+                0x9800
             }
         } else {
             if self.lcdc_bg_tilemap_base {
-                0x1c00
+                0x9c00
             } else {
-                0x1800
+                0x9800
             }
         };
 
-        let line = self.ly as usize + self.scroll_y as usize;
-        let mapbase = background_memory + ((line % 256) >> 3) * 32;
-        let y = if using_window {
-            (self.ly.wrapping_sub(self.wy)) % 8
+        let y_pos = if use_window {
+            scanline.wrapping_sub(window_y)
         } else {
-            (self.ly.wrapping_add(self.scroll_y)) % 8
+            scroll_y.wrapping_add(scanline)
         };
-        let mut x = self.scroll_x % 8;
-        let mut canvas_offset = (self.ly as usize) * 160;
-        let mut i = 0;
-        let tilebase = if !self.lcdc_bg_and_window_tile_base {
-            256
-        } else {
-            0
-        };
-        while i < 160 {
-            let mapoff = if using_window && i >= self.wx {
-                ((i as usize - self.wx.wrapping_sub(7) as usize) % 256) >> 3
-            } else {
-                ((i as usize + self.scroll_x as usize) % 256) >> 3
-            };
-            let tilei = self.video_ram[mapbase + mapoff];
 
-            let tilebase = if self.lcdc_bg_and_window_tile_base {
-                tilebase + tilei as usize
+        let tile_row: u16 = (y_pos / 8) as u16 * 32;
+
+        for pixel in 0..160 {
+            let pixel = pixel as u8;
+            let x_pos = if use_window && pixel >= window_x {
+                pixel.wrapping_sub(window_x)
             } else {
-                (tilebase as isize + (tilei as i8 as isize)) as usize
+                pixel.wrapping_add(scroll_x)
             };
 
-            let row;
-            row = self.tile_set[tilebase as usize][y as usize];
+            let tile_col = (x_pos / 8) as u16;
 
-            while x < 8 && i < 160 as u8 {
-                let palette_index = row[x as usize];
-                let colour = self.palette[palette_index as usize];
+            let tile_address = background_mem + tile_row + tile_col;
 
-                let pixel_y = canvas_offset / FB_W;
-                let pixel_x = canvas_offset % FB_W;
+            let tile_num: i16 = if unsigned {
+                self.get(tile_address) as u16 as i16
+            } else {
+                self.get(tile_address) as i8 as i16
+            };
 
-                // println!("offset: {}, x: {}, y: {}", canvas_offset, pixel_x, pixel_y);
+            let tile_location: u16 = if unsigned {
+                tile_data + (tile_num as u16 * 16)
+            } else {
+                tile_data + ((tile_num + 128) * 16) as u16
+            };
 
-                self.framebuffer[pixel_y][pixel_x][0] = colour[0];
-                self.framebuffer[pixel_y][pixel_x][1] = colour[1];
-                self.framebuffer[pixel_y][pixel_x][2] = colour[2];
+            let line = (y_pos as u16 % 8) * 2;
+            let data1 = self.get(tile_location + line);
+            let data2 = self.get(tile_location + line + 1);
 
-                x += 1;
-                i += 1;
-                canvas_offset += 1;
-            }
+            let color_bit = ((x_pos as i32 % 8) - 7) * -1;
 
-            x = 0;
+            let color_num = ((data2 >> color_bit) & 0b1) << 1;
+            let color_num = color_num | ((data1 >> color_bit) & 0b1);
+
+            let color = self.get_color(color_num, self.bgp);
+
+            self.framebuffer[scanline as usize][pixel as usize] = [color.r, color.g, color.b];
         }
     }
 
     fn render_sprites(&mut self) {
+        let use_8x16 = self.lcdc_obj_sprite_size;
         for sprite in self.sprites.iter() {
             let line = self.ly as i32;
 
-            if self.lcdc_obj_sprite_size {
-                panic!("Double-sized sprites not yet supported");
-            }
+            let y_size = if use_8x16 { 15 } else { 7 };
 
             // If the sprite falls within the scanline
             if sprite.y_pos <= line && (sprite.y_pos + 8) > line {
@@ -325,8 +359,8 @@ impl PPU {
                 let tile_row;
 
                 if sprite.y_flip {
-                    tile_row =
-                        self.tile_set[sprite.tile as usize][7 - (line - sprite.y_pos) as usize];
+                    tile_row = self.tile_set[sprite.tile as usize]
+                        [y_size - (line - sprite.y_pos) as usize];
                 } else {
                     tile_row = self.tile_set[sprite.tile as usize][(line - sprite.y_pos) as usize];
                 }
@@ -341,8 +375,14 @@ impl PPU {
                             x as usize
                         };
 
+                        let palette_num = if sprite.use_palette_1 {
+                            self.op1
+                        } else {
+                            self.op0
+                        };
+
                         let color_index = tile_row[palette_index];
-                        color = self.palette[color_index as usize];
+                        color = self.get_color(color_index, palette_num);
 
                         let pixel_y = canvas_offset / FB_W;
                         let pixel_x = canvas_offset % FB_W;
@@ -353,18 +393,37 @@ impl PPU {
                             continue;
                         }
 
-                        if self.framebuffer[pixel_y][pixel_x] != self.palette[0] {
+                        if self.framebuffer[pixel_y][pixel_x] != [WHITE.r, WHITE.g, WHITE.b] {
                             if sprite.priority_behind_bg {
                                 continue;
                             }
                         }
 
-                        self.framebuffer[pixel_y][pixel_x][0] = color[0];
-                        self.framebuffer[pixel_y][pixel_x][1] = color[1];
-                        self.framebuffer[pixel_y][pixel_x][2] = color[2];
+                        self.framebuffer[pixel_y][pixel_x] = [color.r, color.g, color.b];
                     }
                 }
             }
+        }
+    }
+
+    fn get_color(&self, color_id: u8, palette_num: u8) -> Color {
+        let (hi, lo) = match color_id {
+            0 => (1, 0),
+            1 => (3, 2),
+            2 => (5, 4),
+            3 => (7, 6),
+            _ => panic!("Invalid color id: 0x{:x}", color_id),
+        };
+
+        let color = ((palette_num >> hi) & 0b1) << 1;
+        let color = color | ((palette_num >> lo) & 0b1);
+
+        match color {
+            0 => WHITE,
+            1 => LIGHT_GRAY,
+            2 => DARK_GRAY,
+            3 => BLACK,
+            _ => panic!("Invalid color: 0x{:x}", color),
         }
     }
 
@@ -532,17 +591,6 @@ impl Memory for PPU {
             0xff45 => self.ly_coincidence = value,
             0xff47 => {
                 self.bgp = value;
-                for i in 0..4 {
-                    match (value >> (i * 2)) & 3 {
-                        0 => self.palette[i] = [254, 248, 208],
-                        1 => self.palette[i] = [136, 192, 112],
-                        2 => self.palette[i] = [39, 80, 70],
-                        3 => self.palette[i] = [8, 24, 32],
-                        _ => {
-                            panic!("Unexpected background palette value: {:#X}", i);
-                        }
-                    }
-                }
             }
             0xff48 => {
                 self.op0 = value;
