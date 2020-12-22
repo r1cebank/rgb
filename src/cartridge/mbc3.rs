@@ -124,7 +124,9 @@ impl Savable for Mbc3 {
                 file.read_to_end(&mut ram).unwrap();
                 self.ram = ram;
             }
-            Err(_) => {}
+            Err(_) => {
+                // panic!("Error reading save file");
+            }
         }
     }
 }

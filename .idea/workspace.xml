@@ -33,17 +33,11 @@
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
       <change afterPath="$PROJECT_DIR$/POKEMON RED.rtc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/POKEMON RED.sav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/emulator/control.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pokemon.sav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc1.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc1.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pokemon.sn1" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cartridge/mbc3.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc3.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cartridge/rom.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/rom.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cartridge/rtc.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/rtc.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/save.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/save.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +99,7 @@
       </method>
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
-      <option name="command" value="run -- -r pokemon.gb" />
+      <option name="command" value="run --release -- -r pokemon.gb" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
@@ -151,13 +145,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00051" summary="Refactor instructions">
-      <created>1605403208176</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1605403208176</updated>
     </task>
     <task id="LOCAL-00052" summary="Refactor instructions">
       <created>1605407362471</created>
@@ -495,7 +482,14 @@
       <option name="project" value="LOCAL" />
       <updated>1607449613095</updated>
     </task>
-    <option name="localTasksCounter" value="100" />
+    <task id="LOCAL-00100" summary="Implementing savable">
+      <created>1608614040199</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1608614040199</updated>
+    </task>
+    <option name="localTasksCounter" value="101" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -512,7 +506,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Formatting" />
     <MESSAGE value="Fixed small issue" />
     <MESSAGE value="Add missing instr" />
     <MESSAGE value="Instruction decoder refactor" />
@@ -537,7 +530,8 @@
     <MESSAGE value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
     <MESSAGE value="Fixing graphic bugs with window + pokemon" />
     <MESSAGE value="Refactoring ppu sprite rendering to support double height sprite" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactoring ppu sprite rendering to support double height sprite" />
+    <MESSAGE value="Implementing savable" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implementing savable" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

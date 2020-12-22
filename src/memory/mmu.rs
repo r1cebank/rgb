@@ -40,8 +40,8 @@ impl MMU {
             boot_rom.copy_from_slice(&boot_rom_buffer);
             boot_rom
         });
-        let cartridge = load_cartridge(rom);
-        // cartridge.load(PathBuf::from(format!("{}.sav", cartridge.title())));
+        let mut cartridge = load_cartridge(rom);
+        cartridge.load(PathBuf::from(format!("{}.sav", cartridge.title())));
         // The interrupt flag is shared across each component in the gameboy, any component is able
         // to raise an interrupt
         let interrupt_flags = Rc::new(RefCell::new(InterruptFlags::new()));
