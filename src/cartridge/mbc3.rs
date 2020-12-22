@@ -2,6 +2,8 @@ use super::rtc::RealTimeClock;
 use super::Cartridge;
 use crate::memory::Memory;
 use crate::save::Savable;
+use std::fs::File;
+use std::io::{Error, Read, Write};
 use std::path::PathBuf;
 
 /// MBC3 - Memory Bank Controller 3
@@ -103,12 +105,27 @@ impl Memory for Mbc3 {
 }
 
 impl Savable for Mbc3 {
-    fn save(&self, _: PathBuf) {
-        unimplemented!()
+    fn save(&self, save_path: PathBuf) {
+        let mut rtc = PathBuf::from(save_path.clone());
+        rtc.set_extension("rtc");
+        self.rtc.save(rtc);
+        File::create(save_path.clone())
+            .and_then(|mut f| f.write_all(&self.ram))
+            .unwrap();
     }
 
-    fn load(&self, _: PathBuf) {
-        unimplemented!()
+    fn load(&mut self, save_path: PathBuf) {
+        let mut rtc = PathBuf::from(save_path.clone());
+        rtc.set_extension("rtc");
+        self.rtc.load(rtc);
+        match File::open(save_path) {
+            Ok(mut file) => {
+                let mut ram = Vec::new();
+                file.read_to_end(&mut ram).unwrap();
+                self.ram = ram;
+            }
+            Err(_) => {}
+        }
     }
 }
 

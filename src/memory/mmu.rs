@@ -8,6 +8,7 @@ use crate::util::BOOT_ROM_SIZE;
 use std::cell::RefCell;
 use std::io;
 use std::io::Write;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 pub struct MMU {
@@ -39,6 +40,8 @@ impl MMU {
             boot_rom.copy_from_slice(&boot_rom_buffer);
             boot_rom
         });
+        let cartridge = load_cartridge(rom);
+        // cartridge.load(PathBuf::from(format!("{}.sav", cartridge.title())));
         // The interrupt flag is shared across each component in the gameboy, any component is able
         // to raise an interrupt
         let interrupt_flags = Rc::new(RefCell::new(InterruptFlags::new()));
@@ -50,7 +53,7 @@ impl MMU {
             last_serial: 0x00,
             interrupt_flags: interrupt_flags.clone(),
             boot_rom_enabled: boot_rom != None,
-            cartridge: load_cartridge(rom),
+            cartridge,
             high_ram: [0x00; 0x7f],
             work_ram: [0x00; 0x8000],
             work_ram_bank: 0x01,

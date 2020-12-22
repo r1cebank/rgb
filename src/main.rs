@@ -39,6 +39,7 @@ fn main() {
     // let (debug_command_sender, debug_command_receiver) = flume::unbounded();
     let (debug_message_sender, debug_message_receiver) = flume::bounded(1);
     let (tile_update_sender, tile_update_receiver) = flume::bounded(1);
+    let (control_message_sender, control_message_receiver) = flume::bounded(1);
     let (log_message_sender, log_message_receiver) = flume::unbounded();
     let (input_message_sender, input_message_receiver) = flume::unbounded();
 
@@ -103,6 +104,7 @@ fn main() {
     let emulator_thread = start_emulator_thread(
         boot_rom,
         rom.clone(),
+        control_message_receiver.clone(),
         input_message_receiver.clone(),
         framebuffer_sender.clone(),
         debug_message_sender.clone(),
@@ -112,6 +114,7 @@ fn main() {
     let display_thread = start_display_thread(
         matches.value_of("scale").unwrap().parse::<u32>().unwrap(),
         load_cartridge(rom.clone()).title(),
+        control_message_sender.clone(),
         input_message_sender.clone(),
         framebuffer_receiver.clone(),
         debug_message_receiver.clone(),

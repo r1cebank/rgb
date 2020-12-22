@@ -1,6 +1,9 @@
 use crate::memory::Memory;
 use crate::save::Savable;
 
+use std::fs;
+use std::fs::File;
+use std::io::{Error, Write};
 use std::path::PathBuf;
 use std::time::SystemTime;
 
@@ -99,11 +102,25 @@ impl Memory for RealTimeClock {
 }
 
 impl Savable for RealTimeClock {
-    fn save(&self, _: PathBuf) {
-        unimplemented!()
+    fn save(&self, save_path: PathBuf) {
+        File::create(save_path)
+            .and_then(|mut f| f.write_all(&self.epoch.to_be_bytes()))
+            .unwrap()
     }
 
-    fn load(&self, _: PathBuf) {
-        unimplemented!()
+    fn load(&mut self, save_path: PathBuf) {
+        let epoch = match fs::read(save_path) {
+            Ok(content) => {
+                let mut bytes: [u8; 8] = Default::default();
+                bytes.copy_from_slice(&content);
+                u64::from_be_bytes(bytes)
+            }
+            Err(_) => SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
+        };
+
+        self.epoch = epoch;
     }
 }

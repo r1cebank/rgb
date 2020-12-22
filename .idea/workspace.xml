@@ -31,8 +31,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465ca73c-a499-43d0-8b97-e79199d1d808" name="Default Changelist" comment="Adding necessary files">
+      <change afterPath="$PROJECT_DIR$/POKEMON RED.rtc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/POKEMON RED.sav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/emulator/control.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ppu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ppu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc1.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc1.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/mbc3.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/mbc3.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/rom.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/rom.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cartridge/rtc.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/cartridge/rtc.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/display.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/display.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/emulator.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/emulator.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/mmu.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/mmu.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/save.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/save.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +81,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="language.rust" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -80,38 +91,44 @@
   </component>
   <component name="RunManager" selected="Cargo.Run">
     <configuration name="Format" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="channel" value="DEFAULT" />
       <option name="command" value="fmt" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
       <method v="2">
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
-      <option name="channel" value="DEFAULT" />
       <option name="command" value="run -- -r pokemon.gb" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
       <method v="2">
         <option name="RunConfigurationTask" enabled="true" run_configuration_name="Format" run_configuration_type="CargoCommandRunConfiguration" />
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
     <configuration name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="channel" value="DEFAULT" />
       <option name="command" value="test" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
       <method v="2">
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
@@ -134,13 +151,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604811052083</updated>
-    </task>
-    <task id="LOCAL-00050" summary="Refactor instructions">
-      <created>1605401529797</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1605401529798</updated>
     </task>
     <task id="LOCAL-00051" summary="Refactor instructions">
       <created>1605403208176</created>
@@ -478,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1607410587517</updated>
     </task>
-    <option name="localTasksCounter" value="99" />
+    <task id="LOCAL-00099" summary="Refactoring ppu sprite rendering to support double height sprite">
+      <created>1607449613095</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1607449613095</updated>
+    </task>
+    <option name="localTasksCounter" value="100" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -495,7 +512,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Finished all cpu opcode" />
     <MESSAGE value="Formatting" />
     <MESSAGE value="Fixed small issue" />
     <MESSAGE value="Add missing instr" />
@@ -520,7 +536,8 @@
     <MESSAGE value="Fixed some window rendering issues" />
     <MESSAGE value="Upgrading lib, getting pokemon to run properly + optimize thread code" />
     <MESSAGE value="Fixing graphic bugs with window + pokemon" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixing graphic bugs with window + pokemon" />
+    <MESSAGE value="Refactoring ppu sprite rendering to support double height sprite" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactoring ppu sprite rendering to support double height sprite" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

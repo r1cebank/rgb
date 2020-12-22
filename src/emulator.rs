@@ -1,12 +1,17 @@
+pub mod control;
+
 use super::input::input_message::InputMessage;
 use crate::cartridge::load_cartridge;
 use crate::cpu::instruction::InstructionSet;
 use crate::cpu::ClockedCPU;
 use crate::debug::message::DebugMessage;
+use crate::emulator::control::ControlMessage;
 use crate::memory::mmu::MMU;
 use crate::ppu::{random_framebuffer, Mode, PPUFramebuffer};
+use crate::save::Savable;
 use flume::{Receiver, Sender, TryRecvError, TrySendError};
 use std::cell::RefCell;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::thread;
 use std::thread::{Builder, JoinHandle};
@@ -47,9 +52,20 @@ impl Emulator {
     }
 }
 
+impl Savable for Emulator {
+    fn save(&self, save_path: PathBuf) {
+        self.mmu.borrow().cartridge.save(save_path);
+    }
+
+    fn load(&mut self, save_path: PathBuf) {
+        self.mmu.borrow_mut().cartridge.load(save_path);
+    }
+}
+
 pub fn start_emulator_thread(
     boot_rom: Option<Vec<u8>>,
     rom: Vec<u8>,
+    control_message_receiver: Receiver<ControlMessage>,
     input_message_receiver: Receiver<InputMessage>,
     framebuffer_sender: Sender<PPUFramebuffer>,
     debug_result_sender: Sender<DebugMessage>,
@@ -69,6 +85,24 @@ pub fn start_emulator_thread(
                             emulator.mmu.borrow_mut().joypad.key_down(key)
                         }
                         InputMessage::KeyUp(key) => emulator.mmu.borrow_mut().joypad.key_up(key),
+                    },
+                    Err(TryRecvError::Empty) => {}
+                    Err(TryRecvError::Disconnected) => break 'emulator,
+                }
+                match control_message_receiver.try_recv() {
+                    Ok(control_message) => match control_message {
+                        ControlMessage::SAVE => {
+                            emulator.save(PathBuf::from(format!(
+                                "{}.sav",
+                                emulator.mmu.borrow().cartridge.title()
+                            )));
+                        }
+                        ControlMessage::LOAD => {
+                            emulator.load(PathBuf::from(format!(
+                                "{}.sav",
+                                emulator.mmu.borrow().cartridge.title()
+                            )));
+                        }
                     },
                     Err(TryRecvError::Empty) => {}
                     Err(TryRecvError::Disconnected) => break 'emulator,

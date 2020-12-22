@@ -28,7 +28,7 @@ impl Savable for Rom {
         // Will not save anything for the Rom, no state to persist
     }
 
-    fn load(&self, _: PathBuf) {
+    fn load(&mut self, _: PathBuf) {
         // Will not load anything for the Rom, no state to load from
     }
 }

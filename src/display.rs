@@ -1,6 +1,7 @@
 use crate::cpu::interrupt::Flag::Joypad;
 use crate::debug;
 use crate::debug::message::DebugMessage;
+use crate::emulator::control::ControlMessage;
 use crate::input::input_message::InputMessage;
 use crate::input::joypad::JoyPadKey;
 use crate::ppu::{PPUFramebuffer, FB_H, FB_W};
@@ -24,6 +25,7 @@ pub fn get_actual_window_size(scale: u32) -> (u32, u32) {
 pub fn start_display_thread(
     scale_factor: u32,
     rom_name: String,
+    control_message_sender: Sender<ControlMessage>,
     input_message_sender: Sender<InputMessage>,
     framebuffer_receiver: Receiver<PPUFramebuffer>,
     debug_result_receiver: Receiver<DebugMessage>,
@@ -100,6 +102,25 @@ pub fn start_display_thread(
                         Ok(_) => {}
                         Err(TrySendError::Full(_)) => {}
                         Err(TrySendError::Disconnected(_)) => break 'display,
+                    }
+                    match key {
+                        Key::S => {
+                            debug!("Saving save state");
+                            match control_message_sender.try_send(ControlMessage::SAVE) {
+                                Ok(_) => {}
+                                Err(TrySendError::Full(_)) => {}
+                                Err(TrySendError::Disconnected(_)) => break 'display,
+                            }
+                        }
+                        Key::L => {
+                            debug!("Loading save state");
+                            match control_message_sender.try_send(ControlMessage::LOAD) {
+                                Ok(_) => {}
+                                Err(TrySendError::Full(_)) => {}
+                                Err(TrySendError::Disconnected(_)) => break 'display,
+                            }
+                        }
+                        _ => {}
                     }
                 };
                 if let Some(button) = e.release_args() {

@@ -102,7 +102,7 @@ impl Savable for Mbc1 {
         unimplemented!()
     }
 
-    fn load(&self, _: PathBuf) {
+    fn load(&mut self, _: PathBuf) {
         unimplemented!()
     }
 }
